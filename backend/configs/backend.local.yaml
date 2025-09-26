@@ -1,0 +1,3 @@
+rest:
+  port: 8080
+  allow_origin: http://localhost:8080
