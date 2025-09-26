@@ -1,0 +1,19 @@
+services:
+  backend-app:
+    container_name: backend-app
+    image: backend-app
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - main
+    stdin_open: true
+    tty: true 
+    env_file:
+      - ./.env.example
+
+networks:
+  main:
