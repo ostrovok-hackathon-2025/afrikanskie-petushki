@@ -188,7 +188,7 @@ func (h *ReportHandlers) GetMyReportById(ctx *gin.Context) {
 // @Tags Report
 // @Accept multipart/form-data
 // @Param id path string true "Id of report to update"
-// @Param input body docs.UpdateReportRequest true "Data for updating report"
+// @Param text formData string true "Report text"
 // @Param images formData file true "Report images" collectionFormat multi
 // @Produce json
 // @Security BearerAuth
@@ -199,14 +199,6 @@ func (h *ReportHandlers) GetMyReportById(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /report/{id} [patch]
 func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
-	var request docs.UpdateReportRequest
-
-	if err := ctx.BindJSON(&request); err != nil {
-		log.Println("Invalid body")
-		ctx.String(http.StatusBadRequest, "invalid body")
-		return
-	}
-
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 
@@ -228,17 +220,13 @@ func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
 
 	_ = userId
 
-	form, err := ctx.MultipartForm()
-	if err != nil {
+	var request docs.UpdateReportRequest
+
+	if err := ctx.ShouldBind(&request); err != nil {
 		log.Println("invalid form data")
-		ctx.String(http.StatusBadRequest, "invalid form")
+		ctx.String(http.StatusBadRequest, "invalud form data")
 		return
 	}
-
-	// Получаем все файлы из поля "images"
-	files := form.File["images"]
-
-	_ = files
 
 	ctx.Status(http.StatusOK)
 }

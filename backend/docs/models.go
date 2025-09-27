@@ -1,6 +1,9 @@
 package docs
 
-import "time"
+import (
+	"mime/multipart"
+	"time"
+)
 
 type ApplicationResponse struct {
 	Id      string `json:"id"`
@@ -100,7 +103,8 @@ type GetReportsResponse struct {
 }
 
 type UpdateReportRequest struct {
-	Text string `json:"text" binding:"required"`
+	Text   string                  `form:"text"`
+	Images []*multipart.FileHeader `form:"image"`
 }
 
 type ConfirmReport struct {
