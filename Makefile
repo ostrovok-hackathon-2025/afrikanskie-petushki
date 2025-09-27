@@ -10,7 +10,7 @@ refresh: down up
 
 .PHONY: up
 up:
-	docker compose up -d
+	docker compose --env-file ./.env.example up -d
 
 .PHONY: down
 down:
