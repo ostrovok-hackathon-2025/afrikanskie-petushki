@@ -236,6 +236,7 @@ func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
 // @Description Confirms or declains report
 // @Tags Report
 // @Accept json
+// @Param id path string true "Id of report to update"
 // @Param input body docs.ConfirmReport true "Data for updating report"
 // @Produce json
 // @Security BearerAuth
