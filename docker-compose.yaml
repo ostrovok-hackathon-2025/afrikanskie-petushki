@@ -2,6 +2,8 @@ services:
   backend-app:
     container_name: backend-app
     image: backend-app
+    environment:
+      CONFIG_PATH: "${CONFIG_PATH}"
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -14,6 +16,7 @@ services:
     tty: true
     depends_on:
       - db
+      - minio
 
   db:
     container_name: postgres_secret_guest
