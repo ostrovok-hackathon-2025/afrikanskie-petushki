@@ -1,14 +1,13 @@
 package handlers
 
 import (
-	"log"
-	"net/http"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
+	"log"
+	"net/http"
+	"strconv"
 )
 
 type ApplicationHandlers struct {
