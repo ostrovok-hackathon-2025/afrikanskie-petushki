@@ -13,10 +13,6 @@ func hashPassword(password string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func generateUserID() string {
-	return fmt.Sprintf("user_%d", time.Now().UnixNano())
-}
-
 func generateTokens(user *User, jwtSecret []byte) (*docs.AuthResponse, error) {
 	accessToken, err := generateToken(user, 24*time.Hour, "access", jwtSecret)
 	if err != nil {
@@ -37,8 +33,9 @@ func generateTokens(user *User, jwtSecret []byte) (*docs.AuthResponse, error) {
 }
 
 func generateToken(user *User, duration time.Duration, audience string, jwtSecret []byte) (string, error) {
+	userIDStr := fmt.Sprintf("%s", user.ID)
 	claims := JWTClaims{
-		UserID:        user.ID,
+		UserID:        userIDStr,
 		OstrovokLogin: user.OstrovokLogin,
 		Email:         user.Email,
 		IsAdmin:       user.IsAdmin,
@@ -46,7 +43,7 @@ func generateToken(user *User, duration time.Duration, audience string, jwtSecre
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    "ostrovok-secret-guest",
-			Subject:   user.ID,
+			Subject:   userIDStr,
 			Audience:  []string{audience},
 		},
 	}
