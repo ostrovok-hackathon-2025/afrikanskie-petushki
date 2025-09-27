@@ -772,6 +772,13 @@ const docTemplate = `{
                 "summary": "Confirm report",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Id of report to update",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "Data for updating report",
                         "name": "input",
                         "in": "body",

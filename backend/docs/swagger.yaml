@@ -587,6 +587,11 @@ paths:
       - application/json
       description: Confirms or declains report
       parameters:
+      - description: Id of report to update
+        in: path
+        name: id
+        required: true
+        type: string
       - description: Data for updating report
         in: body
         name: input
