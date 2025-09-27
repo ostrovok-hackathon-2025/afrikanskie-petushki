@@ -3,6 +3,8 @@ package docs
 import (
 	"mime/multipart"
 	"time"
+
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
 )
 
 type ApplicationResponse struct {
@@ -10,6 +12,15 @@ type ApplicationResponse struct {
 	UserId  string `json:"user_id"`
 	OfferId string `json:"offer_id"`
 	Status  string `json:"status"`
+}
+
+func ApplicationModelToResponse(model *application.Application) *ApplicationResponse {
+	return &ApplicationResponse{
+		Id:      model.Id.String(),
+		UserId:  model.UserId.String(),
+		OfferId: model.OfferId.String(),
+		Status:  string(model.Status),
+	}
 }
 
 type CreateApplicationRequest struct {
