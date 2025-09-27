@@ -8,18 +8,20 @@ import (
 )
 
 type ApplicationResponse struct {
-	Id      string `json:"id"`
-	UserId  string `json:"user_id"`
-	OfferId string `json:"offer_id"`
-	Status  string `json:"status"`
+	Id           string    `json:"id"`
+	UserId       string    `json:"user_id"`
+	OfferId      string    `json:"offer_id"`
+	Status       string    `json:"status"`
+	ExpirationAt time.Time `json:"expiration_at"`
 }
 
 func ApplicationModelToResponse(model *application.Application) *ApplicationResponse {
 	return &ApplicationResponse{
-		Id:      model.Id.String(),
-		UserId:  model.UserId.String(),
-		OfferId: model.OfferId.String(),
-		Status:  string(model.Status),
+		Id:           model.Id.String(),
+		UserId:       model.UserId.String(),
+		OfferId:      model.OfferId.String(),
+		Status:       string(model.Status),
+		ExpirationAt: model.ExpirationAt,
 	}
 }
 
