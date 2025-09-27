@@ -11,9 +11,34 @@ services:
     networks:
       - main
     stdin_open: true
-    tty: true 
+    tty: true
     env_file:
       - ./.env.example
+    depends_on:
+      - db
+
+  db:
+    container_name: postgres_secret_guest
+    image: postgres:16
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: secret-guest
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - secret-guest-pgdata:/var/lib/postgresql/data
+      - ./backend/migrations/sql:/docker-entrypoint-initdb.d
 
 networks:
   main:
+
+volumes:
+  secret-guest-pgdata: { }
