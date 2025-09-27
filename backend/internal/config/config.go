@@ -8,12 +8,27 @@ import (
 )
 
 type Config struct {
-	RestConfig `yaml:"rest" env-required:"true"`
+	LoggerConfig   `yaml:"logger" env-required:"true"`
+	RestConfig     `yaml:"rest" env-required:"true"`
+	PostgresConfig `yaml:"postgres" env-required:"true"`
 }
 
 type RestConfig struct {
 	Port        int    `yaml:"port" env-required:"true"`
 	AllowOrigin string `yaml:"allow_origin" env-required:"true"`
+}
+
+type PostgresConfig struct {
+	User     string `yaml:"user" env-required:"true"`
+	Password string `yaml:"password" env-required:"true"`
+	Host     string `yaml:"host" env-required:"true"`
+	Port     int    `yaml:"port" env-required:"true"`
+	Database string `yaml:"database" env-required:"true"`
+}
+
+type LoggerConfig struct {
+	Prefix string
+	Flag   int
 }
 
 func MustLoadConfig() *Config {

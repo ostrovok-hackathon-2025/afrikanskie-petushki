@@ -15,14 +15,13 @@ CREATE TABLE IF NOT EXISTS location
 CREATE TABLE IF NOT EXISTS offer
 (
     id            UUID NOT NULL PRIMARY KEY,
-    user_id       UUID,
     hotel_id      UUID,
-    expiration_at TIMESTAMP,
     location_id   UUID,
+    expiration_at TIMESTAMP,
     used          BOOLEAN,
     task          TEXT,
     CONSTRAINT fk_application_location FOREIGN KEY (location_id) REFERENCES location (id),
-    CONSTRAINT fk_application_user FOREIGN KEY (user_id) REFERENCES "user" (id)
+    CONSTRAINT fk_application_user FOREIGN KEY (location_id) REFERENCES location (id)
 );
 
 CREATE TABLE IF NOT EXISTS report
