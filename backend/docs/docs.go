@@ -167,7 +167,7 @@ const docTemplate = `{
                         "description": "Unauthorized"
                     },
                     "403": {
-                        "description": "Only available for reviewer"
+                        "description": "User is not reviewer or application does not belong to user"
                     },
                     "404": {
                         "description": "Application with given id not found"
@@ -716,13 +716,11 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Data for updating report",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/docs.UpdateReportRequest"
-                        }
+                        "type": "string",
+                        "description": "Report text",
+                        "name": "text",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "file",
@@ -825,6 +823,12 @@ const docTemplate = `{
                         "description": "User data",
                         "schema": {
                             "$ref": "#/definitions/docs.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request to get user data",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "401": {
@@ -1225,17 +1229,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "task": {
-                    "type": "string"
-                }
-            }
-        },
-        "docs.UpdateReportRequest": {
-            "type": "object",
-            "required": [
-                "text"
-            ],
-            "properties": {
-                "text": {
                     "type": "string"
                 }
             }
