@@ -165,13 +165,6 @@ definitions:
       task:
         type: string
     type: object
-  docs.UpdateReportRequest:
-    properties:
-      text:
-        type: string
-    required:
-    - text
-    type: object
   docs.UserResponse:
     properties:
       email:
@@ -282,7 +275,7 @@ paths:
         "401":
           description: Unauthorized
         "403":
-          description: Only available for reviewer
+          description: User is not reviewer or application does not belong to user
         "404":
           description: Application with given id not found
         "500":
@@ -558,12 +551,11 @@ paths:
         name: id
         required: true
         type: string
-      - description: Data for updating report
-        in: body
-        name: input
+      - description: Report text
+        in: formData
+        name: text
         required: true
-        schema:
-          $ref: '#/definitions/docs.UpdateReportRequest'
+        type: string
       - description: Report images
         in: formData
         name: images
@@ -704,6 +696,10 @@ paths:
           description: User data
           schema:
             $ref: '#/definitions/docs.UserResponse'
+        "400":
+          description: Bad request to get user data
+          schema:
+            type: string
         "401":
           description: Unauthorized
         "500":
