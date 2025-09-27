@@ -1,16 +1,28 @@
 package handlers
 
 import (
+	"errors"
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
-	"log"
-	"net/http"
-	"strconv"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/application"
+
+	applicationRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 )
 
 type ApplicationHandlers struct {
+	useCase application.ApplicationUseCase
+}
+
+func NewApplicationHandlers(useCase application.ApplicationUseCase) *ApplicationHandlers {
+	return &ApplicationHandlers{
+		useCase: useCase,
+	}
 }
 
 // Add godoc
@@ -45,8 +57,6 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 		return
 	}
 
-	_ = offerId
-
 	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
@@ -54,9 +64,26 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "invalid user_id")
 	}
 
-	_ = userId
+	appId, err := h.useCase.CreateApplication(ctx.Request.Context(), userId, offerId)
 
-	resp := &docs.CreateApplicationResponse{}
+	if err != nil {
+		log.Println("failed to create app", err)
+
+		switch {
+		case errors.Is(err, applicationRepo.ErrOfferNotExist):
+			ctx.String(http.StatusBadRequest, "offer does not exist")
+		case errors.Is(err, applicationRepo.ErrUserNotExist):
+			ctx.String(http.StatusBadRequest, "user does not exist")
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	resp := &docs.CreateApplicationResponse{
+		ApplicationId: appId.String(),
+	}
 
 	ctx.JSON(http.StatusCreated, resp)
 }
@@ -86,8 +113,6 @@ func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
 		return
 	}
 
-	_ = pageNum
-
 	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
 
@@ -97,9 +122,39 @@ func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
 		return
 	}
 
-	_ = pageSize
+	userId, err := auth.GetUserId(ctx)
 
-	resp := &docs.GetApplicationsResponse{}
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	apps, count, err := h.useCase.GetApplications(ctx.Request.Context(), userId, pageNum, pageSize)
+
+	if err != nil {
+		log.Println("failed to get all applications", err)
+
+		switch {
+		case errors.Is(err, applicationRepo.ErrPageNotFound):
+			ctx.Status(http.StatusNotFound)
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	appsResp := make([]*docs.ApplicationResponse, 0, len(apps))
+
+	for _, app := range apps {
+		appsResp = append(appsResp, docs.ApplicationModelToResponse(app))
+	}
+
+	resp := &docs.GetApplicationsResponse{
+		Applications: appsResp,
+		PagesCount:   count,
+	}
 
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -128,15 +183,38 @@ func (h *ApplicationHandlers) GetApplicationById(ctx *gin.Context) {
 		return
 	}
 
-	_ = id
+	userId, err := auth.GetUserId(ctx)
 
-	resp := &docs.ApplicationResponse{}
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	app, err := h.useCase.GetApplicationById(ctx, userId, id)
+
+	if err != nil {
+		log.Println("failed to get application by id", err)
+
+		switch {
+		case errors.Is(err, applicationRepo.ErrApplicationNotFound):
+			ctx.Status(http.StatusNotFound)
+		case errors.Is(err, application.ErrNotOwner):
+			ctx.Status(http.StatusForbidden)
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	resp := docs.ApplicationModelToResponse(app)
 
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func InitApplicationHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
-	h := &ApplicationHandlers{}
+func InitApplicationHandlers(router *gin.RouterGroup, authProvider *auth.Auth, useCase application.ApplicationUseCase) {
+	h := NewApplicationHandlers(useCase)
 
 	group := router.Group("/application")
 
