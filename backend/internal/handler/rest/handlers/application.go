@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
-	_ "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 )
 
 type ApplicationHandlers struct {
@@ -24,7 +28,34 @@ type ApplicationHandlers struct {
 // @Failure 500 "Internal server error"
 // @Router /application/ [post]
 func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
+	var request docs.CreateApplicationRequest
 
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Println("Invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	offerId := request.OfferId
+
+	if offerId == "" {
+		log.Println("Invalid offer_id: ", offerId)
+		ctx.String(http.StatusBadRequest, "invalid offer_id")
+		return
+	}
+
+	userId, err := auth.GetUserId(ctx)
+
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+	}
+
+	_ = userId
+
+	resp := &docs.CreateApplicationResponse{}
+
+	ctx.JSON(http.StatusCreated, resp)
 }
 
 // Add godoc
@@ -43,7 +74,31 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /application/ [get]
 func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
 
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	_ = pageNum
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+
+	_ = pageSize
+
+	resp := &docs.GetApplicationsResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -56,20 +111,30 @@ func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
 // @Success 200 {object} docs.ApplicationResponse "Requested application"
 // @Failure 400 {string} string "Invalid data for getting application by id"
 // @Failure 401 "Unauthorized"
-// @Failure 403 "Only available for reviewer"
+// @Failure 403 "User is not reviewer or application does not belong to user"
 // @Failure 404 "Application with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /application/{id} [get]
 func (h *ApplicationHandlers) GetApplicationById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
 
+	if idStr == "" {
+		log.Println("invalid application id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid application id")
+		return
+	}
+
+	resp := &docs.ApplicationResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
-func InitApplicationHandlers(router *gin.RouterGroup) {
+func InitApplicationHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
 	h := &ApplicationHandlers{}
 
 	group := router.Group("/application")
 
-	group.Use(middleware.RoleProtected("reviewer"))
+	group.Use(authProvider.RoleProtected("reviewer"))
 
 	{
 		group.POST("/", h.CreateApplication)

@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 
-	_ "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 )
 
 type OfferHandlers struct {
@@ -25,7 +29,17 @@ type OfferHandlers struct {
 // @Failure 500 "Internal server error"
 // @Router /offer/ [post]
 func (h *OfferHandlers) CreateOffer(ctx *gin.Context) {
+	var request docs.CreateOfferRequest
 
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Println("Invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	resp := &docs.CreateOfferResponse{}
+
+	ctx.JSON(http.StatusCreated, resp)
 }
 
 // Add godoc
@@ -44,7 +58,31 @@ func (h *OfferHandlers) CreateOffer(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /offer/ [get]
 func (h *OfferHandlers) GetOffers(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
 
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	_ = pageNum
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+
+	_ = pageSize
+
+	resp := &docs.GetOffersResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -62,7 +100,17 @@ func (h *OfferHandlers) GetOffers(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /offer/{id} [get]
 func (h *OfferHandlers) GetOfferById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
 
+	if idStr == "" {
+		log.Println("invalid offer id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid offer id")
+		return
+	}
+
+	resp := &docs.OfferResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -82,7 +130,39 @@ func (h *OfferHandlers) GetOfferById(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /offer/search [get]
 func (h *OfferHandlers) FindOffers(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
 
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	_ = pageNum
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+
+	_ = pageSize
+
+	cityIdStr := ctx.Query("pageSize")
+
+	if cityIdStr == "" {
+		log.Println("Invalid cityId: ", cityIdStr)
+		ctx.String(http.StatusBadRequest, "invalid cityId")
+		return
+	}
+
+	resp := &docs.GetOffersResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -102,20 +182,36 @@ func (h *OfferHandlers) FindOffers(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /offer/{id} [patch]
 func (h *OfferHandlers) UpdateOffer(ctx *gin.Context) {
+	var request docs.UpdateOfferRequest
 
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Println("Invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	idStr := ctx.Param("id")
+
+	if idStr == "" {
+		log.Println("invalid offer id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid offer id")
+		return
+	}
+
+	ctx.Status(http.StatusOK)
 }
 
-func InitOfferHandlers(router *gin.RouterGroup) {
+func InitOfferHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
 	h := &OfferHandlers{}
 
 	group := router.Group("/offer")
 
 	{
-		group.POST("/", middleware.RoleProtected("admin"), h.CreateOffer)
-		group.GET("/", middleware.RoleProtected("admin"), h.GetOffers)
-		group.GET("/:id", middleware.RoleProtected("admin"), h.GetOfferById)
-		group.PATCH("/:id", middleware.RoleProtected("admin"), h.UpdateOffer)
+		group.POST("/", authProvider.RoleProtected("admin"), h.CreateOffer)
+		group.GET("/", authProvider.RoleProtected("admin"), h.GetOffers)
+		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetOfferById)
+		group.PATCH("/:id", authProvider.RoleProtected("admin"), h.UpdateOffer)
 
-		group.GET("/search", middleware.RoleProtected("reviewer"), h.FindOffers)
+		group.GET("/search", authProvider.RoleProtected("reviewer"), h.FindOffers)
 	}
 }

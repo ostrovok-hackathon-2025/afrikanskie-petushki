@@ -1,8 +1,13 @@
 package handlers
 
 import (
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 )
 
 type ReportHandlers struct {
@@ -24,7 +29,31 @@ type ReportHandlers struct {
 // @Failure 500 "Internal server error"
 // @Router /report/ [get]
 func (h *ReportHandlers) GetReports(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
 
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	_ = pageNum
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+
+	_ = pageSize
+
+	resp := &docs.GetReportsResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -42,7 +71,17 @@ func (h *ReportHandlers) GetReports(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /report/{id} [get]
 func (h *ReportHandlers) GetReportById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
 
+	if idStr == "" {
+		log.Println("invalid report id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid report id")
+		return
+	}
+
+	resp := &docs.ReportResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -61,7 +100,41 @@ func (h *ReportHandlers) GetReportById(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /report/my [get]
 func (h *ReportHandlers) GetMyReports(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
 
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	_ = pageNum
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+
+	_ = pageSize
+
+	userId, err := auth.GetUserId(ctx)
+
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	_ = userId
+
+	resp := &docs.GetReportsResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -79,7 +152,27 @@ func (h *ReportHandlers) GetMyReports(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /report/my/{id} [get]
 func (h *ReportHandlers) GetMyReportById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
 
+	if idStr == "" {
+		log.Println("invalid report id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid report id")
+		return
+	}
+
+	userId, err := auth.GetUserId(ctx)
+
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	_ = userId
+
+	resp := &docs.GetReportsResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -99,7 +192,45 @@ func (h *ReportHandlers) GetMyReportById(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /report/{id} [patch]
 func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
+	var request docs.UpdateReportRequest
 
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Println("Invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	idStr := ctx.Param("id")
+
+	if idStr == "" {
+		log.Println("invalid report id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid report id")
+		return
+	}
+
+	userId, err := auth.GetUserId(ctx)
+
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	_ = userId
+
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		log.Println("invalid form data")
+		ctx.String(http.StatusBadRequest, "invalid form")
+		return
+	}
+
+	// Получаем все файлы из поля "images"
+	files := form.File["images"]
+
+	_ = files
+
+	ctx.Status(http.StatusOK)
 }
 
 // Add godoc
@@ -117,21 +248,37 @@ func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /report/{id}/confirm [patch]
 func (h *ReportHandlers) ConfirmReport(ctx *gin.Context) {
+	var request docs.ConfirmReport
 
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Println("Invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	idStr := ctx.Param("id")
+
+	if idStr == "" {
+		log.Println("invalid report id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid report id")
+		return
+	}
+
+	ctx.Status(http.StatusOK)
 }
 
-func InitReportHandlers(router *gin.RouterGroup) {
+func InitReportHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
 	h := &ReportHandlers{}
 
 	group := router.Group("/report")
 
 	{
-		group.GET("/", middleware.RoleProtected("admin"), h.GetReports)
-		group.GET("/:id", middleware.RoleProtected("admin"), h.GetReportById)
-		group.PATCH("/:id/confirm", middleware.RoleProtected("admin"), h.ConfirmReport)
+		group.GET("/", authProvider.RoleProtected("admin"), h.GetReports)
+		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetReportById)
+		group.PATCH("/:id/confirm", authProvider.RoleProtected("admin"), h.ConfirmReport)
 
-		group.GET("/my", middleware.RoleProtected("reviewer"), h.GetMyReports)
-		group.GET("/my/:id", middleware.RoleProtected("reviewer"), h.GetMyReportById)
-		group.PATCH("/:id", middleware.RoleProtected("reviewer"), h.UpdateReport)
+		group.GET("/my", authProvider.RoleProtected("reviewer"), h.GetMyReports)
+		group.GET("/my/:id", authProvider.RoleProtected("reviewer"), h.GetMyReportById)
+		group.PATCH("/:id", authProvider.RoleProtected("reviewer"), h.UpdateReport)
 	}
 }

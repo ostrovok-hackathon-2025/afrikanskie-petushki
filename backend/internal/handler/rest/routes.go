@@ -4,7 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/config"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/handlers"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/cors"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -24,12 +25,14 @@ import (
 func InitRoutes(router *gin.Engine, cfg *config.RestConfig) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	router.Use(middleware.CORS(cfg.AllowOrigin))
+	router.Use(cors.CORS(cfg.AllowOrigin))
+
+	authProvider := auth.NewAuth()
 
 	api := router.Group("/api/v1")
 
-	handlers.InitApplicationHandlers(api)
-	handlers.InitOfferHandlers(api)
-	handlers.InitUserHandlers(api)
-	handlers.InitReportHandlers(api)
+	handlers.InitApplicationHandlers(api, authProvider)
+	handlers.InitOfferHandlers(api, authProvider)
+	handlers.InitUserHandlers(api, authProvider)
+	handlers.InitReportHandlers(api, authProvider)
 }
