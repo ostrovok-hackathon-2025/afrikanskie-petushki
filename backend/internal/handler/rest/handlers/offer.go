@@ -1,0 +1,217 @@
+package handlers
+
+import (
+	"log"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
+)
+
+type OfferHandlers struct {
+}
+
+// Add godoc
+// @Summary Create offer
+// @Description Creates offer with given info
+// @Tags Offer
+// @Accept json
+// @Param input body docs.CreateOfferRequest true "Data for creating offer"
+// @Produce json
+// @Security BearerAuth
+// @Success 201 {object} docs.CreateOfferResponse "Created offer data"
+// @Failure 400 {string} string "Invalid data for creating offer"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for admin"
+// @Failure 500 "Internal server error"
+// @Router /offer/ [post]
+func (h *OfferHandlers) CreateOffer(ctx *gin.Context) {
+	var request docs.CreateOfferRequest
+
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Println("Invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	resp := &docs.CreateOfferResponse{}
+
+	ctx.JSON(http.StatusCreated, resp)
+}
+
+// Add godoc
+// @Summary Get offers
+// @Description Get all offers with pagination
+// @Tags Offer
+// @Param pageNum query int true "Number of page"
+// @Param pageSize query int true "Size of page"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.GetOffersResponse "Page of offers"
+// @Failure 400 {string} string "Invalid data for getting offers"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for admin"
+// @Failure 404 "Page with given number not found"
+// @Failure 500 "Internal server error"
+// @Router /offer/ [get]
+func (h *OfferHandlers) GetOffers(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	_ = pageNum
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+
+	_ = pageSize
+
+	resp := &docs.GetOffersResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// Add godoc
+// @Summary Get by id
+// @Description Get offer by id
+// @Tags Offer
+// @Param id path string true "Id of requested offer"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.OfferResponse "Requested offer"
+// @Failure 400 {string} string "Invalid data for getting offer by id"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for admin"
+// @Failure 404 "Offer with given id not found"
+// @Failure 500 "Internal server error"
+// @Router /offer/{id} [get]
+func (h *OfferHandlers) GetOfferById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+
+	if idStr == "" {
+		log.Println("invalid offer id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid offer id")
+		return
+	}
+
+	resp := &docs.OfferResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// Add godoc
+// @Summary Find offers
+// @Description Find offers with given search params
+// @Tags Offer
+// @Param cityId query string true "Id of required city"
+// @Param pageNum query int true "Number of page"
+// @Param pageSize query int true "Size of page"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.GetOffersResponse "Page of offers found"
+// @Failure 400 {string} string "Invalid data for finding offers"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for reviewer"
+// @Failure 404 "Page with given number not found"
+// @Failure 500 "Internal server error"
+// @Router /offer/search [get]
+func (h *OfferHandlers) FindOffers(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	_ = pageNum
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+
+	_ = pageSize
+
+	cityIdStr := ctx.Query("pageSize")
+
+	if cityIdStr == "" {
+		log.Println("Invalid cityId: ", cityIdStr)
+		ctx.String(http.StatusBadRequest, "invalid cityId")
+		return
+	}
+
+	resp := &docs.GetOffersResponse{}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// Add godoc
+// @Summary Update offer
+// @Description Update offer with given id and data
+// @Tags Offer
+// @Accept json
+// @Param id path string true "Id of offer to update"
+// @Param input body docs.UpdateOfferRequest true "Data for updating offer"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 "Successfully updated offer"
+// @Failure 400 {string} string "Invalid data for finding offers"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for admin"
+// @Failure 404 "Offer with given id not found"
+// @Failure 500 "Internal server error"
+// @Router /offer/{id} [patch]
+func (h *OfferHandlers) UpdateOffer(ctx *gin.Context) {
+	var request docs.UpdateOfferRequest
+
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Println("Invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	idStr := ctx.Param("id")
+
+	if idStr == "" {
+		log.Println("invalid offer id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid offer id")
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func InitOfferHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
+	h := &OfferHandlers{}
+
+	group := router.Group("/offer")
+
+	{
+		group.POST("/", authProvider.RoleProtected("admin"), h.CreateOffer)
+		group.GET("/", authProvider.RoleProtected("admin"), h.GetOffers)
+		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetOfferById)
+		group.PATCH("/:id", authProvider.RoleProtected("admin"), h.UpdateOffer)
+
+		group.GET("/search", authProvider.RoleProtected("reviewer"), h.FindOffers)
+	}
+}

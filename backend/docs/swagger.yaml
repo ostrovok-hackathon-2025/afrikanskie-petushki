@@ -1,0 +1,814 @@
+basePath: /api/v1
+definitions:
+  docs.ApplicationResponse:
+    properties:
+      id:
+        type: string
+      offer_id:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: string
+    type: object
+  docs.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      access_ttl:
+        type: integer
+      refresh_token:
+        type: string
+      refresh_ttl:
+        type: integer
+    type: object
+  docs.ConfirmReport:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  docs.CreateApplicationRequest:
+    properties:
+      offer_id:
+        type: string
+    required:
+    - offer_id
+    type: object
+  docs.CreateApplicationResponse:
+    properties:
+      application_id:
+        type: string
+    type: object
+  docs.CreateOfferRequest:
+    properties:
+      expiration_at:
+        type: string
+      hotel_id:
+        type: string
+      location_id:
+        type: string
+      task:
+        type: string
+    required:
+    - expiration_at
+    - hotel_id
+    - location_id
+    - task
+    type: object
+  docs.CreateOfferResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  docs.GetApplicationsResponse:
+    properties:
+      applications:
+        items:
+          $ref: '#/definitions/docs.ApplicationResponse'
+        type: array
+      pages_count:
+        type: integer
+    type: object
+  docs.GetOffersResponse:
+    properties:
+      offers:
+        items:
+          $ref: '#/definitions/docs.OfferResponse'
+        type: array
+      pages_count:
+        type: integer
+    type: object
+  docs.GetReportsResponse:
+    properties:
+      pages_count:
+        type: integer
+      reports:
+        items:
+          $ref: '#/definitions/docs.ReportResponse'
+        type: array
+    type: object
+  docs.LogInRequest:
+    properties:
+      ostrovok_login:
+        type: string
+      password:
+        type: string
+    required:
+    - ostrovok_login
+    - password
+    type: object
+  docs.OfferResponse:
+    properties:
+      check_date:
+        type: string
+      expiration_at:
+        type: string
+      hotel_id:
+        type: string
+      id:
+        type: string
+      location_id:
+        type: string
+      task:
+        type: string
+      used:
+        type: boolean
+    type: object
+  docs.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  docs.ReportImageResponse:
+    properties:
+      id:
+        type: string
+      link:
+        type: string
+    type: object
+  docs.ReportResponse:
+    properties:
+      expiration_at:
+        type: string
+      id:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/docs.ReportImageResponse'
+        type: array
+      status:
+        type: string
+      text:
+        type: string
+    type: object
+  docs.SignUpRequest:
+    properties:
+      email:
+        type: string
+      ostrovok_login:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - ostrovok_login
+    - password
+    type: object
+  docs.UpdateOfferRequest:
+    properties:
+      expiration_at:
+        type: string
+      task:
+        type: string
+    type: object
+  docs.UpdateReportRequest:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  docs.UserResponse:
+    properties:
+      email:
+        type: string
+      is_admin:
+        type: boolean
+      ostrovok_login:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for "Secret Guest" app
+  title: Secret Guest API
+  version: "1.0"
+paths:
+  /application/:
+    get:
+      description: Get all applications with pagination
+      parameters:
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of applications
+          schema:
+            $ref: '#/definitions/docs.GetApplicationsResponse'
+        "400":
+          description: Invalid data for getting applications
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for reviewer
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get applications
+      tags:
+      - Application
+    post:
+      consumes:
+      - application/json
+      description: Creates application for given offer
+      parameters:
+      - description: Data for creating offer
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreateApplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created application data
+          schema:
+            $ref: '#/definitions/docs.CreateApplicationResponse'
+        "400":
+          description: Invalid data for creating offer
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for reviewer
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Create application
+      tags:
+      - Application
+  /application/{id}:
+    get:
+      description: Get application by id
+      parameters:
+      - description: Id of requested application
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Requested application
+          schema:
+            $ref: '#/definitions/docs.ApplicationResponse'
+        "400":
+          description: Invalid data for getting application by id
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for reviewer
+        "404":
+          description: Application with given id not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get by id
+      tags:
+      - Application
+  /offer/:
+    get:
+      description: Get all offers with pagination
+      parameters:
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of offers
+          schema:
+            $ref: '#/definitions/docs.GetOffersResponse'
+        "400":
+          description: Invalid data for getting offers
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get offers
+      tags:
+      - Offer
+    post:
+      consumes:
+      - application/json
+      description: Creates offer with given info
+      parameters:
+      - description: Data for creating offer
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreateOfferRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created offer data
+          schema:
+            $ref: '#/definitions/docs.CreateOfferResponse'
+        "400":
+          description: Invalid data for creating offer
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Create offer
+      tags:
+      - Offer
+  /offer/{id}:
+    get:
+      description: Get offer by id
+      parameters:
+      - description: Id of requested offer
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Requested offer
+          schema:
+            $ref: '#/definitions/docs.OfferResponse'
+        "400":
+          description: Invalid data for getting offer by id
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Offer with given id not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get by id
+      tags:
+      - Offer
+    patch:
+      consumes:
+      - application/json
+      description: Update offer with given id and data
+      parameters:
+      - description: Id of offer to update
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data for updating offer
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.UpdateOfferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated offer
+        "400":
+          description: Invalid data for finding offers
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Offer with given id not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Update offer
+      tags:
+      - Offer
+  /offer/search:
+    get:
+      description: Find offers with given search params
+      parameters:
+      - description: Id of required city
+        in: query
+        name: cityId
+        required: true
+        type: string
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of offers found
+          schema:
+            $ref: '#/definitions/docs.GetOffersResponse'
+        "400":
+          description: Invalid data for finding offers
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for reviewer
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Find offers
+      tags:
+      - Offer
+  /report/:
+    get:
+      description: Get all reports with pagination
+      parameters:
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of reports
+          schema:
+            $ref: '#/definitions/docs.GetReportsResponse'
+        "400":
+          description: Invalid data for getting reports
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get reports
+      tags:
+      - Report
+  /report/{id}:
+    get:
+      description: Get report by id
+      parameters:
+      - description: Id of requested report
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Requested report
+          schema:
+            $ref: '#/definitions/docs.ReportResponse'
+        "400":
+          description: Invalid data for getting report by id
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Report with given id not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get by id
+      tags:
+      - Report
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Updates report with given text and photos
+      parameters:
+      - description: Id of report to update
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data for updating report
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.UpdateReportRequest'
+      - description: Report images
+        in: formData
+        name: images
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully update report
+        "400":
+          description: Invalid data for updating report
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for reviewer
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Update report
+      tags:
+      - Report
+  /report/{id}/confirm:
+    patch:
+      consumes:
+      - application/json
+      description: Confirms or declains report
+      parameters:
+      - description: Data for updating report
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.ConfirmReport'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully update status of report
+        "400":
+          description: Invalid data for changing report status
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Confirm report
+      tags:
+      - Report
+  /report/my:
+    get:
+      description: Get all reports of current user with pagination
+      parameters:
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of reports
+          schema:
+            $ref: '#/definitions/docs.GetReportsResponse'
+        "400":
+          description: Invalid data for getting reports
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: User is not reviewer
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get my reports
+      tags:
+      - Report
+  /report/my/{id}:
+    get:
+      description: Get report of current user by id
+      parameters:
+      - description: Id of requested report
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Requested report
+          schema:
+            $ref: '#/definitions/docs.ReportResponse'
+        "400":
+          description: Invalid data for getting report by id
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: User is not reviewer or this report does not belong to user
+          schema:
+            type: string
+        "404":
+          description: Report with given id not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get my by id
+      tags:
+      - Report
+  /user/:
+    get:
+      description: Get data of current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data
+          schema:
+            $ref: '#/definitions/docs.UserResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get me
+      tags:
+      - User
+  /user/log-in:
+    post:
+      consumes:
+      - application/json
+      description: Log in with given name and password
+      parameters:
+      - description: Data for log in
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.LogInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Auth data
+          schema:
+            $ref: '#/definitions/docs.AuthResponse'
+        "400":
+          description: Invalid data for log in
+          schema:
+            type: string
+        "401":
+          description: Wrong password
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
+      summary: Log in
+      tags:
+      - User
+  /user/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh auth credentials via refresh token
+      parameters:
+      - description: Data for refresh
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Auth data
+          schema:
+            $ref: '#/definitions/docs.AuthResponse'
+        "400":
+          description: Invalid data for refresh
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+      summary: Refresh credentials
+      tags:
+      - User
+  /user/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Sign up with given name and password
+      parameters:
+      - description: Data for sign up
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Auth data
+          schema:
+            $ref: '#/definitions/docs.AuthResponse'
+        "400":
+          description: Invalid data for sign up
+          schema:
+            type: string
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
+      summary: Sign up
+      tags:
+      - User
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
