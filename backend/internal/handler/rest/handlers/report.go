@@ -2,13 +2,17 @@ package handlers
 
 import (
 	"log"
+	"mime/multipart"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
+	report2 "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/report"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/report"
 )
 
 type ReportHandler interface {
@@ -21,10 +25,11 @@ type ReportHandler interface {
 }
 
 type reportHandler struct {
+	uc report.Usecase
 }
 
-func NewReportHandler() ReportHandler {
-	return &reportHandler{}
+func NewReportHandler(uc report.Usecase) ReportHandler {
+	return &reportHandler{uc: uc}
 }
 
 // Add godoc
@@ -52,20 +57,21 @@ func (h *reportHandler) GetReports(ctx *gin.Context) {
 		return
 	}
 
-	_ = pageNum
-
 	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
-
-	if pageNumStr == "" || err != nil {
+	if err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
 	}
 
-	_ = pageSize
+	limit := int64(pageSize)
+	offset := int64(pageNum) * int64(pageSize)
 
-	resp := &docs.GetReportsResponse{}
+	reports, err := h.uc.Get(ctx, limit, offset)
+	cnt, err := h.uc.Count(ctx)
+
+	resp := h.convertToReportsResp(reports, cnt, limit)
 
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -94,9 +100,26 @@ func (h *reportHandler) GetReportById(ctx *gin.Context) {
 		return
 	}
 
-	_ = id
+	rep, ok, err := h.uc.GetByID(ctx, id)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "invalid report id")
+		return
+	}
 
-	resp := &docs.ReportResponse{}
+	if !ok {
+		ctx.String(http.StatusNotFound, "report not found")
+		return
+	}
+
+	images := h.convertToRespImages(rep.Images)
+
+	resp := &docs.ReportResponse{
+		Id:           rep.ID.String(),
+		ExpirationAt: rep.ExpirationAt.Format(time.RFC3339),
+		Status:       rep.Status,
+		Text:         rep.Text,
+		Images:       images,
+	}
 
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -126,30 +149,31 @@ func (h *reportHandler) GetMyReports(ctx *gin.Context) {
 		return
 	}
 
-	_ = pageNum
-
 	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
-
-	if pageNumStr == "" || err != nil {
+	if err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
 	}
 
-	_ = pageSize
-
 	userId, err := auth.GetUserId(ctx)
-
 	if err != nil {
 		log.Println("invalid user_id")
 		ctx.String(http.StatusBadRequest, "invalid user_id")
 		return
 	}
 
-	_ = userId
+	limit := int64(pageSize)
+	offset := int64(pageNum) * int64(pageSize)
 
-	resp := &docs.GetReportsResponse{}
+	reports, err := h.uc.GetByUserID(ctx, userId, limit, offset)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "something went wrong")
+		return
+	}
+
+	resp := h.convertToReportsResp(reports, limit, offset)
 
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -171,26 +195,31 @@ func (h *reportHandler) GetMyReports(ctx *gin.Context) {
 func (h *reportHandler) GetMyReportById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
-
 	if idStr == "" || err != nil {
 		log.Println("invalid report id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid report id")
 		return
 	}
 
-	_ = id
-
 	userId, err := auth.GetUserId(ctx)
-
 	if err != nil {
 		log.Println("invalid user_id")
 		ctx.String(http.StatusBadRequest, "invalid user_id")
 		return
 	}
 
-	_ = userId
+	rep, ok, err := h.uc.GetByIDAndUserID(ctx, id, userId)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "something went wrong")
+		return
+	}
 
-	resp := &docs.GetReportsResponse{}
+	if !ok {
+		ctx.String(http.StatusNotFound, "report not found")
+		return
+	}
+
+	resp := h.convertToReportResp(rep)
 
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -221,23 +250,27 @@ func (h *reportHandler) UpdateReport(ctx *gin.Context) {
 		return
 	}
 
-	_ = id
-
 	userId, err := auth.GetUserId(ctx)
-
 	if err != nil {
 		log.Println("invalid user_id")
 		ctx.String(http.StatusBadRequest, "invalid user_id")
 		return
 	}
 
-	_ = userId
-
 	var request docs.UpdateReportRequest
-
 	if err := ctx.ShouldBind(&request); err != nil {
 		log.Println("invalid form data")
 		ctx.String(http.StatusBadRequest, "invalud form data")
+		return
+	}
+
+	if err := h.uc.Update(ctx, report2.Report{
+		ID:     id,
+		UserID: userId,
+		Text:   request.Text,
+		Images: nil,
+	}, request.Images); err != nil {
+		ctx.String(http.StatusInternalServerError, "something went wrong")
 		return
 	}
 
@@ -280,4 +313,64 @@ func (h *reportHandler) ConfirmReport(ctx *gin.Context) {
 	_ = id
 
 	ctx.Status(http.StatusOK)
+}
+
+func InitReportHandlers(router *gin.RouterGroup, authProvider auth.Auth) {
+	h := &reportHandler{}
+
+	group := router.Group("/report")
+
+	{
+		group.GET("/", authProvider.RoleProtected("admin"), h.GetReports)
+		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetReportById)
+		group.PATCH("/:id/confirm", authProvider.RoleProtected("admin"), h.ConfirmReport)
+
+		group.GET("/my", authProvider.RoleProtected("reviewer"), h.GetMyReports)
+		group.GET("/my/:id", authProvider.RoleProtected("reviewer"), h.GetMyReportById)
+		group.PATCH("/:id", authProvider.RoleProtected("reviewer"), h.UpdateReport)
+	}
+}
+
+func (h *reportHandler) convertFromReqImages(images []*multipart.FileHeader) []*docs.ReportImageResponse {
+	res := make([]*docs.ReportImageResponse, len(images))
+	//for i, image := range images {
+	//	res[i] = &docs.ReportImageResponse{
+	//		Id:   image.ID.String(),
+	//		Link: image.Link,
+	//	}
+	//}
+	return res
+}
+
+func (h *reportHandler) convertToRespImages(images []report2.Image) []*docs.ReportImageResponse {
+	res := make([]*docs.ReportImageResponse, len(images))
+	for i, image := range images {
+		res[i] = &docs.ReportImageResponse{
+			Id:   image.ID.String(),
+			Link: image.Link,
+		}
+	}
+	return res
+}
+
+func (h *reportHandler) convertToReportsResp(reports []report2.Report, cnt int64, limit int64) *docs.GetReportsResponse {
+	resp := &docs.GetReportsResponse{
+		Reports:    make([]*docs.ReportResponse, len(reports)),
+		PagesCount: int(cnt / limit),
+	}
+
+	for i, r := range reports {
+		resp.Reports[i] = h.convertToReportResp(r)
+	}
+	return resp
+}
+
+func (h *reportHandler) convertToReportResp(r report2.Report) *docs.ReportResponse {
+	return &docs.ReportResponse{
+		Id:           r.ID.String(),
+		ExpirationAt: r.ExpirationAt.Format(time.RFC3339),
+		Status:       r.Status,
+		Text:         r.Text,
+		Images:       h.convertToRespImages(r.Images),
+	}
 }
