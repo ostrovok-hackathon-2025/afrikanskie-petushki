@@ -1,6 +1,10 @@
 package application
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type ApplicationStatus string
 
@@ -11,10 +15,11 @@ const (
 )
 
 type Application struct {
-	Id      uuid.UUID
-	UserId  uuid.UUID
-	OfferId uuid.UUID
-	Status  ApplicationStatus
+	Id           uuid.UUID
+	UserId       uuid.UUID
+	OfferId      uuid.UUID
+	Status       ApplicationStatus
+	ExpirationAt time.Time
 }
 
 func NewApplication(userId, offerId uuid.UUID) *Application {
