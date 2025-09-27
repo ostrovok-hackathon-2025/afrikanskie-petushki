@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
@@ -101,12 +102,15 @@ func (h *OfferHandlers) GetOffers(ctx *gin.Context) {
 // @Router /offer/{id} [get]
 func (h *OfferHandlers) GetOfferById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid offer id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid offer id")
 		return
 	}
+
+	_ = id
 
 	resp := &docs.OfferResponse{}
 
@@ -191,12 +195,15 @@ func (h *OfferHandlers) UpdateOffer(ctx *gin.Context) {
 	}
 
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid offer id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid offer id")
 		return
 	}
+
+	_ = id
 
 	ctx.Status(http.StatusOK)
 }

@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth/dto"
 )
 
@@ -65,13 +67,18 @@ func (a *Auth) RoleProtected(role string) gin.HandlerFunc {
 	}
 }
 
-func (a *Auth) parseToken(token string) (int, string, error) {
+func (a *Auth) parseToken(token string) (uuid.UUID, string, error) {
 	// валидации токена
-	return 0, "", nil
+	return uuid.UUID{}, "", nil
 }
 
-func GetUserId(ctx *gin.Context) (int, error) {
-	id := ctx.GetInt(_AUTH_USER_ID)
+func GetUserId(ctx *gin.Context) (uuid.UUID, error) {
+	idStr := ctx.GetString(_AUTH_USER_ID)
+	id, err := uuid.Parse(idStr)
+
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to parse user uuid: %w", err)
+	}
 
 	return id, nil
 }

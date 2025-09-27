@@ -86,7 +86,7 @@ func (h *UserHandlers) SignUp(ctx *gin.Context) {
 	}
 
 	if err := validation.ValidatePassword(request.Password); err != nil {
-		log.Println("Invalid username: ", err.Error())
+		log.Println("Invalid password: ", err.Error())
 		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}

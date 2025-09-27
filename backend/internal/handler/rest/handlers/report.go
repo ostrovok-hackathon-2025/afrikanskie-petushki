@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 )
@@ -72,12 +73,15 @@ func (h *ReportHandlers) GetReports(ctx *gin.Context) {
 // @Router /report/{id} [get]
 func (h *ReportHandlers) GetReportById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid report id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid report id")
 		return
 	}
+
+	_ = id
 
 	resp := &docs.ReportResponse{}
 
@@ -153,12 +157,15 @@ func (h *ReportHandlers) GetMyReports(ctx *gin.Context) {
 // @Router /report/my/{id} [get]
 func (h *ReportHandlers) GetMyReportById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid report id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid report id")
 		return
 	}
+
+	_ = id
 
 	userId, err := auth.GetUserId(ctx)
 
@@ -201,12 +208,15 @@ func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
 	}
 
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid report id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid report id")
 		return
 	}
+
+	_ = id
 
 	userId, err := auth.GetUserId(ctx)
 
@@ -257,12 +267,15 @@ func (h *ReportHandlers) ConfirmReport(ctx *gin.Context) {
 	}
 
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid report id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid report id")
 		return
 	}
+
+	_ = id
 
 	ctx.Status(http.StatusOK)
 }

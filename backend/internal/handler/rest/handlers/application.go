@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 )
@@ -36,13 +37,16 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 		return
 	}
 
-	offerId := request.OfferId
+	offerIdStr := request.OfferId
+	offerId, err := uuid.Parse(offerIdStr)
 
-	if offerId == "" {
-		log.Println("Invalid offer_id: ", offerId)
+	if offerIdStr == "" || err != nil {
+		log.Println("Invalid offer_id: ", offerIdStr)
 		ctx.String(http.StatusBadRequest, "invalid offer_id")
 		return
 	}
+
+	_ = offerId
 
 	userId, err := auth.GetUserId(ctx)
 
@@ -117,12 +121,15 @@ func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
 // @Router /application/{id} [get]
 func (h *ApplicationHandlers) GetApplicationById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid application id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid application id")
 		return
 	}
+
+	_ = id
 
 	resp := &docs.ApplicationResponse{}
 
