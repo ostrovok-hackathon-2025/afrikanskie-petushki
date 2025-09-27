@@ -1,0 +1,1260 @@
+{
+    "schemes": ["http","https"],
+    "swagger": "2.0",
+    "info": {
+        "description": "API for \"Secret Guest\" app",
+        "title": "Secret Guest API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/application/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all applications with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Get applications",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of applications",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetApplicationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting applications",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for reviewer"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates application for given offer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Create application",
+                "parameters": [
+                    {
+                        "description": "Data for creating offer",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateApplicationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created application data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateApplicationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating offer",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for reviewer"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/application/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get application by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Get by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of requested application",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requested application",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ApplicationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting application by id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for reviewer"
+                    },
+                    "404": {
+                        "description": "Application with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/offer/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all offers with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Offer"
+                ],
+                "summary": "Get offers",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of offers",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetOffersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting offers",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates offer with given info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Offer"
+                ],
+                "summary": "Create offer",
+                "parameters": [
+                    {
+                        "description": "Data for creating offer",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateOfferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created offer data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateOfferResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating offer",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/offer/search": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find offers with given search params",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Offer"
+                ],
+                "summary": "Find offers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of required city",
+                        "name": "cityId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of offers found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetOffersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for finding offers",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for reviewer"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/offer/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get offer by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Offer"
+                ],
+                "summary": "Get by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of requested offer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requested offer",
+                        "schema": {
+                            "$ref": "#/definitions/docs.OfferResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting offer by id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Offer with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update offer with given id and data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Offer"
+                ],
+                "summary": "Update offer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of offer to update",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data for updating offer",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.UpdateOfferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated offer"
+                    },
+                    "400": {
+                        "description": "Invalid data for finding offers",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Offer with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/report/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all reports with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get reports",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of reports",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetReportsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting reports",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/report/my": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all reports of current user with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get my reports",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of reports",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetReportsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting reports",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "User is not reviewer"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/report/my/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get report of current user by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get my by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of requested report",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requested report",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ReportResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting report by id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "User is not reviewer or this report does not belong to user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Report with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/report/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get report by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of requested report",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requested report",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ReportResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting report by id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Report with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates report with given text and photos",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Update report",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of report to update",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data for updating report",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.UpdateReportRequest"
+                        }
+                    },
+                    {
+                        "type": "file",
+                        "description": "Report images",
+                        "name": "images",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully update report"
+                    },
+                    "400": {
+                        "description": "Invalid data for updating report",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for reviewer"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/report/{id}/confirm": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Confirms or declains report",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Confirm report",
+                "parameters": [
+                    {
+                        "description": "Data for updating report",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.ConfirmReport"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully update status of report"
+                    },
+                    "400": {
+                        "description": "Invalid data for changing report status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/user/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get data of current user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get me",
+                "responses": {
+                    "200": {
+                        "description": "User data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.UserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/user/log-in": {
+            "post": {
+                "description": "Log in with given name and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Log in",
+                "parameters": [
+                    {
+                        "description": "Data for log in",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.LogInRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Auth data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for log in",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Wrong password"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/user/refresh": {
+            "post": {
+                "description": "Refresh auth credentials via refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Refresh credentials",
+                "parameters": [
+                    {
+                        "description": "Data for refresh",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.RefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Auth data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for refresh",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/user/sign-up": {
+            "post": {
+                "description": "Sign up with given name and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Sign up",
+                "parameters": [
+                    {
+                        "description": "Data for sign up",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.SignUpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Auth data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for sign up",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "docs.ApplicationResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "offer_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "access_ttl": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "refresh_ttl": {
+                    "type": "integer"
+                }
+            }
+        },
+        "docs.ConfirmReport": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateApplicationRequest": {
+            "type": "object",
+            "required": [
+                "offer_id"
+            ],
+            "properties": {
+                "offer_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateApplicationResponse": {
+            "type": "object",
+            "properties": {
+                "application_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateOfferRequest": {
+            "type": "object",
+            "required": [
+                "expiration_at",
+                "hotel_id",
+                "location_id",
+                "task"
+            ],
+            "properties": {
+                "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_id": {
+                    "type": "string"
+                },
+                "location_id": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateOfferResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.GetApplicationsResponse": {
+            "type": "object",
+            "properties": {
+                "applications": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.ApplicationResponse"
+                    }
+                },
+                "pages_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "docs.GetOffersResponse": {
+            "type": "object",
+            "properties": {
+                "offers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.OfferResponse"
+                    }
+                },
+                "pages_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "docs.GetReportsResponse": {
+            "type": "object",
+            "properties": {
+                "pages_count": {
+                    "type": "integer"
+                },
+                "reports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.ReportResponse"
+                    }
+                }
+            }
+        },
+        "docs.LogInRequest": {
+            "type": "object",
+            "required": [
+                "ostrovok_login",
+                "password"
+            ],
+            "properties": {
+                "ostrovok_login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.OfferResponse": {
+            "type": "object",
+            "properties": {
+                "check_date": {
+                    "type": "string"
+                },
+                "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location_id": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                },
+                "used": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "docs.RefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.ReportImageResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.ReportResponse": {
+            "type": "object",
+            "properties": {
+                "expiration_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.ReportImageResponse"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.SignUpRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "ostrovok_login",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "ostrovok_login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.UpdateOfferRequest": {
+            "type": "object",
+            "properties": {
+                "expiration_at": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.UpdateReportRequest": {
+            "type": "object",
+            "required": [
+                "text"
+            ],
+            "properties": {
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "is_admin": {
+                    "type": "boolean"
+                },
+                "ostrovok_login": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
