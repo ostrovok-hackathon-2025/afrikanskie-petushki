@@ -1,3 +1,14 @@
 rest:
   port: 8080
   allow_origin: http://localhost:8080
+
+postgres:
+  user: admin
+  password: admin
+  host: localhost
+  port: 5432
+  database: secret-guest
+
+logger:
+  prefix: "app."
+  flag: 19

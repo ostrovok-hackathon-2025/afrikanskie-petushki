@@ -14,17 +14,17 @@ import (
 
 const pgForeginKeyErr = "foreign_key_violation"
 
-type ApplicationRepoImpl struct {
+type applicationRepo struct {
 	db *sqlx.DB
 }
 
 func NewApplicationRepo(db *sqlx.DB) ApplicationRepo {
-	return &ApplicationRepoImpl{
+	return &applicationRepo{
 		db: db,
 	}
 }
 
-func (r *ApplicationRepoImpl) CreateApplication(
+func (r *applicationRepo) CreateApplication(
 	ctx context.Context,
 	application *application.Application,
 ) error {
@@ -45,7 +45,7 @@ func (r *ApplicationRepoImpl) CreateApplication(
 	return nil
 }
 
-func (r *ApplicationRepoImpl) GetApplications(
+func (r *applicationRepo) GetApplications(
 	ctx context.Context,
 	userId uuid.UUID,
 	pageNum, pageSize int,
@@ -98,7 +98,7 @@ func (r *ApplicationRepoImpl) GetApplications(
 	return res, pagesCount, nil
 }
 
-func (r *ApplicationRepoImpl) GetApplicationById(
+func (r *applicationRepo) GetApplicationById(
 	ctx context.Context,
 	applicationId uuid.UUID,
 ) (*application.Application, error) {

@@ -11,7 +11,20 @@ import (
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 )
 
-type ReportHandlers struct {
+type ReportHandler interface {
+	GetReports(ctx *gin.Context)
+	GetReportById(ctx *gin.Context)
+	GetMyReports(ctx *gin.Context)
+	GetMyReportById(ctx *gin.Context)
+	UpdateReport(ctx *gin.Context)
+	ConfirmReport(ctx *gin.Context)
+}
+
+type reportHandler struct {
+}
+
+func NewReportHandler() ReportHandler {
+	return &reportHandler{}
 }
 
 // Add godoc
@@ -29,7 +42,7 @@ type ReportHandlers struct {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /report/ [get]
-func (h *ReportHandlers) GetReports(ctx *gin.Context) {
+func (h *reportHandler) GetReports(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
@@ -71,7 +84,7 @@ func (h *ReportHandlers) GetReports(ctx *gin.Context) {
 // @Failure 404 "Report with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /report/{id} [get]
-func (h *ReportHandlers) GetReportById(ctx *gin.Context) {
+func (h *reportHandler) GetReportById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 
@@ -103,7 +116,7 @@ func (h *ReportHandlers) GetReportById(ctx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /report/my [get]
-func (h *ReportHandlers) GetMyReports(ctx *gin.Context) {
+func (h *reportHandler) GetMyReports(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
@@ -155,7 +168,7 @@ func (h *ReportHandlers) GetMyReports(ctx *gin.Context) {
 // @Failure 404 "Report with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /report/my/{id} [get]
-func (h *ReportHandlers) GetMyReportById(ctx *gin.Context) {
+func (h *reportHandler) GetMyReportById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 
@@ -198,7 +211,7 @@ func (h *ReportHandlers) GetMyReportById(ctx *gin.Context) {
 // @Failure 403 "Only available for reviewer"
 // @Failure 500 "Internal server error"
 // @Router /report/{id} [patch]
-func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
+func (h *reportHandler) UpdateReport(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 
@@ -246,7 +259,7 @@ func (h *ReportHandlers) UpdateReport(ctx *gin.Context) {
 // @Failure 403 "Only available for admin"
 // @Failure 500 "Internal server error"
 // @Router /report/{id}/confirm [patch]
-func (h *ReportHandlers) ConfirmReport(ctx *gin.Context) {
+func (h *reportHandler) ConfirmReport(ctx *gin.Context) {
 	var request docs.ConfirmReport
 
 	if err := ctx.BindJSON(&request); err != nil {
@@ -267,20 +280,4 @@ func (h *ReportHandlers) ConfirmReport(ctx *gin.Context) {
 	_ = id
 
 	ctx.Status(http.StatusOK)
-}
-
-func InitReportHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
-	h := &ReportHandlers{}
-
-	group := router.Group("/report")
-
-	{
-		group.GET("/", authProvider.RoleProtected("admin"), h.GetReports)
-		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetReportById)
-		group.PATCH("/:id/confirm", authProvider.RoleProtected("admin"), h.ConfirmReport)
-
-		group.GET("/my", authProvider.RoleProtected("reviewer"), h.GetMyReports)
-		group.GET("/my/:id", authProvider.RoleProtected("reviewer"), h.GetMyReportById)
-		group.PATCH("/:id", authProvider.RoleProtected("reviewer"), h.UpdateReport)
-	}
 }

@@ -1,11 +1,14 @@
-package register
+package user
 
 import (
 	"crypto/sha256"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
-	"time"
+	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
 )
 
 func hashPassword(password string) string {
@@ -13,7 +16,7 @@ func hashPassword(password string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func generateTokens(user *User, jwtSecret []byte) (*docs.AuthResponse, error) {
+func generateTokens(user *model.User, jwtSecret []byte) (*docs.AuthResponse, error) {
 	accessToken, err := generateToken(user, 24*time.Hour, "access", jwtSecret)
 	if err != nil {
 		return nil, err
@@ -32,9 +35,9 @@ func generateTokens(user *User, jwtSecret []byte) (*docs.AuthResponse, error) {
 	}, nil
 }
 
-func generateToken(user *User, duration time.Duration, audience string, jwtSecret []byte) (string, error) {
+func generateToken(user *model.User, duration time.Duration, audience string, jwtSecret []byte) (string, error) {
 	userIDStr := fmt.Sprintf("%s", user.ID)
-	claims := JWTClaims{
+	claims := model.JWTClaims{
 		UserID:        userIDStr,
 		OstrovokLogin: user.OstrovokLogin,
 		Email:         user.Email,
@@ -50,4 +53,11 @@ func generateToken(user *User, duration time.Duration, audience string, jwtSecre
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
+}
+
+func getEnvWithDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }

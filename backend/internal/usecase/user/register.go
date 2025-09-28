@@ -1,52 +1,27 @@
-package register
+package user
 
 import (
 	"context"
 	"errors"
+
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
+	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
 )
-
-// OstrovokUser представляет пользователя из системы Островок
-type OstrovokUser struct {
-	Login string `json:"login"`
-	Email string `json:"email"`
-}
-
-// OstrovokService интерфейс для работы с API Островок
-type OstrovokService interface {
-	GetUserByLogin(ctx context.Context, login string) (*OstrovokUser, error)
-}
-
-type RegistrationService struct {
-	userRepo    UserRepository
-	ostrovokSvc OstrovokService
-	jwtSecret   []byte
-}
 
 type RegisterRequest struct {
 	OstrovokLogin string `json:"ostrovok_login"`
 	Password      string `json:"password"`
 }
 
-func NewRegistrationService(userRepo UserRepository, ostrovokSvc OstrovokService) *RegistrationService {
-	jwtSecret := getEnvWithDefault("JWT_SECRET", "your-super-secret-jwt-key-change-in-production")
-
-	return &RegistrationService{
-		userRepo:    userRepo,
-		ostrovokSvc: ostrovokSvc,
-		jwtSecret:   []byte(jwtSecret),
-	}
-}
-
-func (s *RegistrationService) Register(ctx context.Context, req RegisterRequest) (*docs.AuthResponse, error) {
+func (u *useCase) Register(ctx context.Context, req *docs.SignUpRequest) (*docs.AuthResponse, error) {
 	// 1. Получаем пользователя из системы Островок
-	ostrovokUser, err := s.ostrovokSvc.GetUserByLogin(ctx, req.OstrovokLogin)
+	ostrovokUser, err := u.ostrovokClient.GetUserByLogin(ctx, req.OstrovokLogin)
 	if err != nil {
 		return nil, err
 	}
 
-	exists, err := s.userRepo.UserExists(ctx, req.OstrovokLogin)
+	exists, err := u.repo.UserExists(ctx, req.OstrovokLogin)
 	if err != nil {
 		return nil, err
 	}
@@ -56,17 +31,17 @@ func (s *RegistrationService) Register(ctx context.Context, req RegisterRequest)
 
 	passwordHash := hashPassword(req.Password)
 
-	user := &User{
+	user := &model.User{
 		ID:            uuid.New(),
 		OstrovokLogin: ostrovokUser.Login,
 		Email:         ostrovokUser.Email,
 		IsAdmin:       false,
 	}
 
-	err = s.userRepo.CreateUser(ctx, user, passwordHash)
+	err = u.repo.CreateUser(ctx, user, passwordHash)
 	if err != nil {
 		return nil, err
 	}
 
-	return generateTokens(user, s.jwtSecret)
+	return generateTokens(user, u.jwtSecret)
 }

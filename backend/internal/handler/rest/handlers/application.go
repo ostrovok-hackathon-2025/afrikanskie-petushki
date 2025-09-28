@@ -15,12 +15,18 @@ import (
 	applicationRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 )
 
-type ApplicationHandlers struct {
+type ApplicationHandler interface {
+	CreateApplication(ctx *gin.Context)
+	GetApplications(ctx *gin.Context)
+	GetApplicationById(ctx *gin.Context)
+}
+
+type applicationHandler struct {
 	useCase application.ApplicationUseCase
 }
 
-func NewApplicationHandlers(useCase application.ApplicationUseCase) *ApplicationHandlers {
-	return &ApplicationHandlers{
+func NewApplicationHandler(useCase application.ApplicationUseCase) ApplicationHandler {
+	return &applicationHandler{
 		useCase: useCase,
 	}
 }
@@ -39,7 +45,7 @@ func NewApplicationHandlers(useCase application.ApplicationUseCase) *Application
 // @Failure 403 "Only available for reviewer"
 // @Failure 500 "Internal server error"
 // @Router /application/ [post]
-func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
+func (h *applicationHandler) CreateApplication(ctx *gin.Context) {
 	var request docs.CreateApplicationRequest
 
 	if err := ctx.BindJSON(&request); err != nil {
@@ -103,7 +109,7 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /application/ [get]
-func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
+func (h *applicationHandler) GetApplications(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
@@ -173,7 +179,7 @@ func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
 // @Failure 404 "Application with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /application/{id} [get]
-func (h *ApplicationHandlers) GetApplicationById(ctx *gin.Context) {
+func (h *applicationHandler) GetApplicationById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 
@@ -211,18 +217,4 @@ func (h *ApplicationHandlers) GetApplicationById(ctx *gin.Context) {
 	resp := docs.ApplicationModelToResponse(app)
 
 	ctx.JSON(http.StatusOK, resp)
-}
-
-func InitApplicationHandlers(router *gin.RouterGroup, authProvider *auth.Auth, useCase application.ApplicationUseCase) {
-	h := NewApplicationHandlers(useCase)
-
-	group := router.Group("/application")
-
-	group.Use(authProvider.RoleProtected("reviewer"))
-
-	{
-		group.POST("/", h.CreateApplication)
-		group.GET("/", h.GetApplications)
-		group.GET("/:id", h.GetApplicationById)
-	}
 }

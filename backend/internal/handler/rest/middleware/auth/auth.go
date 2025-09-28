@@ -12,14 +12,20 @@ import (
 const _AUTH_USER_ID = "__auth_user_id"
 const _AUTH_USER_ROLE = "__auth_user_role"
 
-type Auth struct {
+type Auth interface {
+	LoginProtected() gin.HandlerFunc
+	RoleProtected(role string) gin.HandlerFunc
+	parseToken(token string) (uuid.UUID, string, error)
 }
 
-func NewAuth() *Auth {
-	return &Auth{}
+type auth struct {
 }
 
-func (a *Auth) LoginProtected() gin.HandlerFunc {
+func NewAuth() Auth {
+	return &auth{}
+}
+
+func (a *auth) LoginProtected() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dto.TokenRequest
 
@@ -41,7 +47,7 @@ func (a *Auth) LoginProtected() gin.HandlerFunc {
 	}
 }
 
-func (a *Auth) RoleProtected(role string) gin.HandlerFunc {
+func (a *auth) RoleProtected(role string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dto.TokenRequest
 
@@ -67,7 +73,7 @@ func (a *Auth) RoleProtected(role string) gin.HandlerFunc {
 	}
 }
 
-func (a *Auth) parseToken(token string) (uuid.UUID, string, error) {
+func (a *auth) parseToken(token string) (uuid.UUID, string, error) {
 	// валидации токена
 	return uuid.UUID{}, "", nil
 }

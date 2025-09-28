@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/config"
 )
