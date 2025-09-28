@@ -3,30 +3,37 @@ package offer
 import (
 	"context"
 
+	sq "github.com/Masterminds/squirrel"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
 )
 
-func (r *repo) Edit(_ context.Context, _ *model.Edit) error {
-	panic("implement me")
+func (r *repo) Edit(ctx context.Context, edit model.Edit) error {
+	sql := sq.Update("offer")
+	if task, ok := edit.Task.Get(); ok {
+		sql = sql.Set("task", task)
+	}
+	if roomID, ok := edit.RoomID.Get(); ok {
+		sql = sql.Set("room_id", roomID)
+	}
+	if hotelID, ok := edit.HotelID.Get(); ok {
+		sql = sql.Set("hotel_id", hotelID)
+	}
+	if checkIn, ok := edit.CheckIn.Get(); ok {
+		sql = sql.Set("check_in", checkIn)
+	}
+	if checkOut, ok := edit.CheckOut.Get(); ok {
+		sql = sql.Set("check_out", checkOut)
+	}
+	if expirationAt, ok := edit.ExpirationAT.Get(); ok {
+		sql = sql.Set("expiration_at", expirationAt)
+	}
+	query, args, err := sql.Where(sq.Eq{"id": edit.OfferID}).ToSql()
+	if err != nil {
+		return err
+	}
+	err = r.sqlClient.QueryRowContext(ctx, query, args...).Scan()
+	if err != nil {
+		return err
+	}
+	return nil
 }
-
-//TODO create sql from squirrel
-//func (r *repo) Edit(ctx context.Context, filter *model.Edit) error {
-//	sql := `
-//			UPDATE offer
-//			SET expiration_at=$1, task=$2
-//			WHERE id=$2;
-//			`
-//	err := r.sqlClient.QueryRowContext(ctx, sql, filter.ExpirationAT, filter.Task, filter.OfferID).Scan()
-//	switch {
-//	case errors.Is(err, sql2.ErrNoRows):
-//		log.Printf("no user with id %d\n", filter.OfferID)
-//		return ErrNotFroundUser
-//	case err != nil:
-//		return err
-//	default:
-//		log.Printf("update user with %v\n", filter.OfferID)
-//	}
-//
-//	return nil
-//}

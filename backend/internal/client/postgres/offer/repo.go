@@ -11,15 +11,13 @@ import (
 )
 
 type Repo interface {
-	GetByID(ctx context.Context, id string) (*model.Offer, error)
-	GetForPage(ctx context.Context, pageSettings *model.PageSettings) ([]*model.Offer, int, error)
-	GetByFilter(ctx context.Context, filter *model.Filter) ([]*model.Offer, int, error)
+	GetByID(ctx context.Context, id string) (model.Offer, error)
+	GetForPage(ctx context.Context, pageSettings model.PageSettings) ([]model.Offer, int, error)
+	GetByFilter(ctx context.Context, filter model.Filter) ([]model.Offer, int, error)
 
-	Check(ctx context.Context, check *model.Check) (bool, error)
+	Create(ctx context.Context, create model.Create) (uuid.UUID, error)
 
-	Create(ctx context.Context, create *model.Create) (uuid.UUID, error)
-
-	Edit(ctx context.Context, filter *model.Edit) error
+	Edit(ctx context.Context, filter model.Edit) error
 }
 
 type repo struct {

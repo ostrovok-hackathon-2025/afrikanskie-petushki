@@ -14,7 +14,7 @@ var (
 	ErrNotFroundUser = errors.New("user not found")
 )
 
-func (r *repo) Create(ctx context.Context, create *model.Create) (uuid.UUID, error) {
+func (r *repo) Create(ctx context.Context, create model.Create) (uuid.UUID, error) {
 	id := uuid.New()
 	sql := `
 			INSERT INTO offer (id, hotel_id, room_id, check_in_at, check_out_at, expiration_at, task)
@@ -24,7 +24,7 @@ func (r *repo) Create(ctx context.Context, create *model.Create) (uuid.UUID, err
 		ctx, sql, id, create.HotelID,
 		create.RoomID, create.CheckIn,
 		create.CheckOut, create.ExpirationAT, create.Task,
-	).Scan(&id)
+	).Scan()
 	switch {
 	case errors.Is(err, sql2.ErrNoRows):
 		log.Printf("no user with id %d\n", id)
