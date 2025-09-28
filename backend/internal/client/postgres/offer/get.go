@@ -18,7 +18,7 @@ func (r *repo) GetByID(ctx context.Context, id string) (*model.Offer, error) {
 	return res, nil
 }
 
-func (r *repo) Get(
+func (r *repo) GetForPage(
 	ctx context.Context,
 	pageSettings *model.PageSettings,
 ) (offers []*model.Offer, pagesCount int, err error) {
