@@ -58,7 +58,7 @@ func (h *offerHandler) CreateOffer(ginCtx *gin.Context) {
 
 	create := model.Create{}
 
-	id, err := h.useCase.Create(ctx, &create)
+	id, err := h.useCase.Create(ctx, create)
 
 	if err != nil {
 		log.Println("Err to create offer: ", err.Error())
@@ -112,7 +112,7 @@ func (h *offerHandler) GetOffers(ginCtx *gin.Context) {
 		Offset: (pageNum - 1) * pageSize,
 	}
 	//TODO CREATE BODY
-	_, _, err = h.useCase.GetForPage(ctx, &pageSettings)
+	_, _, err = h.useCase.GetForPage(ctx, pageSettings)
 
 	if err != nil {
 		log.Println("Err to get offers for page: ", err.Error())
@@ -225,7 +225,7 @@ func (h *offerHandler) FindOffers(ginCtx *gin.Context) {
 		},
 	}
 	//TODO CREATE BODY
-	_, _, err = h.useCase.GetByFilter(ctx, &filter)
+	_, _, err = h.useCase.GetByFilter(ctx, filter)
 
 	if err != nil {
 		log.Println("Err to get offer by id: ", err.Error())
