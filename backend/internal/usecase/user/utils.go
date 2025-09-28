@@ -36,7 +36,7 @@ func generateTokens(user *model.User, jwtSecret []byte) (*docs.AuthResponse, err
 }
 
 func generateToken(user *model.User, duration time.Duration, audience string, jwtSecret []byte) (string, error) {
-	userIDStr := fmt.Sprintf("%s", user.ID)
+	userIDStr := user.ID.String()
 	claims := model.JWTClaims{
 		UserID:        userIDStr,
 		OstrovokLogin: user.OstrovokLogin,

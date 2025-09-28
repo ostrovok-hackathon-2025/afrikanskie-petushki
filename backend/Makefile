@@ -1,2 +1,2 @@
 swag:
-	swag init -g internal/handler/rest/routes.go --output docs --parseDependency true
+	swag init -g internal/app/endpoints.go --output docs --parseDependency true

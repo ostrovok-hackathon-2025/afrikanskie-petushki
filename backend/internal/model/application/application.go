@@ -9,9 +9,9 @@ import (
 type ApplicationStatus string
 
 const (
-	APPLICATION_CREATED  = ApplicationStatus("__application_created")
-	APPLICATION_ACCEPTED = ApplicationStatus("__application_accepted")
-	APPLICATION_DECLINED = ApplicationStatus("__application_declined")
+	APPLICATION_CREATED  = ApplicationStatus("__app_created")
+	APPLICATION_ACCEPTED = ApplicationStatus("__app_accepted")
+	APPLICATION_DECLINED = ApplicationStatus("__app_declined")
 )
 
 type Application struct {
@@ -20,6 +20,7 @@ type Application struct {
 	OfferId      uuid.UUID
 	Status       ApplicationStatus
 	ExpirationAt time.Time
+	HotelName    string
 }
 
 func NewApplication(userId, offerId uuid.UUID) *Application {

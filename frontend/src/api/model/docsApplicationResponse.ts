@@ -7,6 +7,8 @@
  */
 
 export interface DocsApplicationResponse {
+  expiration_at?: string;
+  hotel_name?: string;
   id?: string;
   offer_id?: string;
   status?: string;

@@ -841,6 +841,9 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized"
                     },
+                    "404": {
+                        "description": "User not found"
+                    },
                     "500": {
                         "description": "Internal server error"
                     }
@@ -990,6 +993,12 @@ const docTemplate = `{
         "docs.ApplicationResponse": {
             "type": "object",
             "properties": {
+                "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1244,6 +1253,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "is_admin": {

@@ -8,6 +8,7 @@
 
 export interface DocsUserResponse {
   email?: string;
+  id?: string;
   is_admin?: boolean;
   ostrovok_login?: string;
 }

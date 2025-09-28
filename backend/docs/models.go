@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
 )
 
 type ApplicationResponse struct {
@@ -13,6 +14,7 @@ type ApplicationResponse struct {
 	OfferId      string    `json:"offer_id"`
 	Status       string    `json:"status"`
 	ExpirationAt time.Time `json:"expiration_at"`
+	HotelName    string    `json:"hotel_name"`
 }
 
 func ApplicationModelToResponse(model *application.Application) *ApplicationResponse {
@@ -22,6 +24,7 @@ func ApplicationModelToResponse(model *application.Application) *ApplicationResp
 		OfferId:      model.OfferId.String(),
 		Status:       string(model.Status),
 		ExpirationAt: model.ExpirationAt,
+		HotelName:    model.HotelName,
 	}
 }
 
@@ -77,9 +80,19 @@ type AuthResponse struct {
 }
 
 type UserResponse struct {
+	Id            string `json:"id"`
 	OstrovokLogin string `json:"ostrovok_login"`
 	Email         string `json:"email"`
 	IsAdmin       bool   `json:"is_admin"`
+}
+
+func UserModelToResponse(u *user.User) *UserResponse {
+	return &UserResponse{
+		Id:            u.ID.String(),
+		OstrovokLogin: u.OstrovokLogin,
+		Email:         u.Email,
+		IsAdmin:       u.IsAdmin,
+	}
 }
 
 type LogInRequest struct {

@@ -27,10 +27,11 @@ type Filter struct {
 type Create struct {
 	Task         string
 	RoomID       uuid.UUID
-	HotelID      uuid.UUID
 	CheckIn      time.Time
 	CheckOut     time.Time
 	ExpirationAT time.Time
+	HotelID      uuid.UUID
+	LocalID      uuid.UUID
 }
 
 type Edit struct {

@@ -16,3 +16,6 @@ down: ## Stop all service dependencies and services itself(Cache will be preserv
 .PHONY: clean
 clean: ## Stop all service dependencies and services itself and fully clean every data which was in containers
 	docker compose --env-file ./.env.example down -v --remove-orphans
+
+.PHONY: rebuild
+rebuild: build up

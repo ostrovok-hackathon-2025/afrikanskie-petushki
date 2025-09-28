@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/ostrovok"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
@@ -13,6 +14,7 @@ type UseCase interface {
 	Register(ctx context.Context, req *docs.SignUpRequest) (*docs.AuthResponse, error)
 	ValidateToken(tokenString string) (*model.JWTClaims, error)
 	Login(ctx context.Context, req *docs.LogInRequest) (*docs.AuthResponse, error)
+	GetMe(ctx context.Context, userId uuid.UUID) (*model.User, error)
 }
 
 type useCase struct {
