@@ -55,8 +55,8 @@ func (h *offerHandler) CreateOffer(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get offers
-// @Description Get all offers with pagination
+// @Summary GetForPage offers
+// @Description GetForPage all offers with pagination
 // @Tags Offer
 // @Param pageNum query int true "Number of page"
 // @Param pageSize query int true "Size of page"
@@ -98,8 +98,8 @@ func (h *offerHandler) GetOffers(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get by id
-// @Description Get offer by id
+// @Summary GetForPage by id
+// @Description GetForPage offer by id
 // @Tags Offer
 // @Param id path string true "Id of requested offer"
 // @Produce json

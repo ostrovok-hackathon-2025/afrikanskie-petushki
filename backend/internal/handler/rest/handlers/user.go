@@ -153,8 +153,8 @@ func (h *userHandler) Refresh(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get me
-// @Description Get data of current user
+// @Summary GetForPage me
+// @Description GetForPage data of current user
 // @Tags User
 // @Produce json
 // @Security BearerAuth

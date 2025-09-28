@@ -22,14 +22,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all applications with pagination",
+                "description": "GetForPage all applications with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Application"
                 ],
-                "summary": "Get applications",
+                "summary": "GetForPage applications",
                 "parameters": [
                     {
                         "type": "integer",
@@ -133,14 +133,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get application by id",
+                "description": "GetForPage application by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Application"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -185,14 +185,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all offers with pagination",
+                "description": "GetForPage all offers with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Offer"
                 ],
-                "summary": "Get offers",
+                "summary": "GetForPage offers",
                 "parameters": [
                     {
                         "type": "integer",
@@ -362,14 +362,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get offer by id",
+                "description": "GetForPage offer by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Offer"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -473,14 +473,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all reports with pagination",
+                "description": "GetForPage all reports with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get reports",
+                "summary": "GetForPage reports",
                 "parameters": [
                     {
                         "type": "integer",
@@ -532,14 +532,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all reports of current user with pagination",
+                "description": "GetForPage all reports of current user with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get my reports",
+                "summary": "GetForPage my reports",
                 "parameters": [
                     {
                         "type": "integer",
@@ -591,14 +591,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get report of current user by id",
+                "description": "GetForPage report of current user by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get my by id",
+                "summary": "GetForPage my by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -646,14 +646,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get report by id",
+                "description": "GetForPage report by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -817,14 +817,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get data of current user",
+                "description": "GetForPage data of current user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User"
                 ],
-                "summary": "Get me",
+                "summary": "GetForPage me",
                 "responses": {
                     "200": {
                         "description": "User data",

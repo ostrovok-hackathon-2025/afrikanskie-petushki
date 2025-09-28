@@ -7,7 +7,7 @@ build:
 	docker compose --env-file ./.env.example build
 
 .PHONY: restart ## Run service with cleaning
-restart: clean up
+restart: clean build up
 
 .PHONY: down
 down: ## Stop all service dependencies and services itself(Cache will be preserved)
