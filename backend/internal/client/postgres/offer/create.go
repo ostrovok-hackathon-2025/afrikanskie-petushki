@@ -21,7 +21,7 @@ func (r *repo) Create(ctx context.Context, create *model.Create) (uuid.UUID, err
 			VALUES ($1, $2, $3, $4)
 			RETURNING id;
 			`
-	err := r.sqlClient.QueryRowContext(ctx, sql, create.HotelID, create.ExpirationAT, create.LocalID, create.Task).Scan(&id)
+	err := r.sqlClient.QueryRowContext(ctx, sql, create.HotelID, create.ExpirationAT, create.LocationID, create.Task).Scan(&id)
 	switch {
 	case errors.Is(err, sql2.ErrNoRows):
 		log.Printf("no user with id %d\n", id)

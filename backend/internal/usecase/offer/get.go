@@ -10,7 +10,10 @@ func (u *useCase) GetByID(ctx context.Context, id string) (*model.Offer, error) 
 	return u.repo.GetByID(ctx, id)
 }
 
-func (u *useCase) GetAll(ctx context.Context, pageSettings *model.PageSettings) (offers []*model.Offer, pageCount int, err error) {
+func (u *useCase) GetForPage(
+	ctx context.Context,
+	pageSettings *model.PageSettings,
+) (offers []*model.Offer, pageCount int, err error) {
 	return u.repo.GetForPage(ctx, pageSettings)
 }
 
