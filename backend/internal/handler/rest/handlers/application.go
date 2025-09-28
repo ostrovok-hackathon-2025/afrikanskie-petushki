@@ -95,8 +95,8 @@ func (h *applicationHandler) CreateApplication(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get applications
-// @Description Get all applications with pagination
+// @Summary GetForPage applications
+// @Description GetForPage all applications with pagination
 // @Tags Application
 // @Param pageNum query int true "Number of page"
 // @Param pageSize query int true "Size of page"
@@ -166,8 +166,8 @@ func (h *applicationHandler) GetApplications(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get by id
-// @Description Get application by id
+// @Summary GetForPage by id
+// @Description GetForPage application by id
 // @Tags Application
 // @Param id path string true "Id of requested application"
 // @Produce json

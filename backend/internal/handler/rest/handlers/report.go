@@ -28,8 +28,8 @@ func NewReportHandler() ReportHandler {
 }
 
 // Add godoc
-// @Summary Get reports
-// @Description Get all reports with pagination
+// @Summary GetForPage reports
+// @Description GetForPage all reports with pagination
 // @Tags Report
 // @Param pageNum query int true "Number of page"
 // @Param pageSize query int true "Size of page"
@@ -71,8 +71,8 @@ func (h *reportHandler) GetReports(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get by id
-// @Description Get report by id
+// @Summary GetForPage by id
+// @Description GetForPage report by id
 // @Tags Report
 // @Param id path string true "Id of requested report"
 // @Produce json
@@ -102,8 +102,8 @@ func (h *reportHandler) GetReportById(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get my reports
-// @Description Get all reports of current user with pagination
+// @Summary GetForPage my reports
+// @Description GetForPage all reports of current user with pagination
 // @Tags Report
 // @Param pageNum query int true "Number of page"
 // @Param pageSize query int true "Size of page"
@@ -155,8 +155,8 @@ func (h *reportHandler) GetMyReports(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get my by id
-// @Description Get report of current user by id
+// @Summary GetForPage my by id
+// @Description GetForPage report of current user by id
 // @Tags Report
 // @Param id path string true "Id of requested report"
 // @Produce json

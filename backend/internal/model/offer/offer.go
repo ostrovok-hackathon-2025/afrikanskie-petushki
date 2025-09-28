@@ -8,11 +8,13 @@ import (
 
 type Offer struct {
 	ID           uuid.UUID
-	HotelID      uuid.UUID
-	ExpirationAT time.Time
-	LocalID      uuid.UUID
-	Used         bool
 	Task         string
+	Location     string
+	RoomType     string
+	Hotel        string
+	CheckIn      time.Time
+	CheckOut     time.Time
+	ExpirationAT time.Time
 }
 
 type Filter struct {
@@ -21,19 +23,35 @@ type Filter struct {
 }
 
 type Create struct {
-	HotelID      uuid.UUID
-	ExpirationAT time.Time
-	LocalID      uuid.UUID
 	Task         string
+	Location     string
+	RoomType     string
+	Hotel        string
+	CheckIn      time.Time
+	CheckOut     time.Time
+	ExpirationAT time.Time
 }
 
 type Edit struct {
 	OfferID      uuid.UUID
-	ExpirationAT time.Time
 	Task         string
+	Location     string
+	RoomType     string
+	Hotel        string
+	CheckIn      time.Time
+	CheckOut     time.Time
+	ExpirationAT time.Time
 }
 
 type PageSettings struct {
 	Limit  int
 	Offset int
+}
+
+type Check struct {
+	Location string
+	RoomType string
+	Hotel    string
+	CheckIn  time.Time
+	CheckOut time.Time
 }

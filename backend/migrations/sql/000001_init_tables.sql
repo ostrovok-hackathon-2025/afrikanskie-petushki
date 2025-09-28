@@ -12,16 +12,44 @@ CREATE TABLE IF NOT EXISTS location
     name TEXT
 );
 
+CREATE TABLE IF NOT EXISTS room_type
+(
+    id   UUID NOT NULL PRIMARY KEY,
+    name TEXT
+);
+
+CREATE TABLE IF NOT EXISTS hotel
+(
+    id          UUID NOT NULL PRIMARY KEY,
+    name        TEXT,
+    location_id UUID NOT NULL REFERENCES location (id)
+);
+
+CREATE TABLE IF NOT EXISTS slay_slot
+(
+    id              UUID PRIMARY KEY,
+    hotel_id        UUID      NOT NULL REFERENCES hotel (id),
+    room_type_id    UUID      NOT NULL REFERENCES room_type (id),
+    check_in_at     TIMESTAMP NOT NULL,
+    check_out_at    TIMESTAMP NOT NULL,
+    available_count INTEGER DEFAULT 1,
+    CONSTRAINT uq_slot UNIQUE (hotel_id, room_type_id, check_in_at, check_out_at)
+);
+
 CREATE TABLE IF NOT EXISTS offer
 (
     id            UUID NOT NULL PRIMARY KEY,
-    hotel_id      UUID,
-    location_id   UUID,
+    slay_slot_id  UUID NOT NULL REFERENCES slay_slot (id),
     expiration_at TIMESTAMP,
-    used          BOOLEAN,
-    task          TEXT,
-    CONSTRAINT fk_application_location FOREIGN KEY (location_id) REFERENCES location (id),
-    CONSTRAINT fk_application_user FOREIGN KEY (location_id) REFERENCES location (id)
+    task          TEXT
+);
+
+CREATE TABLE IF NOT EXISTS application
+(
+    id       UUID NOT NULL PRIMARY KEY,
+    user_id  UUID NOT NULL REFERENCES "user" (id),
+    offer_id UUID NOT NULL REFERENCES offer (id),
+    status   VARCHAR(16)
 );
 
 CREATE TABLE IF NOT EXISTS report
@@ -32,20 +60,9 @@ CREATE TABLE IF NOT EXISTS report
     text          TEXT
 );
 
-CREATE TABLE IF NOT EXISTS application
-(
-    id       UUID NOT NULL PRIMARY KEY,
-    user_id  UUID,
-    offer_id UUID,
-    status   VARCHAR(16),
-    CONSTRAINT fk_application_user FOREIGN KEY (user_id) REFERENCES "user" (id),
-    CONSTRAINT fk_application_offer FOREIGN KEY (offer_id) REFERENCES offer (id)
-);
-
 CREATE TABLE IF NOT EXISTS photo
 (
-    id UUID NOT NULL PRIMARY KEY,
-    report_id UUID,
-    s3_link TEXT,
-    CONSTRAINT fk_application_report FOREIGN KEY (report_id) REFERENCES report(id)
-)
+    id        UUID NOT NULL PRIMARY KEY,
+    report_id UUID REFERENCES report (id),
+    s3_link   TEXT
+);
