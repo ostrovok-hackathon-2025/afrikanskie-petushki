@@ -6,12 +6,27 @@ import (
 	"github.com/google/uuid"
 )
 
+type Hotel struct {
+	ID   uuid.UUID
+	Name string
+}
+
+type RoomType struct {
+	ID   uuid.UUID
+	Name string
+}
+
+type Location struct {
+	ID   uuid.UUID
+	Name string
+}
+
 type Offer struct {
 	ID           uuid.UUID
 	Task         string
-	Location     string
-	RoomType     string
-	Hotel        string
+	Location     Location
+	RoomType     RoomType
+	Hotel        Hotel
 	CheckIn      time.Time
 	CheckOut     time.Time
 	ExpirationAT time.Time
@@ -24,9 +39,9 @@ type Filter struct {
 
 type Create struct {
 	Task         string
-	Location     string
-	RoomType     string
-	Hotel        string
+	LocationID   uuid.UUID
+	RoomTypeID   uuid.UUID
+	HotelID      uuid.UUID
 	CheckIn      time.Time
 	CheckOut     time.Time
 	ExpirationAT time.Time
@@ -49,9 +64,9 @@ type PageSettings struct {
 }
 
 type Check struct {
-	Location string
-	RoomType string
-	Hotel    string
-	CheckIn  time.Time
-	CheckOut time.Time
+	LocationID uuid.UUID
+	RoomTypeID uuid.UUID
+	HotelID    uuid.UUID
+	CheckIn    time.Time
+	CheckOut   time.Time
 }

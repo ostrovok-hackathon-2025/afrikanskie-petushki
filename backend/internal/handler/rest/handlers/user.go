@@ -68,7 +68,8 @@ func (h *userHandler) LogIn(ginCtx *gin.Context) {
 
 	if err != nil {
 		//TODO обработка похитрее
-		ginCtx.JSON(http.StatusBadRequest, err)
+		log.Println("Err to login: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 

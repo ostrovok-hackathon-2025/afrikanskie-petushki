@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/offer"
 
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 )
@@ -20,10 +23,13 @@ type OfferHandler interface {
 }
 
 type offerHandler struct {
+	useCase offer.UseCase
 }
 
-func NewOfferHandler() OfferHandler {
-	return &offerHandler{}
+func NewOfferHandler(useCase offer.UseCase) OfferHandler {
+	return &offerHandler{
+		useCase: useCase,
+	}
 }
 
 // Add godoc
@@ -40,18 +46,31 @@ func NewOfferHandler() OfferHandler {
 // @Failure 403 "Only available for admin"
 // @Failure 500 "Internal server error"
 // @Router /offer/ [post]
-func (h *offerHandler) CreateOffer(ctx *gin.Context) {
+func (h *offerHandler) CreateOffer(ginCtx *gin.Context) {
 	var request docs.CreateOfferRequest
+	ctx := context.Background()
 
-	if err := ctx.BindJSON(&request); err != nil {
+	if err := ginCtx.BindJSON(&request); err != nil {
 		log.Println("Invalid body")
-		ctx.String(http.StatusBadRequest, "invalid body")
+		ginCtx.String(http.StatusBadRequest, "invalid body")
 		return
 	}
 
-	resp := &docs.CreateOfferResponse{}
+	create := model.Create{}
 
-	ctx.JSON(http.StatusCreated, resp)
+	id, err := h.useCase.Create(ctx, &create)
+
+	if err != nil {
+		log.Println("Err to create offer: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	resp := &docs.CreateOfferResponse{
+		Id: id.String(),
+	}
+
+	ginCtx.JSON(http.StatusCreated, resp)
 }
 
 // Add godoc
@@ -69,32 +88,41 @@ func (h *offerHandler) CreateOffer(ctx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/ [get]
-func (h *offerHandler) GetOffers(ctx *gin.Context) {
-	pageNumStr := ctx.Query("pageNum")
+func (h *offerHandler) GetOffers(ginCtx *gin.Context) {
+	ctx := context.Background()
+	pageNumStr := ginCtx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageNum: ", pageNumStr)
-		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		ginCtx.String(http.StatusBadRequest, "invalid pageNum")
 		return
 	}
 
-	_ = pageNum
-
-	pageSizeStr := ctx.Query("pageSize")
+	pageSizeStr := ginCtx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
-		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		ginCtx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+	pageSettings := model.PageSettings{
+		Limit:  pageSize,
+		Offset: (pageNum - 1) * pageSize,
+	}
+	//TODO CREATE BODY
+	_, _, err = h.useCase.GetForPage(ctx, &pageSettings)
+
+	if err != nil {
+		log.Println("Err to get offers for page: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	_ = pageSize
-
 	resp := &docs.GetOffersResponse{}
 
-	ctx.JSON(http.StatusOK, resp)
+	ginCtx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -111,21 +139,28 @@ func (h *offerHandler) GetOffers(ctx *gin.Context) {
 // @Failure 404 "Offer with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/{id} [get]
-func (h *offerHandler) GetOfferById(ctx *gin.Context) {
-	idStr := ctx.Param("id")
+func (h *offerHandler) GetOfferById(ginCtx *gin.Context) {
+	ctx := context.Background()
+	idStr := ginCtx.Param("id")
 	id, err := uuid.Parse(idStr)
 
 	if idStr == "" || err != nil {
 		log.Println("invalid offer id", idStr)
-		ctx.String(http.StatusBadRequest, "invalid offer id")
+		ginCtx.String(http.StatusBadRequest, "invalid offer id")
 		return
 	}
 
-	_ = id
+	//TODO CREATE BODY
+	_, err = h.useCase.GetByID(ctx, id.String())
+	if err != nil {
+		log.Println("Err to get offer by id: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
+		return
+	}
 
 	resp := &docs.OfferResponse{}
 
-	ctx.JSON(http.StatusOK, resp)
+	ginCtx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -144,40 +179,63 @@ func (h *offerHandler) GetOfferById(ctx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/search [get]
-func (h *offerHandler) FindOffers(ctx *gin.Context) {
-	pageNumStr := ctx.Query("pageNum")
+func (h *offerHandler) FindOffers(ginCtx *gin.Context) {
+	ctx := context.Background()
+	pageNumStr := ginCtx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageNum: ", pageNumStr)
-		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		ginCtx.String(http.StatusBadRequest, "invalid pageNum")
 		return
 	}
 
 	_ = pageNum
 
-	pageSizeStr := ctx.Query("pageSize")
+	pageSizeStr := ginCtx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
-		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		ginCtx.String(http.StatusBadRequest, "invalid pageSize")
 		return
 	}
 
 	_ = pageSize
 
-	cityIdStr := ctx.Query("pageSize")
+	cityIdStr := ginCtx.Query("pageSize")
 
 	if cityIdStr == "" {
 		log.Println("Invalid cityId: ", cityIdStr)
-		ctx.String(http.StatusBadRequest, "invalid cityId")
+		ginCtx.String(http.StatusBadRequest, "invalid cityId")
+		return
+	}
+	cityId, err := uuid.Parse(cityIdStr)
+	if err != nil {
+		log.Println("Fail to parse id: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	filter := model.Filter{
+		LocalID: cityId,
+		PageSettings: model.PageSettings{
+			Limit:  pageSize,
+			Offset: (pageNum - 1) * pageSize,
+		},
+	}
+	//TODO CREATE BODY
+	_, _, err = h.useCase.GetByFilter(ctx, &filter)
+
+	if err != nil {
+		log.Println("Err to get offer by id: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	resp := &docs.GetOffersResponse{}
 
-	ctx.JSON(http.StatusOK, resp)
+	ginCtx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
