@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS location
     name TEXT
 );
 
-CREATE TABLE IF NOT EXISTS room_type
+CREATE TABLE IF NOT EXISTS room
 (
     id   UUID NOT NULL PRIMARY KEY,
     name TEXT
@@ -25,23 +25,16 @@ CREATE TABLE IF NOT EXISTS hotel
     location_id UUID NOT NULL REFERENCES location (id)
 );
 
-CREATE TABLE IF NOT EXISTS slay_slot
-(
-    id              UUID PRIMARY KEY,
-    hotel_id        UUID      NOT NULL REFERENCES hotel (id),
-    room_type_id    UUID      NOT NULL REFERENCES room_type (id),
-    check_in_at     TIMESTAMP NOT NULL,
-    check_out_at    TIMESTAMP NOT NULL,
-    available_count INTEGER DEFAULT 1,
-    CONSTRAINT uq_slot UNIQUE (hotel_id, room_type_id, check_in_at, check_out_at)
-);
-
 CREATE TABLE IF NOT EXISTS offer
 (
-    id            UUID NOT NULL PRIMARY KEY,
-    slay_slot_id  UUID NOT NULL REFERENCES slay_slot (id),
+    id            UUID      NOT NULL PRIMARY KEY,
+    hotel_id      UUID      NOT NULL REFERENCES hotel (id),
+    room_id  UUID      NOT NULL REFERENCES room (id),
+    check_in_at   TIMESTAMP NOT NULL,
+    check_out_at  TIMESTAMP NOT NULL,
     expiration_at TIMESTAMP,
-    task          TEXT
+    task          TEXT,
+    CONSTRAINT uq_offer UNIQUE (hotel_id, room_id, check_in_at, check_out_at)
 );
 
 CREATE TABLE IF NOT EXISTS application
