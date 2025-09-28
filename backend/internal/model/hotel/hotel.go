@@ -2,13 +2,13 @@ package hotel
 
 import (
 	"github.com/google/uuid"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/location"
 )
 
 type Hotel struct {
-	ID       uuid.UUID `db:"hotel_id"`
-	Name     string    `db:"hotel_name"`
-	Location location.Location
+	ID           uuid.UUID `db:"hotel_id"`
+	Name         string    `db:"hotel_name"`
+	LocationID   uuid.UUID `db:"location_id"`
+	LocationName string    `db:"location_name"`
 }
 
 type Create struct {
