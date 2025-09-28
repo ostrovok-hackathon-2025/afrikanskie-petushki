@@ -176,6 +176,196 @@
                 }
             }
         },
+        "/hotel/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetHotels all hotels",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hotel"
+                ],
+                "summary": "Get hotels",
+                "responses": {
+                    "200": {
+                        "description": "Page of hotels",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetHotelsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting hotels",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates offer with given info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hotel"
+                ],
+                "summary": "Create hotel",
+                "parameters": [
+                    {
+                        "description": "Data for creating hotel",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateHotelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created hotel data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateHotelResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating hotel",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/location/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetLocations all locations",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Get locations",
+                "responses": {
+                    "200": {
+                        "description": "Page of locations",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetLocationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting locations",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates location with given info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Create location",
+                "parameters": [
+                    {
+                        "description": "Data for creating location",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created location data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateLocationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating location",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/offer/": {
             "get": {
                 "security": [
@@ -808,6 +998,101 @@
                 }
             }
         },
+        "/room/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetRooms all rooms",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Get rooms",
+                "responses": {
+                    "200": {
+                        "description": "Page of rooms",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetRoomsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting rooms",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates offer with given info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Create offer",
+                "parameters": [
+                    {
+                        "description": "Data for creating room",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateRoomRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created room data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateRoomResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating room",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/user/": {
             "get": {
                 "security": [
@@ -1058,6 +1343,48 @@
                 }
             }
         },
+        "docs.CreateHotelRequest": {
+            "type": "object",
+            "required": [
+                "location_id",
+                "name"
+            ],
+            "properties": {
+                "location_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateHotelResponse": {
+            "type": "object",
+            "properties": {
+                "hotel_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateLocationRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateLocationResponse": {
+            "type": "object",
+            "properties": {
+                "location_id": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.CreateOfferRequest": {
             "type": "object",
             "required": [
@@ -1089,6 +1416,25 @@
                 }
             }
         },
+        "docs.CreateRoomRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateRoomResponse": {
+            "type": "object",
+            "properties": {
+                "room_id": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.GetApplicationsResponse": {
             "type": "object",
             "properties": {
@@ -1100,6 +1446,28 @@
                 },
                 "pages_count": {
                     "type": "integer"
+                }
+            }
+        },
+        "docs.GetHotelsResponse": {
+            "type": "object",
+            "properties": {
+                "hotels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.HotelResponse"
+                    }
+                }
+            }
+        },
+        "docs.GetLocationsResponse": {
+            "type": "object",
+            "properties": {
+                "locations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.LocationResponse"
+                    }
                 }
             }
         },
@@ -1128,6 +1496,45 @@
                     "items": {
                         "$ref": "#/definitions/docs.ReportResponse"
                     }
+                }
+            }
+        },
+        "docs.GetRoomsResponse": {
+            "type": "object",
+            "properties": {
+                "rooms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.RoomResponse"
+                    }
+                }
+            }
+        },
+        "docs.HotelResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "location_id": {
+                    "type": "string"
+                },
+                "location_name": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.LocationResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1213,6 +1620,17 @@
                     "type": "string"
                 },
                 "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.RoomResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

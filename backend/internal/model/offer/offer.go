@@ -14,6 +14,8 @@ type Offer struct {
 	RoomName     string    `db:"room_name"`
 	HotelID      uuid.UUID `db:"hotel_id"`
 	HotelName    string    `db:"hotel_name"`
+	LocationID   uuid.UUID `db:"location_id"`
+	LocationName string    `db:"location_name"`
 	CheckIn      time.Time `db:"check_in_at"`
 	CheckOut     time.Time `db:"check_out_at"`
 	ExpirationAT time.Time `db:"expiration_at"`

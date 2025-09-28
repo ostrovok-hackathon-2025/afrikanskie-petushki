@@ -136,3 +136,57 @@ type UpdateReportRequest struct {
 type ConfirmReport struct {
 	Status string `json:"status" binding:"required"`
 }
+
+type CreateHotelRequest struct {
+	Name       string `json:"name" binding:"required"`
+	LocationID string `json:"location_id" binding:"required"`
+}
+
+type CreateHotelResponse struct {
+	HotelId string `json:"hotel_id"`
+}
+
+type CreateLocationRequest struct {
+	Name string `json:"name" binding:"required"`
+}
+
+type HotelResponse struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	LocationId   string `json:"location_id"`
+	LocationName string `json:"location_name"`
+}
+
+type GetHotelsResponse struct {
+	Hotels []*HotelResponse `json:"hotels"`
+}
+
+type CreateLocationResponse struct {
+	LocationId string `json:"location_id"`
+}
+
+type LocationResponse struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type GetLocationsResponse struct {
+	Locations []*LocationResponse `json:"locations"`
+}
+
+type CreateRoomRequest struct {
+	Name string `json:"name" binding:"required"`
+}
+
+type CreateRoomResponse struct {
+	RoomId string `json:"room_id"`
+}
+
+type RoomResponse struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type GetRoomsResponse struct {
+	Rooms []*RoomResponse `json:"rooms"`
+}

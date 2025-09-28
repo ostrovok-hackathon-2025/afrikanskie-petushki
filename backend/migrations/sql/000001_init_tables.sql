@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS offer
 (
     id            UUID      NOT NULL PRIMARY KEY,
     hotel_id      UUID      NOT NULL REFERENCES hotel (id),
-    room_id  UUID      NOT NULL REFERENCES room (id),
+    room_id       UUID      NOT NULL REFERENCES room (id),
     check_in_at   TIMESTAMP NOT NULL,
     check_out_at  TIMESTAMP NOT NULL,
     expiration_at TIMESTAMP,

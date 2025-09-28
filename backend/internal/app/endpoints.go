@@ -29,6 +29,9 @@ func initAllEndpoints(
 	applicationHandler handlers.ApplicationHandler,
 	offerHandler handlers.OfferHandler,
 	reportHandler handlers.ReportHandler,
+	hotelHandler handlers.HotelHandler,
+	locationHandler handlers.LocationHandler,
+	roomHandler handlers.RoomHandler,
 ) {
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	engine.Use(cors.CORS(cfg.AllowOrigin))
@@ -39,6 +42,9 @@ func initAllEndpoints(
 	initApplicationHandler(router, authProvider, applicationHandler)
 	initOfferHandler(router, authProvider, offerHandler)
 	initReportHandler(router, authProvider, reportHandler)
+	initHotelHandler(router, authProvider, hotelHandler)
+	initLocationHandler(router, authProvider, locationHandler)
+
 }
 
 func initUserEndpoints(router *gin.RouterGroup, authProvider auth.Auth, h handlers.UserHandler) {
@@ -91,5 +97,30 @@ func initReportHandler(router *gin.RouterGroup, authProvider auth.Auth, h handle
 		group.GET("/my", authProvider.RoleProtected("reviewer"), h.GetMyReports)
 		group.GET("/my/:id", authProvider.RoleProtected("reviewer"), h.GetMyReportById)
 		group.PATCH("/:id", authProvider.RoleProtected("reviewer"), h.UpdateReport)
+	}
+}
+
+func initHotelHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers.HotelHandler) {
+	group := router.Group("/hotel")
+
+	{
+		group.POST("/", authProvider.RoleProtected("admin"), h.CreateHotel)
+		group.GET("/", h.GetHotels)
+	}
+}
+
+func initLocationHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers.LocationHandler) {
+	group := router.Group("/location")
+	{
+		group.POST("/", authProvider.RoleProtected("admin"), h.CreateLocation)
+		group.GET("/", h.GetLocations)
+	}
+}
+
+func initRoomHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers.RoomHandler) {
+	group := router.Group("/room")
+	{
+		group.POST("/", authProvider.RoleProtected("admin"), h.CreateRoom)
+		group.GET("/", h.GetRooms)
 	}
 }
