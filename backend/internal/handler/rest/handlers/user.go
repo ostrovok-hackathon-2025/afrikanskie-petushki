@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/user"
+
+	repo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 )
 
 type UserHandler interface {
@@ -161,6 +164,7 @@ func (h *userHandler) Refresh(ctx *gin.Context) {
 // @Success 200 {object} docs.UserResponse "User data"
 // @Failure 400 {string} string "Bad request to get user data"
 // @Failure 401 "Unauthorized"
+// @Failure 404 "User not found"
 // @Failure 500 "Internal server error"
 // @Router /user/ [get]
 func (h *userHandler) GetMe(ctx *gin.Context) {
@@ -172,9 +176,22 @@ func (h *userHandler) GetMe(ctx *gin.Context) {
 		return
 	}
 
-	_ = userId
+	user, err := h.useCase.GetMe(ctx.Request.Context(), userId)
 
-	resp := &docs.UserResponse{}
+	if err != nil {
+		log.Println("failed to get user info", err)
+
+		switch {
+		case errors.Is(err, repo.ErrUserNotFound):
+			ctx.Status(http.StatusNotFound)
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	resp := docs.UserModelToResponse(user)
 
 	ctx.JSON(http.StatusOK, resp)
 }

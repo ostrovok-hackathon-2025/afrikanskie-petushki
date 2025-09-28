@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
 )
 
 type ApplicationResponse struct {
@@ -77,9 +78,19 @@ type AuthResponse struct {
 }
 
 type UserResponse struct {
+	Id            string `json:"id"`
 	OstrovokLogin string `json:"ostrovok_login"`
 	Email         string `json:"email"`
 	IsAdmin       bool   `json:"is_admin"`
+}
+
+func UserModelToResponse(u *user.User) *UserResponse {
+	return &UserResponse{
+		Id:            u.ID.String(),
+		OstrovokLogin: u.OstrovokLogin,
+		Email:         u.Email,
+		IsAdmin:       u.IsAdmin,
+	}
 }
 
 type LogInRequest struct {

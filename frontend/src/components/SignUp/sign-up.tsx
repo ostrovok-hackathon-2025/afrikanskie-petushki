@@ -8,12 +8,15 @@ import { signIn } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { ERR_EMPTY, ERR_INVALID_VALUE, ERR_LATIN_ONLY, ERR_NO_CAPITALS, ERR_NO_DIGITS, ERR_NO_SPECIAL_CHARACTERS, ERR_TOO_LONG, ERR_TOO_SHORT, NO_ERR, useForm } from "@/lib/formHook/form-hook";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const { postUserSignUp } = getSecretGuestAPI();
 
 export default function SignUp() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState("chicherin");
+    const [password, setPassword] = useState("Abcdefg1!");
+
+    const router = useRouter();
 
     const [validate, getError, markInvalid, withReset] = useForm({
         username: {
@@ -49,8 +52,10 @@ export default function SignUp() {
             const authData = await postUserSignUp({
                 ostrovok_login: username,
                 password: password,
-                email: ""
+                email: "legacy@mail.com"
             });
+
+            console.log(authData.data);
 
             await signIn("credentials", {
                 redirect: false,
@@ -61,7 +66,7 @@ export default function SignUp() {
                 refresh_ttl: authData.data.refresh_ttl?.toString() ?? "",
             });
 
-            redirect("/");
+            router.replace("/");
         } catch (err) {
             console.error(err);
         }
@@ -111,23 +116,25 @@ export default function SignUp() {
         <div className="w-1/3 h-1/2 rounded-lg border border-foreground box-border p-5">
             <h2 className="font-gain text-xl mb-6">Регистрация</h2>
 
-            <div className="font-gain text-base mb-1">Логин Островка</div>
-            <Input 
-                value={username} 
-                onChange={withReset((e) => setUsername(e.target.value))} 
-                placeholder="логин" 
-                className={cn("mb-2", getError("username") !== NO_ERR && "border-destructive")} 
-                type="text"
-            />
-            
-            <div className="font-gain text-base mb-1">Пароль</div>
-            <Input 
-                value={password} 
-                onChange={withReset((e) => setPassword(e.target.value))} 
-                placeholder="password" 
-                className={cn("mb-3", getError("password") !== NO_ERR && "border-destructive")}  
-                type="password"
-            />
+            <form>
+                <div className="font-gain text-base mb-1">Логин Островка</div>
+                <Input 
+                    value={username} 
+                    onChange={withReset((e) => setUsername(e.target.value))} 
+                    placeholder="логин" 
+                    className={cn("mb-2", getError("username") !== NO_ERR && "border-destructive")} 
+                    type="text"
+                />
+                
+                <div className="font-gain text-base mb-1">Пароль</div>
+                <Input 
+                    value={password} 
+                    onChange={withReset((e) => setPassword(e.target.value))} 
+                    placeholder="password" 
+                    className={cn("mb-3", getError("password") !== NO_ERR && "border-destructive")}  
+                    type="password"
+                />
+            </form>
 
             <div className="mb-4">
                 Уже есть аккаунт? <a href="/log-in" className="text-primary">Войти</a>

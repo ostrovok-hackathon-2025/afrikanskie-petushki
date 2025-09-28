@@ -8,17 +8,17 @@ import { useEffect, useState } from "react";
 const { getUser } = getSecretGuestAPI();
 
 export default function Profile() {
-    const [username, setUsername] = useState("Andrey");
+    const [username, setUsername] = useState("");
 
     useEffect(() => {
         (async () => {
-            // const session = await getSession();
+            const session = await getSession();
 
-            // if (!session) return redirect("log-in");
+            if (!session) return redirect("log-in");
 
-            // const resp = await getUser({ headers: withAuthHeader(session) });
+            const resp = await getUser({ headers: withAuthHeader(session) });
 
-            // setUsername(resp.data.ostrovok_login ?? "");
+            setUsername(resp.data.ostrovok_login ?? "");
         })();
     }, []);
 

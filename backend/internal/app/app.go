@@ -43,7 +43,7 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 	reportHandler := handlers.NewReportHandler()
 
 	//MiddleWare
-	authMiddleWare := auth.NewAuth()
+	authMiddleWare := auth.NewAuth(userUseCase)
 
 	//InitEndpoints
 	initAllEndpoints(engine, &cfg.RestConfig, authMiddleWare, userHandler, applicationHandler, offerHandler, reportHandler)

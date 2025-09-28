@@ -46,7 +46,7 @@ const getApplication = <TData = AxiosResponse<DocsGetApplicationsResponse>>(
     params: GetApplicationParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/application/`,{
+      `http://localhost:8080/api/v1/application/`,{
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -60,7 +60,7 @@ const postApplication = <TData = AxiosResponse<DocsCreateApplicationResponse>>(
     docsCreateApplicationRequest: DocsCreateApplicationRequest, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
-      `http://localhost:8080/application/`,
+      `http://localhost:8080/api/v1/application/`,
       docsCreateApplicationRequest,options
     );
   }
@@ -73,7 +73,7 @@ const getApplicationId = <TData = AxiosResponse<DocsApplicationResponse>>(
     id: string, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/application/${id}`,options
+      `http://localhost:8080/api/v1/application/${id}`,options
     );
   }
 
@@ -85,7 +85,7 @@ const getOffer = <TData = AxiosResponse<DocsGetOffersResponse>>(
     params: GetOfferParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/offer/`,{
+      `http://localhost:8080/api/v1/offer/`,{
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -99,7 +99,7 @@ const postOffer = <TData = AxiosResponse<DocsCreateOfferResponse>>(
     docsCreateOfferRequest: DocsCreateOfferRequest, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
-      `http://localhost:8080/offer/`,
+      `http://localhost:8080/api/v1/offer/`,
       docsCreateOfferRequest,options
     );
   }
@@ -112,7 +112,7 @@ const getOfferSearch = <TData = AxiosResponse<DocsGetOffersResponse>>(
     params: GetOfferSearchParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/offer/search`,{
+      `http://localhost:8080/api/v1/offer/search`,{
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -126,7 +126,7 @@ const getOfferId = <TData = AxiosResponse<DocsOfferResponse>>(
     id: string, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/offer/${id}`,options
+      `http://localhost:8080/api/v1/offer/${id}`,options
     );
   }
 
@@ -139,7 +139,7 @@ const patchOfferId = <TData = AxiosResponse<void>>(
     docsUpdateOfferRequest: DocsUpdateOfferRequest, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.patch(
-      `http://localhost:8080/offer/${id}`,
+      `http://localhost:8080/api/v1/offer/${id}`,
       docsUpdateOfferRequest,options
     );
   }
@@ -152,7 +152,7 @@ const getReport = <TData = AxiosResponse<DocsGetReportsResponse>>(
     params: GetReportParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/report/`,{
+      `http://localhost:8080/api/v1/report/`,{
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -166,7 +166,7 @@ const getReportMy = <TData = AxiosResponse<DocsGetReportsResponse>>(
     params: GetReportMyParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/report/my`,{
+      `http://localhost:8080/api/v1/report/my`,{
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -180,7 +180,7 @@ const getReportMyId = <TData = AxiosResponse<DocsReportResponse>>(
     id: string, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/report/my/${id}`,options
+      `http://localhost:8080/api/v1/report/my/${id}`,options
     );
   }
 
@@ -192,7 +192,7 @@ const getReportId = <TData = AxiosResponse<DocsReportResponse>>(
     id: string, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/report/${id}`,options
+      `http://localhost:8080/api/v1/report/${id}`,options
     );
   }
 
@@ -208,7 +208,7 @@ formData.append(`text`, patchReportIdBody.text)
 formData.append(`images`, patchReportIdBody.images)
 
     return axios.patch(
-      `http://localhost:8080/report/${id}`,
+      `http://localhost:8080/api/v1/report/${id}`,
       formData,options
     );
   }
@@ -222,7 +222,7 @@ const patchReportIdConfirm = <TData = AxiosResponse<void>>(
     docsConfirmReport: DocsConfirmReport, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.patch(
-      `http://localhost:8080/report/${id}/confirm`,
+      `http://localhost:8080/api/v1/report/${id}/confirm`,
       docsConfirmReport,options
     );
   }
@@ -235,7 +235,7 @@ const getUser = <TData = AxiosResponse<DocsUserResponse>>(
      options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `http://localhost:8080/user/`,options
+      `http://localhost:8080/api/v1/user/`,options
     );
   }
 
@@ -247,7 +247,7 @@ const postUserLogIn = <TData = AxiosResponse<DocsAuthResponse>>(
     docsLogInRequest: DocsLogInRequest, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
-      `http://localhost:8080/user/log-in`,
+      `http://localhost:8080/api/v1/user/log-in`,
       docsLogInRequest,options
     );
   }
@@ -260,7 +260,7 @@ const postUserRefresh = <TData = AxiosResponse<DocsAuthResponse>>(
     docsRefreshRequest: DocsRefreshRequest, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
-      `http://localhost:8080/user/refresh`,
+      `http://localhost:8080/api/v1/user/refresh`,
       docsRefreshRequest,options
     );
   }
@@ -273,7 +273,7 @@ const postUserSignUp = <TData = AxiosResponse<DocsAuthResponse>>(
     docsSignUpRequest: DocsSignUpRequest, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
-      `http://localhost:8080/user/sign-up`,
+      `http://localhost:8080/api/v1/user/sign-up`,
       docsSignUpRequest,options
     );
   }

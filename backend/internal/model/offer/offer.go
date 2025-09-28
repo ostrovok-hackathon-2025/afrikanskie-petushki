@@ -30,6 +30,8 @@ type Create struct {
 	CheckIn      time.Time
 	CheckOut     time.Time
 	ExpirationAT time.Time
+	HotelID      uuid.UUID
+	LocalID      uuid.UUID
 }
 
 type Edit struct {
