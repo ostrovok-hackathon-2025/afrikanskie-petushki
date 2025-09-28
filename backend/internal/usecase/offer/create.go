@@ -12,20 +12,6 @@ var (
 	ErrAlreadyExists = errors.New("offer: already exists")
 )
 
-func (u *useCase) Create(ctx context.Context, create *model.Create) (uuid.UUID, error) {
-	check := model.Check{
-		RoomTypeID: create.RoomID,
-		HotelID:    create.HotelID,
-		CheckIn:    create.CheckIn,
-		CheckOut:   create.CheckOut,
-	}
-	exists, err := u.repo.Check(ctx, &check)
-	if err != nil {
-		return uuid.Nil, err
-	}
-	if exists {
-		return uuid.Nil, ErrAlreadyExists
-	}
-
+func (u *useCase) Create(ctx context.Context, create model.Create) (uuid.UUID, error) {
 	return u.repo.Create(ctx, create)
 }

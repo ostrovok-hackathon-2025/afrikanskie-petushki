@@ -4,15 +4,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/hotel"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/room"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 )
 
 type Offer struct {
 	ID           uuid.UUID `db:"offer_id"`
 	Task         string    `db:"task"`
-	Room         room.Room
-	Hotel        hotel.Hotel
+	RoomID       uuid.UUID `db:"room_id"`
+	RoomName     string    `db:"room_name"`
+	HotelID      uuid.UUID `db:"hotel_id"`
+	HotelName    string    `db:"hotel_name"`
 	CheckIn      time.Time `db:"check_in_at"`
 	CheckOut     time.Time `db:"check_out_at"`
 	ExpirationAT time.Time `db:"expiration_at"`
@@ -35,22 +36,15 @@ type Create struct {
 
 type Edit struct {
 	OfferID      uuid.UUID
-	Task         string
-	RoomID       uuid.UUID
-	HotelID      uuid.UUID
-	CheckIn      time.Time
-	CheckOut     time.Time
-	ExpirationAT time.Time
+	Task         pkg.Opt[string]
+	RoomID       pkg.Opt[uuid.UUID]
+	HotelID      pkg.Opt[uuid.UUID]
+	CheckIn      pkg.Opt[time.Time]
+	CheckOut     pkg.Opt[time.Time]
+	ExpirationAT pkg.Opt[time.Time]
 }
 
 type PageSettings struct {
 	Limit  int
 	Offset int
-}
-
-type Check struct {
-	RoomTypeID uuid.UUID
-	HotelID    uuid.UUID
-	CheckIn    time.Time
-	CheckOut   time.Time
 }
