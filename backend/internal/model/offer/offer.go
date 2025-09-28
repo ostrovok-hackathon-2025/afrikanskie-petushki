@@ -4,43 +4,28 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/hotel"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/room"
 )
 
-type Hotel struct {
-	ID   uuid.UUID
-	Name string
-}
-
-type RoomType struct {
-	ID   uuid.UUID
-	Name string
-}
-
-type Location struct {
-	ID   uuid.UUID
-	Name string
-}
-
 type Offer struct {
-	ID           uuid.UUID
-	Task         string
-	Location     Location
-	RoomType     RoomType
-	Hotel        Hotel
-	CheckIn      time.Time
-	CheckOut     time.Time
-	ExpirationAT time.Time
+	ID           uuid.UUID `db:"offer_id"`
+	Task         string    `db:"task"`
+	Room         room.Room
+	Hotel        hotel.Hotel
+	CheckIn      time.Time `db:"check_in_at"`
+	CheckOut     time.Time `db:"check_out_at"`
+	ExpirationAT time.Time `db:"expiration_at"`
 }
 
 type Filter struct {
-	LocalID      uuid.UUID
+	LocationID   uuid.UUID
 	PageSettings PageSettings
 }
 
 type Create struct {
 	Task         string
-	LocationID   uuid.UUID
-	RoomTypeID   uuid.UUID
+	RoomID       uuid.UUID
 	HotelID      uuid.UUID
 	CheckIn      time.Time
 	CheckOut     time.Time
@@ -50,9 +35,8 @@ type Create struct {
 type Edit struct {
 	OfferID      uuid.UUID
 	Task         string
-	Location     string
-	RoomType     string
-	Hotel        string
+	RoomID       uuid.UUID
+	HotelID      uuid.UUID
 	CheckIn      time.Time
 	CheckOut     time.Time
 	ExpirationAT time.Time
@@ -64,7 +48,6 @@ type PageSettings struct {
 }
 
 type Check struct {
-	LocationID uuid.UUID
 	RoomTypeID uuid.UUID
 	HotelID    uuid.UUID
 	CheckIn    time.Time

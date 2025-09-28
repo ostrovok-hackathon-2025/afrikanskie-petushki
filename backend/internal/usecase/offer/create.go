@@ -14,8 +14,7 @@ var (
 
 func (u *useCase) Create(ctx context.Context, create *model.Create) (uuid.UUID, error) {
 	check := model.Check{
-		LocationID: create.LocationID,
-		RoomTypeID: create.RoomTypeID,
+		RoomTypeID: create.RoomID,
 		HotelID:    create.HotelID,
 		CheckIn:    create.CheckIn,
 		CheckOut:   create.CheckOut,

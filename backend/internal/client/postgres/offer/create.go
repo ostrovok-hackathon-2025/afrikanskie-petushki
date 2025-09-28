@@ -15,13 +15,16 @@ var (
 )
 
 func (r *repo) Create(ctx context.Context, create *model.Create) (uuid.UUID, error) {
-	var id uuid.UUID
+	id := uuid.New()
 	sql := `
-			INSERT INTO offer (hotel_id, expiration_at, location_id, task)
-			VALUES ($1, $2, $3, $4)
-			RETURNING id;
+			INSERT INTO offer (id, hotel_id, room_id, check_in_at, check_out_at, expiration_at, task)
+			VALUES ($1, $2, $3, $4, $5, $6, $7);
 			`
-	err := r.sqlClient.QueryRowContext(ctx, sql, create.HotelID, create.ExpirationAT, create.LocationID, create.Task).Scan(&id)
+	err := r.sqlClient.QueryRowContext(
+		ctx, sql, id, create.HotelID,
+		create.RoomID, create.CheckIn,
+		create.CheckOut, create.ExpirationAT, create.Task,
+	).Scan(&id)
 	switch {
 	case errors.Is(err, sql2.ErrNoRows):
 		log.Printf("no user with id %d\n", id)

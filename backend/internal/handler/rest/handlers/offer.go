@@ -218,7 +218,7 @@ func (h *offerHandler) FindOffers(ginCtx *gin.Context) {
 	}
 
 	filter := model.Filter{
-		LocalID: cityId,
+		LocationID: cityId,
 		PageSettings: model.PageSettings{
 			Limit:  pageSize,
 			Offset: (pageNum - 1) * pageSize,
