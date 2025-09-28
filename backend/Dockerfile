@@ -10,7 +10,7 @@ COPY . .
 RUN go build -o backend-app ./cmd/main.go
 
 # Stage 2: final
-FROM ubuntu
+FROM alpine:latest
 
 WORKDIR /root
 
@@ -18,7 +18,8 @@ WORKDIR /root
 COPY --from=builder /app/backend-app .
 
 # copy config file
-COPY ./configs ./configs
+# убрал так как неправильный парсинг если не пересобирать каждый раз образ
+#COPY ./configs ./configs
 
 # app start
 CMD [ "./backend-app" ]

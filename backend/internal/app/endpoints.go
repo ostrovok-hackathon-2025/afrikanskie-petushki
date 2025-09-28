@@ -1,0 +1,95 @@
+package app
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/config"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/handlers"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/cors"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+)
+
+// @title Secret Guest API
+// @version 1.0
+// @description API for "Secret Guest" app
+// @host localhost:8080
+// @BasePath /api/v1
+// @schemes http https
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
+func initAllEndpoints(
+	engine *gin.Engine,
+	cfg *config.RestConfig,
+	authProvider auth.Auth,
+	userHandler handlers.UserHandler,
+	applicationHandler handlers.ApplicationHandler,
+	offerHandler handlers.OfferHandler,
+	reportHandler handlers.ReportHandler,
+) {
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	engine.Use(cors.CORS(cfg.AllowOrigin))
+
+	router := engine.Group("/api/v1")
+
+	initUserEndpoints(router, authProvider, userHandler)
+	initApplicationHandler(router, authProvider, applicationHandler)
+	initOfferHandler(router, authProvider, offerHandler)
+	initReportHandler(router, authProvider, reportHandler)
+}
+
+func initUserEndpoints(router *gin.RouterGroup, authProvider auth.Auth, h handlers.UserHandler) {
+	group := router.Group("/user")
+
+	{
+		group.POST("/log-in", h.LogIn)
+		group.POST("/sign-up", h.SignUp)
+		group.POST("/refresh", h.Refresh)
+		group.GET("/", authProvider.LoginProtected(), h.GetMe)
+	}
+}
+
+func initApplicationHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers.ApplicationHandler) {
+
+	group := router.Group("/application")
+
+	group.Use(authProvider.RoleProtected("reviewer"))
+
+	{
+		group.POST("/", h.CreateApplication)
+		group.GET("/", h.GetApplications)
+		group.GET("/:id", h.GetApplicationById)
+	}
+}
+
+func initOfferHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers.OfferHandler) {
+
+	group := router.Group("/offer")
+
+	{
+		group.POST("/", authProvider.RoleProtected("admin"), h.CreateOffer)
+		group.GET("/", authProvider.RoleProtected("admin"), h.GetOffers)
+		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetOfferById)
+		group.PATCH("/:id", authProvider.RoleProtected("admin"), h.UpdateOffer)
+
+		group.GET("/search", authProvider.RoleProtected("reviewer"), h.FindOffers)
+	}
+}
+
+func initReportHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers.ReportHandler) {
+
+	group := router.Group("/report")
+
+	{
+		group.GET("/", authProvider.RoleProtected("admin"), h.GetReports)
+		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetReportById)
+		group.PATCH("/:id/confirm", authProvider.RoleProtected("admin"), h.ConfirmReport)
+
+		group.GET("/my", authProvider.RoleProtected("reviewer"), h.GetMyReports)
+		group.GET("/my/:id", authProvider.RoleProtected("reviewer"), h.GetMyReportById)
+		group.PATCH("/:id", authProvider.RoleProtected("reviewer"), h.UpdateReport)
+	}
+}

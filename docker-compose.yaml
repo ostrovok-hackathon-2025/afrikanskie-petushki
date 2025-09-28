@@ -15,15 +15,19 @@ services:
     stdin_open: true
     tty: true
     depends_on:
-      - db
-      - minio
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./backend/configs:/root/configs:ro
 
   db:
     container_name: postgres_secret_guest
     image: postgres:16
     restart: on-failure
     ports:
-      - "5432:5432"
+      - 5432:5432
     networks:
       - main
     environment:
@@ -32,7 +36,7 @@ services:
       POSTGRES_DB: secret-guest
       PGDATA: /var/lib/postgresql/data/pgdata
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -50,7 +54,7 @@ services:
       MINIO_DEFAULT_BUCKETS: "${MINIO_DEFAULT_BUCKETS}"
       MINIO_USE_SSL: "${MINIO_USE_SSL}"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:9090/minio/health/live" ]
       interval: 10s
       timeout: 5s
       retries: 3

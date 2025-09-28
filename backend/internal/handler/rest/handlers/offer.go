@@ -9,10 +9,21 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 )
 
-type OfferHandlers struct {
+type OfferHandler interface {
+	CreateOffer(ctx *gin.Context)
+	GetOffers(ctx *gin.Context)
+	GetOfferById(ctx *gin.Context)
+	FindOffers(ctx *gin.Context)
+	UpdateOffer(ctx *gin.Context)
+}
+
+type offerHandler struct {
+}
+
+func NewOfferHandler() OfferHandler {
+	return &offerHandler{}
 }
 
 // Add godoc
@@ -29,7 +40,7 @@ type OfferHandlers struct {
 // @Failure 403 "Only available for admin"
 // @Failure 500 "Internal server error"
 // @Router /offer/ [post]
-func (h *OfferHandlers) CreateOffer(ctx *gin.Context) {
+func (h *offerHandler) CreateOffer(ctx *gin.Context) {
 	var request docs.CreateOfferRequest
 
 	if err := ctx.BindJSON(&request); err != nil {
@@ -58,7 +69,7 @@ func (h *OfferHandlers) CreateOffer(ctx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/ [get]
-func (h *OfferHandlers) GetOffers(ctx *gin.Context) {
+func (h *offerHandler) GetOffers(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
@@ -100,7 +111,7 @@ func (h *OfferHandlers) GetOffers(ctx *gin.Context) {
 // @Failure 404 "Offer with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/{id} [get]
-func (h *OfferHandlers) GetOfferById(ctx *gin.Context) {
+func (h *offerHandler) GetOfferById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 
@@ -133,7 +144,7 @@ func (h *OfferHandlers) GetOfferById(ctx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/search [get]
-func (h *OfferHandlers) FindOffers(ctx *gin.Context) {
+func (h *offerHandler) FindOffers(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
@@ -185,7 +196,7 @@ func (h *OfferHandlers) FindOffers(ctx *gin.Context) {
 // @Failure 404 "Offer with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/{id} [patch]
-func (h *OfferHandlers) UpdateOffer(ctx *gin.Context) {
+func (h *offerHandler) UpdateOffer(ctx *gin.Context) {
 	var request docs.UpdateOfferRequest
 
 	if err := ctx.BindJSON(&request); err != nil {
@@ -206,19 +217,4 @@ func (h *OfferHandlers) UpdateOffer(ctx *gin.Context) {
 	_ = id
 
 	ctx.Status(http.StatusOK)
-}
-
-func InitOfferHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
-	h := &OfferHandlers{}
-
-	group := router.Group("/offer")
-
-	{
-		group.POST("/", authProvider.RoleProtected("admin"), h.CreateOffer)
-		group.GET("/", authProvider.RoleProtected("admin"), h.GetOffers)
-		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetOfferById)
-		group.PATCH("/:id", authProvider.RoleProtected("admin"), h.UpdateOffer)
-
-		group.GET("/search", authProvider.RoleProtected("reviewer"), h.FindOffers)
-	}
 }

@@ -6,23 +6,23 @@ import (
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
 )
 
-func (o *offer) GetByID(ctx context.Context, id string) (*model.Offer, error) {
+func (r *repo) GetByID(ctx context.Context, id string) (*model.Offer, error) {
 	var res *model.Offer
 	sql := `
 			SELECT id, hotel_id, location_id, expiration_at, used, task FROM offer WHERE id = $1;
 			`
-	err := o.postgresClient.GetContext(ctx, res, sql, id)
+	err := r.sqlClient.GetContext(ctx, res, sql, id)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (o *offer) Get(
+func (r *repo) Get(
 	ctx context.Context,
 	pageSettings *model.PageSettings,
 ) (offers []*model.Offer, pagesCount int, err error) {
-	tr, err := o.postgresClient.Beginx()
+	tr, err := r.sqlClient.Beginx()
 	if err != nil {
 		return nil, 0, err
 	}
@@ -53,16 +53,16 @@ func (o *offer) Get(
 	return offers, count/pageSettings.Limit + 1, nil
 }
 
-func (o *offer) GetByFilter(
+func (r *repo) GetByFilter(
 	ctx context.Context,
 	filter *model.Filter,
 ) (offers []*model.Offer, pagesCount int, err error) {
-	tr, err := o.postgresClient.Beginx()
+	tr, err := r.sqlClient.Beginx()
 	if err != nil {
 		return nil, 0, err
 	}
 	sql := `
-			SELECT id, hotel_id, location_id, expiration_at, used, task WHERE location_id=$1 FROM offer LIMIT $2, $3;
+			SELECT id, hotel_id, location_id, expiration_at, used, task FROM offer WHERE location_id=$1 LIMIT $2, $3;
 			`
 	err = tr.SelectContext(ctx, offers, sql, filter.LocalID, filter.PageSettings.Offset, filter.PageSettings.Limit)
 	if err != nil {

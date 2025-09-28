@@ -9,13 +9,13 @@ import (
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
 )
 
-func (o *offer) Edit(ctx context.Context, filter *model.Edit) error {
+func (r *repo) Edit(ctx context.Context, filter *model.Edit) error {
 	sql := `
 			UPDATE offer
 			SET expiration_at=$1, task=$2
 			WHERE id=$2;
 			`
-	err := o.postgresClient.QueryRowContext(ctx, sql, filter.ExpirationAT, filter.Task, filter.OfferID).Scan()
+	err := r.sqlClient.QueryRowContext(ctx, sql, filter.ExpirationAT, filter.Task, filter.OfferID).Scan()
 	switch {
 	case errors.Is(err, sql2.ErrNoRows):
 		log.Printf("no user with id %d\n", filter.OfferID)

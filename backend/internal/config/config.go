@@ -27,8 +27,8 @@ type PostgresConfig struct {
 }
 
 type LoggerConfig struct {
-	Prefix string
-	Flag   int
+	Prefix string `yaml:"prefix" env-required:"false"`
+	Flag   int    `yaml:"flag" env-required:"false"`
 }
 
 func MustLoadConfig() *Config {
@@ -43,6 +43,7 @@ func MustLoadConfig() *Config {
 	}
 
 	var cfg Config
+	log.Printf(configPath)
 
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
 		log.Fatalf("failed to load config: %s", err)

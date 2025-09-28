@@ -10,7 +10,7 @@ import (
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
 )
 
-type Offer interface {
+type Repo interface {
 	GetByID(ctx context.Context, id string) (*model.Offer, error)
 	Get(ctx context.Context, pageSettings *model.PageSettings) ([]*model.Offer, int, error)
 	GetByFilter(ctx context.Context, filter *model.Filter) ([]*model.Offer, int, error)
@@ -20,14 +20,14 @@ type Offer interface {
 	Edit(ctx context.Context, filter *model.Edit) error
 }
 
-type offer struct {
-	postgresClient *sqlx.DB
-	logger         *log.Logger
+type repo struct {
+	sqlClient *sqlx.DB
+	logger    *log.Logger
 }
 
-func New(postgresClient *sqlx.DB, logger *log.Logger) Offer {
-	return &offer{
-		postgresClient: postgresClient,
-		logger:         logger,
+func New(sqlClient *sqlx.DB, logger *log.Logger) Repo {
+	return &repo{
+		sqlClient: sqlClient,
+		logger:    logger,
 	}
 }
