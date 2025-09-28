@@ -4,6 +4,7 @@ import { TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import Profile from "./Profile/profile";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import Applications from "./Applications/applications";
 
 const tabsStyle = `transition-all duration-150 text-foreground hover:text-primary cursor-pointer py-2 border-b-transparent 
 border-b-2 hover:border-b-primary`;
@@ -36,7 +37,7 @@ export default function Home() {
                     <Profile />
                 </TabsContent>
                 <TabsContent value="applications">
-                    apps
+                    <Applications />
                 </TabsContent>
             </Tabs>
         </div>
