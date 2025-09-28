@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/offer"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 )
@@ -46,13 +46,12 @@ func NewOfferHandler(useCase offer.UseCase) OfferHandler {
 // @Failure 403 "Only available for admin"
 // @Failure 500 "Internal server error"
 // @Router /offer/ [post]
-func (h *offerHandler) CreateOffer(ginCtx *gin.Context) {
+func (h *offerHandler) CreateOffer(ctx *gin.Context) {
 	var request docs.CreateOfferRequest
-	ctx := context.Background()
 
-	if err := ginCtx.BindJSON(&request); err != nil {
+	if err := ctx.BindJSON(&request); err != nil {
 		log.Println("Invalid body")
-		ginCtx.String(http.StatusBadRequest, "invalid body")
+		ctx.String(http.StatusBadRequest, "invalid body")
 		return
 	}
 
@@ -62,7 +61,7 @@ func (h *offerHandler) CreateOffer(ginCtx *gin.Context) {
 
 	if err != nil {
 		log.Println("Err to create offer: ", err.Error())
-		ginCtx.String(http.StatusBadRequest, err.Error())
+		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -70,7 +69,7 @@ func (h *offerHandler) CreateOffer(ginCtx *gin.Context) {
 		Id: id.String(),
 	}
 
-	ginCtx.JSON(http.StatusCreated, resp)
+	ctx.JSON(http.StatusCreated, resp)
 }
 
 // Add godoc
@@ -88,23 +87,22 @@ func (h *offerHandler) CreateOffer(ginCtx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/ [get]
-func (h *offerHandler) GetOffers(ginCtx *gin.Context) {
-	ctx := context.Background()
-	pageNumStr := ginCtx.Query("pageNum")
+func (h *offerHandler) GetOffers(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageNum: ", pageNumStr)
-		ginCtx.String(http.StatusBadRequest, "invalid pageNum")
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
 		return
 	}
 
-	pageSizeStr := ginCtx.Query("pageSize")
+	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
-		ginCtx.String(http.StatusBadRequest, "invalid pageSize")
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
 	}
 	pageSettings := model.PageSettings{
@@ -112,17 +110,20 @@ func (h *offerHandler) GetOffers(ginCtx *gin.Context) {
 		Offset: (pageNum - 1) * pageSize,
 	}
 	//TODO CREATE BODY
-	_, _, err = h.useCase.GetForPage(ctx, pageSettings)
+	ucOffers, pagesCount, err := h.useCase.GetForPage(ctx, pageSettings)
 
 	if err != nil {
 		log.Println("Err to get offers for page: ", err.Error())
-		ginCtx.String(http.StatusBadRequest, err.Error())
+		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := &docs.GetOffersResponse{}
+	resp := &docs.GetOffersResponse{
+		Offers:     convertUcOffersToApi(ucOffers),
+		PagesCount: pagesCount,
+	}
 
-	ginCtx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -139,28 +140,26 @@ func (h *offerHandler) GetOffers(ginCtx *gin.Context) {
 // @Failure 404 "Offer with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/{id} [get]
-func (h *offerHandler) GetOfferById(ginCtx *gin.Context) {
-	ctx := context.Background()
-	idStr := ginCtx.Param("id")
+func (h *offerHandler) GetOfferById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 
 	if idStr == "" || err != nil {
 		log.Println("invalid offer id", idStr)
-		ginCtx.String(http.StatusBadRequest, "invalid offer id")
+		ctx.String(http.StatusBadRequest, "invalid offer id")
 		return
 	}
 
-	//TODO CREATE BODY
-	_, err = h.useCase.GetByID(ctx, id.String())
+	ucOffer, err := h.useCase.GetByID(ctx, id)
 	if err != nil {
 		log.Println("Err to get offer by id: ", err.Error())
-		ginCtx.String(http.StatusBadRequest, err.Error())
+		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := &docs.OfferResponse{}
+	resp := convertUcOfferToApi(ucOffer)
 
-	ginCtx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -179,63 +178,60 @@ func (h *offerHandler) GetOfferById(ginCtx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /offer/search [get]
-func (h *offerHandler) FindOffers(ginCtx *gin.Context) {
-	ctx := context.Background()
-	pageNumStr := ginCtx.Query("pageNum")
+func (h *offerHandler) FindOffers(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageNum: ", pageNumStr)
-		ginCtx.String(http.StatusBadRequest, "invalid pageNum")
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
 		return
 	}
 
-	_ = pageNum
-
-	pageSizeStr := ginCtx.Query("pageSize")
+	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
-		ginCtx.String(http.StatusBadRequest, "invalid pageSize")
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
 	}
 
-	_ = pageSize
-
-	cityIdStr := ginCtx.Query("pageSize")
+	cityIdStr := ctx.Query("pageSize")
 
 	if cityIdStr == "" {
 		log.Println("Invalid cityId: ", cityIdStr)
-		ginCtx.String(http.StatusBadRequest, "invalid cityId")
+		ctx.String(http.StatusBadRequest, "invalid cityId")
 		return
 	}
 	cityId, err := uuid.Parse(cityIdStr)
 	if err != nil {
 		log.Println("Fail to parse id: ", err.Error())
-		ginCtx.String(http.StatusBadRequest, err.Error())
+		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	filter := model.Filter{
-		LocationID: cityId,
+		LocationID: pkg.NewWithValue(cityId),
 		PageSettings: model.PageSettings{
 			Limit:  pageSize,
 			Offset: (pageNum - 1) * pageSize,
 		},
 	}
-	//TODO CREATE BODY
-	_, _, err = h.useCase.GetByFilter(ctx, filter)
+	ucOffers, pagesCount, err := h.useCase.GetByFilter(ctx, filter)
 
 	if err != nil {
-		log.Println("Err to get offer by id: ", err.Error())
-		ginCtx.String(http.StatusBadRequest, err.Error())
+		log.Println("Err to find offers by filter: ", err.Error())
+		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := &docs.GetOffersResponse{}
+	resp := &docs.GetOffersResponse{
+		Offers:     convertUcOffersToApi(ucOffers),
+		PagesCount: pagesCount,
+	}
 
-	ginCtx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -271,8 +267,68 @@ func (h *offerHandler) UpdateOffer(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "invalid offer id")
 		return
 	}
+	var (
+		count int
+		edit  model.Edit
+	)
+	edit.OfferID = id
+	if request.Task != "" {
+		edit.Task = pkg.NewWithValue(request.Task)
+		count++
+	}
+	if request.RoomID != "" {
+		roomID, err := uuid.Parse(request.RoomID)
+		if err != nil {
+			log.Println("invalid room id", idStr)
+			ctx.String(http.StatusBadRequest, "invalid room id")
+			return
+		}
+		edit.RoomID = pkg.NewWithValue(roomID)
+		count++
+	}
+	if request.HotelID != "" {
+		hotelID, err := uuid.Parse(request.HotelID)
+		if err != nil {
+			log.Println("invalid hotel id", idStr)
+			ctx.String(http.StatusBadRequest, "invalid hotel id")
+			return
+		}
+		edit.RoomID = pkg.NewWithValue(hotelID)
+		count++
+	}
+	//TODO Validation
+	edit.CheckIn = pkg.NewWithValue(request.CheckIn)
+	edit.CheckOut = pkg.NewWithValue(request.CheckOut)
+	edit.ExpirationAT = pkg.NewWithValue(request.ExpirationAT)
 
-	_ = id
+	err = h.useCase.Edit(ctx, edit)
+	if err != nil {
+		log.Println("Err to update offer by id: ", err.Error())
+		ctx.String(http.StatusBadRequest, err.Error())
+		return
+	}
 
 	ctx.Status(http.StatusOK)
+}
+
+func convertUcOffersToApi(ucOffers []model.Offer) []*docs.OfferResponse {
+	apiOffers := make([]*docs.OfferResponse, len(ucOffers))
+	for i, ucOffer := range ucOffers {
+		apiOffers[i] = convertUcOfferToApi(ucOffer)
+	}
+	return apiOffers
+}
+
+func convertUcOfferToApi(ucOffer model.Offer) *docs.OfferResponse {
+	return &docs.OfferResponse{
+		ID:           ucOffer.ID.String(),
+		Task:         ucOffer.Task,
+		RoomID:       ucOffer.RoomID.String(),
+		RoomName:     ucOffer.RoomName,
+		HotelID:      ucOffer.HotelID.String(),
+		HotelName:    ucOffer.HotelName,
+		CheckIn:      ucOffer.CheckIn,
+		CheckOut:     ucOffer.CheckOut,
+		ExpirationAt: ucOffer.ExpirationAt,
+	}
 }
