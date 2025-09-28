@@ -20,14 +20,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all applications with pagination",
+                "description": "GetForPage all applications with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Application"
                 ],
-                "summary": "Get applications",
+                "summary": "GetForPage applications",
                 "parameters": [
                     {
                         "type": "integer",
@@ -131,14 +131,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get application by id",
+                "description": "GetForPage application by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Application"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -183,14 +183,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all offers with pagination",
+                "description": "GetForPage all offers with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Offer"
                 ],
-                "summary": "Get offers",
+                "summary": "GetForPage offers",
                 "parameters": [
                     {
                         "type": "integer",
@@ -360,14 +360,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get offer by id",
+                "description": "GetForPage offer by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Offer"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -471,14 +471,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all reports with pagination",
+                "description": "GetForPage all reports with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get reports",
+                "summary": "GetForPage reports",
                 "parameters": [
                     {
                         "type": "integer",
@@ -530,14 +530,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all reports of current user with pagination",
+                "description": "GetForPage all reports of current user with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get my reports",
+                "summary": "GetForPage my reports",
                 "parameters": [
                     {
                         "type": "integer",
@@ -589,14 +589,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get report of current user by id",
+                "description": "GetForPage report of current user by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get my by id",
+                "summary": "GetForPage my by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -644,14 +644,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get report by id",
+                "description": "GetForPage report by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -815,14 +815,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get data of current user",
+                "description": "GetForPage data of current user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User"
                 ],
-                "summary": "Get me",
+                "summary": "GetForPage me",
                 "responses": {
                     "200": {
                         "description": "User data",
@@ -838,6 +838,9 @@
                     },
                     "401": {
                         "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "User not found"
                     },
                     "500": {
                         "description": "Internal server error"
@@ -988,6 +991,12 @@
         "docs.ApplicationResponse": {
             "type": "object",
             "properties": {
+                "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1242,6 +1251,9 @@
             "type": "object",
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "is_admin": {

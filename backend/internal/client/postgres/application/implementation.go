@@ -53,15 +53,17 @@ func (r *applicationRepo) GetApplications(
 	offset := pageNum * pageSize
 
 	query := `
-	SELECT (a.id, a.user_id, a.offer_id, a.status, o.expiration_at) FROM application as a
-	INNER JOIN offer as o ON a.offer_id = offer.id
-	OFFSET $1
-	LIMIT $2
+	SELECT a.id, a.user_id, a.offer_id, a.status, o.expiration_at, h.name FROM application as a
+	INNER JOIN offer as o ON a.offer_id = o.id
+	INNER JOIN hotel as h ON o.hotel_id = h.id
+	WHERE a.user_id = $1
+	OFFSET $2
+	LIMIT $3
 	`
 
 	var apps []ApplicationDTO
 
-	err := r.db.SelectContext(ctx, &apps, query, offset, pageSize)
+	err := r.db.SelectContext(ctx, &apps, query, userId, offset, pageSize)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -76,16 +78,16 @@ func (r *applicationRepo) GetApplications(
 	}
 
 	var count int
-	query = "SELECT COUNT(*) FROM application"
+	query = "SELECT COUNT(*) FROM application WHERE user_id = $1"
 
-	err = r.db.Get(&count, query)
+	err = r.db.Get(&count, query, userId)
 
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get count of applications: %w", err)
 	}
 
 	pagesCount := count / pageSize
-	if pagesCount%pageSize != 0 {
+	if count%pageSize != 0 {
 		pagesCount++
 	}
 
@@ -103,8 +105,9 @@ func (r *applicationRepo) GetApplicationById(
 	applicationId uuid.UUID,
 ) (*application.Application, error) {
 	query := `
-	SELECT (a.id, a.user_id, a.offer_id, a.status, o.expiration_at) FROM application as a
-	INNER JOIN offer as o ON a.offer_id = offer.id
+	SELECT a.id, a.user_id, a.offer_id, a.status, o.expiration_at, h.name FROM application as a
+	INNER JOIN offer as o ON a.offer_id = o.id
+	INNER JOIN hotel as h ON o.hotel_id = h.id
 	WHERE a.id = $1
 	`
 
@@ -120,12 +123,7 @@ func (r *applicationRepo) GetApplicationById(
 		return nil, fmt.Errorf("failed to get application from repo: %w", err)
 	}
 
-	res := &application.Application{
-		Id:      app.Id,
-		UserId:  app.UserId,
-		OfferId: app.OfferId,
-		Status:  application.ApplicationStatus(app.Status),
-	}
+	res := app.ToApplicationModel()
 
 	return res, nil
 }

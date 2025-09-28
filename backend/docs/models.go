@@ -14,6 +14,7 @@ type ApplicationResponse struct {
 	OfferId      string    `json:"offer_id"`
 	Status       string    `json:"status"`
 	ExpirationAt time.Time `json:"expiration_at"`
+	HotelName    string    `json:"hotel_name"`
 }
 
 func ApplicationModelToResponse(model *application.Application) *ApplicationResponse {
@@ -23,6 +24,7 @@ func ApplicationModelToResponse(model *application.Application) *ApplicationResp
 		OfferId:      model.OfferId.String(),
 		Status:       string(model.Status),
 		ExpirationAt: model.ExpirationAt,
+		HotelName:    model.HotelName,
 	}
 }
 

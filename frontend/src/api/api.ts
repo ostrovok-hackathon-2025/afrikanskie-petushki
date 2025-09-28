@@ -39,8 +39,8 @@ import type {
 
 export const getSecretGuestAPI = () => {
 /**
- * Get all applications with pagination
- * @summary Get applications
+ * GetForPage all applications with pagination
+ * @summary GetForPage applications
  */
 const getApplication = <TData = AxiosResponse<DocsGetApplicationsResponse>>(
     params: GetApplicationParams, options?: AxiosRequestConfig
@@ -66,8 +66,8 @@ const postApplication = <TData = AxiosResponse<DocsCreateApplicationResponse>>(
   }
 
 /**
- * Get application by id
- * @summary Get by id
+ * GetForPage application by id
+ * @summary GetForPage by id
  */
 const getApplicationId = <TData = AxiosResponse<DocsApplicationResponse>>(
     id: string, options?: AxiosRequestConfig
@@ -78,8 +78,8 @@ const getApplicationId = <TData = AxiosResponse<DocsApplicationResponse>>(
   }
 
 /**
- * Get all offers with pagination
- * @summary Get offers
+ * GetForPage all offers with pagination
+ * @summary GetForPage offers
  */
 const getOffer = <TData = AxiosResponse<DocsGetOffersResponse>>(
     params: GetOfferParams, options?: AxiosRequestConfig
@@ -119,8 +119,8 @@ const getOfferSearch = <TData = AxiosResponse<DocsGetOffersResponse>>(
   }
 
 /**
- * Get offer by id
- * @summary Get by id
+ * GetForPage offer by id
+ * @summary GetForPage by id
  */
 const getOfferId = <TData = AxiosResponse<DocsOfferResponse>>(
     id: string, options?: AxiosRequestConfig
@@ -145,8 +145,8 @@ const patchOfferId = <TData = AxiosResponse<void>>(
   }
 
 /**
- * Get all reports with pagination
- * @summary Get reports
+ * GetForPage all reports with pagination
+ * @summary GetForPage reports
  */
 const getReport = <TData = AxiosResponse<DocsGetReportsResponse>>(
     params: GetReportParams, options?: AxiosRequestConfig
@@ -159,8 +159,8 @@ const getReport = <TData = AxiosResponse<DocsGetReportsResponse>>(
   }
 
 /**
- * Get all reports of current user with pagination
- * @summary Get my reports
+ * GetForPage all reports of current user with pagination
+ * @summary GetForPage my reports
  */
 const getReportMy = <TData = AxiosResponse<DocsGetReportsResponse>>(
     params: GetReportMyParams, options?: AxiosRequestConfig
@@ -173,8 +173,8 @@ const getReportMy = <TData = AxiosResponse<DocsGetReportsResponse>>(
   }
 
 /**
- * Get report of current user by id
- * @summary Get my by id
+ * GetForPage report of current user by id
+ * @summary GetForPage my by id
  */
 const getReportMyId = <TData = AxiosResponse<DocsReportResponse>>(
     id: string, options?: AxiosRequestConfig
@@ -185,8 +185,8 @@ const getReportMyId = <TData = AxiosResponse<DocsReportResponse>>(
   }
 
 /**
- * Get report by id
- * @summary Get by id
+ * GetForPage report by id
+ * @summary GetForPage by id
  */
 const getReportId = <TData = AxiosResponse<DocsReportResponse>>(
     id: string, options?: AxiosRequestConfig
@@ -228,8 +228,8 @@ const patchReportIdConfirm = <TData = AxiosResponse<void>>(
   }
 
 /**
- * Get data of current user
- * @summary Get me
+ * GetForPage data of current user
+ * @summary GetForPage me
  */
 const getUser = <TData = AxiosResponse<DocsUserResponse>>(
      options?: AxiosRequestConfig

@@ -8,11 +8,12 @@ import (
 )
 
 type ApplicationDTO struct {
-	Id           uuid.UUID `db:"expiration_at"`
-	UserId       uuid.UUID `db:"id"`
-	OfferId      uuid.UUID `db:"user_id"`
-	Status       string    `db:"offer_id"`
-	ExpirationAt time.Time `db:"status"`
+	Id           uuid.UUID `db:"id"`
+	UserId       uuid.UUID `db:"user_id"`
+	OfferId      uuid.UUID `db:"offer_id"`
+	Status       string    `db:"status"`
+	ExpirationAt time.Time `db:"expiration_at"`
+	HotelName    string    `db:"name"`
 }
 
 func (d *ApplicationDTO) ToApplicationModel() *application.Application {
@@ -22,5 +23,6 @@ func (d *ApplicationDTO) ToApplicationModel() *application.Application {
 		OfferId:      d.OfferId,
 		Status:       application.ApplicationStatus(d.Status),
 		ExpirationAt: d.ExpirationAt,
+		HotelName:    d.HotelName,
 	}
 }

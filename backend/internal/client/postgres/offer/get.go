@@ -57,9 +57,6 @@ func (r *repo) GetByFilter(
 	ctx context.Context,
 	filter *model.Filter,
 ) (offers []*model.Offer, pagesCount int, err error) {
-	if err != nil {
-		return nil, 0, err
-	}
 	sql := `
 			SELECT o.id as offer_id,
 			       o.hotel_id as hotel_id,
