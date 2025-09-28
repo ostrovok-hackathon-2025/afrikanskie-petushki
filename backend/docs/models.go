@@ -42,13 +42,15 @@ type GetApplicationsResponse struct {
 }
 
 type OfferResponse struct {
-	Id           string    `json:"id"`
-	HotelId      string    `json:"hotel_id"`
-	LocationId   string    `json:"location_id"`
-	ExpirationAt time.Time `json:"expiration_at"`
-	CheckDate    time.Time `json:"check_date"`
+	ID           string    `json:"id"`
 	Task         string    `json:"task"`
-	Used         bool      `json:"used"`
+	RoomID       string    `json:"room_id"`
+	RoomName     string    `json:"room_name"`
+	HotelID      string    `json:"hotel_id"`
+	HotelName    string    `json:"hotel_name"`
+	CheckIn      time.Time `json:"check_in_at"`
+	CheckOut     time.Time `json:"check_out_at"`
+	ExpirationAt time.Time `json:"expiration_at"`
 }
 
 type CreateOfferRequest struct {
@@ -68,8 +70,12 @@ type GetOffersResponse struct {
 }
 
 type UpdateOfferRequest struct {
-	ExpirationAt time.Time `json:"expiration_at"`
 	Task         string    `json:"task"`
+	RoomID       string    `json:"room_id"`
+	HotelID      string    `json:"hotel_id"`
+	CheckIn      time.Time `json:"check_in_at"`
+	CheckOut     time.Time `json:"check_out_at"`
+	ExpirationAT time.Time `json:"expiration_at"`
 }
 
 type AuthResponse struct {

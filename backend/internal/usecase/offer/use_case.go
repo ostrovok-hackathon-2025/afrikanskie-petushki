@@ -11,7 +11,7 @@ import (
 type UseCase interface {
 	Create(ctx context.Context, create model.Create) (uuid.UUID, error)
 
-	GetByID(ctx context.Context, id string) (model.Offer, error)
+	GetByID(ctx context.Context, id uuid.UUID) (model.Offer, error)
 	GetForPage(ctx context.Context, pageSettings model.PageSettings) (offers []model.Offer, pageCount int, err error)
 	GetByFilter(ctx context.Context, filter model.Filter) (offers []model.Offer, pagesCount int, err error)
 

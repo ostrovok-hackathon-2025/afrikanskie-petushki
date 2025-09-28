@@ -18,11 +18,11 @@ type Offer struct {
 	LocationName string    `db:"location_name"`
 	CheckIn      time.Time `db:"check_in_at"`
 	CheckOut     time.Time `db:"check_out_at"`
-	ExpirationAT time.Time `db:"expiration_at"`
+	ExpirationAt time.Time `db:"expiration_at"`
 }
 
 type Filter struct {
-	LocationID   uuid.UUID
+	LocationID   pkg.Opt[uuid.UUID]
 	PageSettings PageSettings
 }
 
