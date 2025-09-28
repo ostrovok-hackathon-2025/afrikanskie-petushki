@@ -14,10 +14,11 @@ type Image struct {
 }
 
 type Report struct {
-	ID           uuid.UUID
-	UserID       uuid.UUID
-	ExpirationAt time.Time
-	Status       string
-	Text         string
-	Images       []Image
+	ID            uuid.UUID
+	UserID        uuid.UUID
+	ApplicationID uuid.UUID
+	ExpirationAt  time.Time
+	Status        string
+	Text          string
+	Images        []Image
 }

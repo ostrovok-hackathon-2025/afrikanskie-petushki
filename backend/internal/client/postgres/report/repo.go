@@ -31,24 +31,30 @@ func NewRepo(db *sqlx.DB) Repo {
 const queryGetByID = `
         SELECT 
             r.id,
+            a.user_id,
+            r.application_id,
             r.expiration_at,
             r.status,
             r.text,
             p.id as "image_id",
-            p.s3_link as "image_link"
+            p.s3_link as "image_link",
+            a.user_id as "user_id"
         FROM report r
         LEFT JOIN photo p ON r.id = p.report_id
+        LEFT JOIN application a ON a.id = r.application_id
         WHERE r.id = $1
     `
 
 func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, error) {
 	var rows []struct {
-		ID           uuid.UUID  `db:"id"`
-		ExpirationAt time.Time  `db:"expiration_at"`
-		Status       string     `db:"status"`
-		Text         string     `db:"text"`
-		ImageID      *uuid.UUID `db:"image_id"`
-		ImageLink    *string    `db:"image_link"`
+		ID            uuid.UUID  `db:"id"`
+		ApplicationID uuid.UUID  `db:"application_id"`
+		UserID        uuid.UUID  `db:"user_id"`
+		ExpirationAt  time.Time  `db:"expiration_at"`
+		Status        string     `db:"status"`
+		Text          string     `db:"text"`
+		ImageID       *uuid.UUID `db:"image_id"`
+		ImageLink     *string    `db:"image_link"`
 	}
 
 	err := sqlx.SelectContext(ctx, r.db, &rows, queryGetByID, id)
@@ -65,11 +71,13 @@ func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, e
 
 	// Собираем отчет из первой строки (основные данные)
 	report := model.Report{
-		ID:           rows[0].ID,
-		ExpirationAt: rows[0].ExpirationAt,
-		Status:       rows[0].Status,
-		Text:         rows[0].Text,
-		Images:       make([]model.Image, 0),
+		ID:            rows[0].ID,
+		UserID:        rows[0].UserID,
+		ApplicationID: rows[0].ApplicationID,
+		ExpirationAt:  rows[0].ExpirationAt,
+		Status:        rows[0].Status,
+		Text:          rows[0].Text,
+		Images:        make([]model.Image, 0),
 	}
 
 	// Собираем изображения из всех строк
@@ -88,6 +96,7 @@ func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, e
 const queryGetByUserID = `
         SELECT 
             r.id,
+            r.application_id,
             r.expiration_at,
             r.status,
             r.text,
@@ -95,19 +104,21 @@ const queryGetByUserID = `
             p.s3_link as "image_link"
         FROM report r
         LEFT JOIN photo p ON r.id = p.report_id
-        WHERE r.user_id = $1
+        LEFT JOIN application a ON a.id = r.application_id
+        WHERE a.user_id = $1
         ORDER BY r.expiration_at DESC
         LIMIT $2 OFFSET $3
     `
 
 func (r *repo) GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset int64) ([]model.Report, error) {
 	var rows []struct {
-		ID           uuid.UUID  `db:"id"`
-		ExpirationAt time.Time  `db:"expiration_at"`
-		Status       string     `db:"status"`
-		Text         string     `db:"text"`
-		ImageID      *uuid.UUID `db:"image_id"`
-		ImageLink    *string    `db:"image_link"`
+		ID            uuid.UUID  `db:"id"`
+		ApplicationID uuid.UUID  `db:"application_id"`
+		ExpirationAt  time.Time  `db:"expiration_at"`
+		Status        string     `db:"status"`
+		Text          string     `db:"text"`
+		ImageID       *uuid.UUID `db:"image_id"`
+		ImageLink     *string    `db:"image_link"`
 	}
 
 	err := sqlx.SelectContext(ctx, r.db, &rows, queryGetByUserID, userID, limit, offset)
@@ -125,12 +136,13 @@ func (r *repo) GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset 
 	for _, row := range rows {
 		if _, exists := reportsMap[row.ID]; !exists {
 			reportsMap[row.ID] = &model.Report{
-				ID:           row.ID,
-				UserID:       userID,
-				ExpirationAt: row.ExpirationAt,
-				Status:       row.Status,
-				Text:         row.Text,
-				Images:       make([]model.Image, 0),
+				ID:            row.ID,
+				ApplicationID: row.ApplicationID,
+				UserID:        userID,
+				ExpirationAt:  row.ExpirationAt,
+				Status:        row.Status,
+				Text:          row.Text,
+				Images:        make([]model.Image, 0),
 			}
 		}
 
@@ -156,7 +168,8 @@ func (r *repo) GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset 
 const queryGet = `
         SELECT 
             r.id,
-            r.user_id,
+            a.user_id,
+            r.application_id,
             r.expiration_at,
             r.status,
             r.text,
@@ -164,6 +177,7 @@ const queryGet = `
             p.s3_link as "image_link"
         FROM report r
         LEFT JOIN photo p ON r.id = p.report_id
+        LEFT JOIN application a ON a.id = r.application_id
         WHERE r.id IN (
             SELECT id FROM report 
             ORDER BY expiration_at DESC 
@@ -174,13 +188,14 @@ const queryGet = `
 
 func (r *repo) Get(ctx context.Context, limit, offset int64) ([]model.Report, error) {
 	var rows []struct {
-		ID           uuid.UUID  `db:"id"`
-		UserID       uuid.UUID  `db:"user_id"`
-		ExpirationAt time.Time  `db:"expiration_at"`
-		Status       string     `db:"status"`
-		Text         string     `db:"text"`
-		ImageID      *uuid.UUID `db:"image_id"`
-		ImageLink    *string    `db:"image_link"`
+		ID            uuid.UUID  `db:"id"`
+		UserID        uuid.UUID  `db:"user_id"`
+		ApplicationID uuid.UUID  `db:"application_id"`
+		ExpirationAt  time.Time  `db:"expiration_at"`
+		Status        string     `db:"status"`
+		Text          string     `db:"text"`
+		ImageID       *uuid.UUID `db:"image_id"`
+		ImageLink     *string    `db:"image_link"`
 	}
 
 	err := sqlx.SelectContext(ctx, r.db, &rows, queryGet, limit, offset)
@@ -199,12 +214,13 @@ func (r *repo) Get(ctx context.Context, limit, offset int64) ([]model.Report, er
 	for _, row := range rows {
 		if _, exists := reportsMap[row.ID]; !exists {
 			reportsMap[row.ID] = &model.Report{
-				ID:           row.ID,
-				UserID:       row.UserID,
-				ExpirationAt: row.ExpirationAt,
-				Status:       row.Status,
-				Text:         row.Text,
-				Images:       make([]model.Image, 0),
+				ID:            row.ID,
+				UserID:        row.UserID,
+				ApplicationID: row.ApplicationID,
+				ExpirationAt:  row.ExpirationAt,
+				Status:        row.Status,
+				Text:          row.Text,
+				Images:        make([]model.Image, 0),
 			}
 			reportOrder = append(reportOrder, row.ID)
 		}
@@ -243,10 +259,10 @@ func (r *repo) Count(ctx context.Context) (int64, error) {
 }
 
 const reportUpsertQuery = `
-        INSERT INTO report (id, user_id, expiration_at, status, text)
+        INSERT INTO report (id, application_id, expiration_at, status, text)
         VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id) DO UPDATE SET
-            user_id = EXCLUDED.user_id,
+            application_id = EXCLUDED.application_id,
             expiration_at = EXCLUDED.expiration_at,
             status = EXCLUDED.status,
             text = EXCLUDED.text
@@ -271,7 +287,7 @@ func (r *repo) Upsert(ctx context.Context, report model.Report) error {
 	// Upsert для отчета
 	_, err = tx.ExecContext(ctx, reportUpsertQuery,
 		report.ID,
-		report.UserID,
+		report.ApplicationID,
 		report.ExpirationAt,
 		report.Status,
 		report.Text,
