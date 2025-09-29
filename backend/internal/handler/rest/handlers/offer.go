@@ -89,7 +89,7 @@ func (h *offerHandler) CreateOffer(ctx *gin.Context) {
 // @Router /offer/ [get]
 func (h *offerHandler) GetOffers(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
-	pageNum, err := strconv.Atoi(pageNumStr)
+	pageNum, err := strconv.ParseUint(pageNumStr, 10, 0)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageNum: ", pageNumStr)
@@ -98,18 +98,17 @@ func (h *offerHandler) GetOffers(ctx *gin.Context) {
 	}
 
 	pageSizeStr := ctx.Query("pageSize")
-	pageSize, err := strconv.Atoi(pageSizeStr)
+	pageSize, err := strconv.ParseUint(pageSizeStr, 10, 0)
 
-	if pageNumStr == "" || err != nil {
+	if err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
 	}
 	pageSettings := model.PageSettings{
 		Limit:  pageSize,
-		Offset: (pageNum - 1) * pageSize,
+		Offset: pageNum * pageSize,
 	}
-	//TODO CREATE BODY
 	ucOffers, pagesCount, err := h.useCase.GetForPage(ctx, pageSettings)
 
 	if err != nil {
@@ -180,7 +179,7 @@ func (h *offerHandler) GetOfferById(ctx *gin.Context) {
 // @Router /offer/search [get]
 func (h *offerHandler) FindOffers(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
-	pageNum, err := strconv.Atoi(pageNumStr)
+	pageNum, err := strconv.ParseUint(pageNumStr, 10, 0)
 
 	if pageNumStr == "" || err != nil {
 		log.Println("Invalid pageNum: ", pageNumStr)
@@ -189,9 +188,9 @@ func (h *offerHandler) FindOffers(ctx *gin.Context) {
 	}
 
 	pageSizeStr := ctx.Query("pageSize")
-	pageSize, err := strconv.Atoi(pageSizeStr)
+	pageSize, err := strconv.ParseUint(pageSizeStr, 10, 0)
 
-	if pageNumStr == "" || err != nil {
+	if err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
@@ -213,10 +212,8 @@ func (h *offerHandler) FindOffers(ctx *gin.Context) {
 
 	filter := model.Filter{
 		LocationID: pkg.NewWithValue(cityId),
-		PageSettings: model.PageSettings{
-			Limit:  pageSize,
-			Offset: (pageNum - 1) * pageSize,
-		},
+		Limit:      pkg.NewWithValue(pageSize),
+		Offset:     pkg.NewWithValue(pageNum * pageSize),
 	}
 	ucOffers, pagesCount, err := h.useCase.GetByFilter(ctx, filter)
 

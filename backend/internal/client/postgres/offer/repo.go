@@ -11,8 +11,8 @@ import (
 )
 
 type Repo interface {
-	GetByID(ctx context.Context, id uuid.UUID) (model.Offer, error)
-	GetByFilter(ctx context.Context, filter model.Filter) ([]model.Offer, int, error)
+	GetByFilter(ctx context.Context, filter model.Filter) ([]model.Offer, error)
+	GetCount(ctx context.Context, filter model.Filter) (int, error)
 
 	Create(ctx context.Context, id uuid.UUID, create model.Create) error
 

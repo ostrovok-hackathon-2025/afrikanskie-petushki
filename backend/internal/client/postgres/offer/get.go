@@ -5,7 +5,6 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/google/uuid"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
 )
 
@@ -26,58 +25,57 @@ var (
 		Join("room r ON o.room_id = r.id")
 )
 
-func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Offer, error) {
-	var offer model.Offer
-	query, args, err := baseGetSql.Where(sq.Eq{"o.id": id}).ToSql()
-	if err != nil {
-		return model.Offer{}, err
-	}
-	err = r.sqlClient.GetContext(ctx, &offer, query, args...)
-	if err != nil {
-		return model.Offer{}, err
-	}
-	return offer, nil
-}
-
 func (r *repo) GetByFilter(
 	ctx context.Context,
 	filter model.Filter,
-) (offers []model.Offer, pagesCount int, err error) {
+) (offers []model.Offer, err error) {
 
 	// SELECT By filter
 	sql := baseGetSql
+	if id, ok := filter.ID.Get(); ok {
+		sql = sql.Where(sq.Eq{"o.id": id})
+	}
 	if locationID, ok := filter.LocationID.Get(); ok {
 		sql = sql.Where(sq.Eq{"h.location_id": locationID})
 	}
-	query, args, err := sql.Limit(uint64(filter.PageSettings.Limit)).Offset(uint64(filter.PageSettings.Offset)).ToSql()
+	if limit, ok := filter.Limit.Get(); ok {
+		sql = sql.Limit(limit)
+	}
+	if offset, ok := filter.Offset.Get(); ok {
+		sql = sql.Limit(offset)
+	}
+	query, args, err := sql.ToSql()
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	err = r.sqlClient.SelectContext(ctx, &offers, query, args...)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
+	return offers, nil
+}
 
-	// GET count
+func (r *repo) GetCount(ctx context.Context, filter model.Filter) (int, error) {
 	var count int
-
-	sql = sq.Select("COUNT(*)")
+	sql := sq.Select("COUNT(*)")
 	if locationID, ok := filter.LocationID.Get(); ok {
 		sql = sql.Where(sq.Eq{"h.location_id": locationID})
 	}
-	query, args, err = sql.ToSql()
+	query, args, err := sql.ToSql()
 	if err != nil {
-		return nil, 0, err
+		return 0, err
 	}
 	err = r.sqlClient.GetContext(ctx, &count, query, args...)
-	err = r.sqlClient.SelectContext(ctx, &offers, query, args...)
 	if err != nil {
-		return nil, 0, err
+		return 0, err
 	}
-	if count%filter.PageSettings.Limit == 0 {
-		return offers, count / filter.PageSettings.Limit, nil
+	if limit, ok := filter.Limit.Get(); ok {
+		if count%int(limit) == 0 {
+			return count, nil
+		}
+		return count + 1, nil
 	}
-	return offers, count/filter.PageSettings.Limit + 1, nil
+	return count, nil
 }
 
 func (r *repo) GetByExpirationTime(ctx context.Context) (offers []model.Offer, err error) { // поиск истекших оферов
