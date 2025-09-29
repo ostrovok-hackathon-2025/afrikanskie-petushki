@@ -17,6 +17,8 @@ type Repo interface {
 	Create(ctx context.Context, id uuid.UUID, create model.Create) error
 
 	Edit(ctx context.Context, filter model.Edit) error
+	GetByExpirationTime(ctx context.Context) ([]model.Offer, error)
+	EditStatus(ctx context.Context, offerID uuid.UUID, status string) error
 }
 
 type repo struct {

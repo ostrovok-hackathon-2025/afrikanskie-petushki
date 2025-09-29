@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/worker"
 	"log"
 	"os"
 
@@ -10,8 +11,8 @@ import (
 	hotelRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/hotel"
 	locationRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/location"
 	offerRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/offer"
-	roomRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/room"
 	reportRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/report"
+	roomRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/room"
 	userRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/config"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/handlers"
@@ -79,6 +80,9 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 		locationHandler,
 		roomHandler,
 	)
-
-	return func() {}
+	secretGuestWorker := worker.NewSecretGuestWorker(offerRepository, applicationRepository)
+	secretGuestWorker.Start()
+	return func() {
+		secretGuestWorker.Stop()
+	}
 }

@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS offer
     room_id       UUID      NOT NULL REFERENCES room (id),
     check_in_at   TIMESTAMP NOT NULL,
     check_out_at  TIMESTAMP NOT NULL,
-    expiration_at TIMESTAMP,
+    status        VARCHAR(20) DEFAULT 'created',
     task          TEXT,
     CONSTRAINT uq_offer UNIQUE (hotel_id, room_id, check_in_at, check_out_at)
 );

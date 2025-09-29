@@ -127,3 +127,31 @@ func (r *applicationRepo) GetApplicationById(
 
 	return res, nil
 }
+
+func (r *applicationRepo) GetByOfferID(
+	ctx context.Context,
+	offerID uuid.UUID,
+) ([]*application.Application, error) {
+	query := `
+	SELECT id, user_id, offer_id, status
+	FROM application
+	WHERE offer_id = $1
+	`
+
+	var apps []ApplicationDTO
+
+	err := r.db.SelectContext(ctx, &apps, query, offerID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []*application.Application{}, nil // пустой слайс, если нет заявок. когда отель кал
+		}
+		return nil, fmt.Errorf("failed to get applications by offer_id: %w", err)
+	}
+
+	res := make([]*application.Application, 0, len(apps))
+	for _, app := range apps {
+		res = append(res, app.ToApplicationModel())
+	}
+
+	return res, nil
+}
