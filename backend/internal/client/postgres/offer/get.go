@@ -2,6 +2,7 @@ package offer
 
 import (
 	"context"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
@@ -18,6 +19,7 @@ var (
 		"o.check_out_at",
 		"o.expiration_at",
 		"o.task",
+		"o.status",
 	).From("offer o").
 		Join("hotel h ON o.hotel_id = h.id").
 		Join("room r ON o.room_id = r.id")
@@ -74,4 +76,21 @@ func (r *repo) GetCount(ctx context.Context, filter model.Filter) (int, error) {
 		return count + 1, nil
 	}
 	return count, nil
+}
+
+func (r *repo) GetByExpirationTime(ctx context.Context) (offers []model.Offer, err error) { // поиск истекших оферов
+	sql := baseGetSql.Where(sq.LtOrEq{"o.expiration_at": time.Now()}). //истекшие оферы
+										Where(sq.Eq{"o.status": "created"}).
+										Limit(10) // Берем по 10 оферов, позже запихну в воркер. Для равномерной нагрузки. А то можно надорвать мышцу если резко взять большой вес. А в приседе вообще геморрой может выскочить.
+	query, args, err := sql.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.sqlClient.SelectContext(ctx, &offers, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	// проверили две ошибки на запрос и на подключение
+	return offers, nil
 }

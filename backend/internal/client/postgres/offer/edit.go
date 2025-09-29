@@ -2,6 +2,7 @@ package offer
 
 import (
 	"context"
+	"github.com/google/uuid"
 
 	sq "github.com/Masterminds/squirrel"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/offer"
@@ -36,4 +37,17 @@ func (r *repo) Edit(ctx context.Context, edit model.Edit) error {
 		return err
 	}
 	return nil
+}
+
+func (r *repo) EditStatus(ctx context.Context, offerID uuid.UUID, status string) error {
+	query, args, err := sq.Update("offer").
+		Set("status", status).
+		Where(sq.Eq{"id": offerID}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.sqlClient.ExecContext(ctx, query, args...)
+	return err
 }

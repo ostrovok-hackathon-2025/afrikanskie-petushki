@@ -19,6 +19,7 @@ type Offer struct {
 	CheckIn      time.Time `db:"check_in_at"`
 	CheckOut     time.Time `db:"check_out_at"`
 	ExpirationAt time.Time `db:"expiration_at"`
+	Status       string    `db:"status"`
 }
 
 type Filter struct {
