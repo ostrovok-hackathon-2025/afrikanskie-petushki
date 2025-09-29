@@ -33,9 +33,8 @@ func (u *useCase) GetForPage(
 
 	//GET offers by filter use only limit and offset
 	filter := model.Filter{
-		LocationID: pkg.NewEmpty[uuid.UUID](),
-		Limit:      pkg.NewWithValue(pageSettings.Limit),
-		Offset:     pkg.NewWithValue(pageSettings.Offset),
+		Limit:  pkg.NewWithValue(pageSettings.Limit),
+		Offset: pkg.NewWithValue(pageSettings.Offset),
 	}
 	offers, err = u.repo.GetByFilter(ctx, filter)
 	if err != nil {

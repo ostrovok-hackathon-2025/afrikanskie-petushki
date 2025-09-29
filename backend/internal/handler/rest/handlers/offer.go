@@ -100,7 +100,7 @@ func (h *offerHandler) GetOffers(ctx *gin.Context) {
 	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.ParseUint(pageSizeStr, 10, 0)
 
-	if pageNumStr == "" || err != nil {
+	if err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
@@ -109,7 +109,6 @@ func (h *offerHandler) GetOffers(ctx *gin.Context) {
 		Limit:  pageSize,
 		Offset: pageNum * pageSize,
 	}
-	//TODO CREATE BODY
 	ucOffers, pagesCount, err := h.useCase.GetForPage(ctx, pageSettings)
 
 	if err != nil {
@@ -191,7 +190,7 @@ func (h *offerHandler) FindOffers(ctx *gin.Context) {
 	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.ParseUint(pageSizeStr, 10, 0)
 
-	if pageNumStr == "" || err != nil {
+	if err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
