@@ -8,5 +8,5 @@ export default async function HomePage() {
 
   if (!session) return redirect("log-in");
 
-  return <Home />;
+  return redirect("/home/profile");
 }

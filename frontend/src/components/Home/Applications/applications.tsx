@@ -105,7 +105,13 @@ export default function Applications() {
 
         {Array.from({ length: pagesCount }).map((_, i) => (
           <PaginationItem key={i}>
-            <PaginationLink onClick={() => setPageNum(i)}>
+            <PaginationLink
+              onClick={() => setPageNum(i)}
+              className={cn(
+                "hover:text-primary",
+                pageNum === i && "text-primary bg-accent"
+              )}
+            >
               {i + 1}
             </PaginationLink>
           </PaginationItem>

@@ -9,39 +9,47 @@ import { useCallback, useEffect, useState } from "react";
 const { getUser } = getSecretGuestAPI();
 
 export default function Header() {
-    const [username, setUsername] = useState("");
-    const router = useRouter();
+  const [username, setUsername] = useState("");
+  const router = useRouter();
 
-    useEffect(() => {
-        (async () => {
-            const session = await getSession();
-            
-            if (!session) {
-                setUsername("$empty");
-                return;
-            }
+  useEffect(() => {
+    (async () => {
+      const session = await getSession();
 
-            const resp = await getUser({ headers: withAuthHeader(session) });
+      if (!session) {
+        setUsername("$empty");
+        return;
+      }
 
-            setUsername(resp.data.ostrovok_login ?? "");
-        })();
-    }, []);
+      const resp = await getUser({ headers: withAuthHeader(session) });
 
-    const handleRedirect = useCallback(() => {
-        if (username === "$empty") {
-            router.replace("/log-in");
-        } else {
-            router.replace("/");
-        }
-    }, [username]);
+      setUsername(resp.data.ostrovok_login ?? "");
+    })();
+  }, []);
 
-    const handleExit = useCallback(async () => {
-        await signOut();
-        router.replace("/log-in");
-    }, []);
+  const handleRedirect = useCallback(() => {
+    if (username === "$empty") {
+      router.replace("/log-in");
+    } else {
+      router.replace("/home/profile");
+    }
+  }, [username]);
 
-    return <div className="w-full h-16 fixed top-0 left-0 flex gap-3 items-center justify-end bg-[#F0F0F0] px-6 z-[100]">
-        {username && username !== "$empty" && <Button onClick={handleExit}>Выйти</Button>}
-        {username && <Button onClick={handleRedirect}>{username == "$empty" ? "Войти" : username}</Button>}
+  const handleExit = useCallback(async () => {
+    await signOut();
+    router.replace("/log-in");
+  }, []);
+
+  return (
+    <div className="w-full h-16 fixed top-0 left-0 flex gap-3 items-center justify-end bg-[#F0F0F0] px-6 z-[100]">
+      {username && username !== "$empty" && (
+        <Button onClick={handleExit}>Выйти</Button>
+      )}
+      {username && (
+        <Button onClick={handleRedirect}>
+          {username == "$empty" ? "Войти" : username}
+        </Button>
+      )}
     </div>
+  );
 }
