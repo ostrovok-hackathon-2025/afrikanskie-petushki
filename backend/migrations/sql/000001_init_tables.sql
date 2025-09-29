@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS offer
     hotel_id      UUID      NOT NULL REFERENCES hotel (id),
     room_id       UUID      NOT NULL REFERENCES room (id),
     check_in_at   TIMESTAMP NOT NULL,
+    expiration_at TIMESTAMP,
     check_out_at  TIMESTAMP NOT NULL,
     status        VARCHAR(20) DEFAULT 'created',
     task          TEXT,
