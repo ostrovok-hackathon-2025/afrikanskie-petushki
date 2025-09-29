@@ -17,11 +17,20 @@ import type {
   DocsConfirmReport,
   DocsCreateApplicationRequest,
   DocsCreateApplicationResponse,
+  DocsCreateHotelRequest,
+  DocsCreateHotelResponse,
+  DocsCreateLocationRequest,
+  DocsCreateLocationResponse,
   DocsCreateOfferRequest,
   DocsCreateOfferResponse,
+  DocsCreateRoomRequest,
+  DocsCreateRoomResponse,
   DocsGetApplicationsResponse,
+  DocsGetHotelsResponse,
+  DocsGetLocationsResponse,
   DocsGetOffersResponse,
   DocsGetReportsResponse,
+  DocsGetRoomsResponse,
   DocsLogInRequest,
   DocsOfferResponse,
   DocsRefreshRequest,
@@ -74,6 +83,56 @@ const getApplicationId = <TData = AxiosResponse<DocsApplicationResponse>>(
  ): Promise<TData> => {
     return axios.get(
       `http://localhost:8080/api/v1/application/${id}`,options
+    );
+  }
+
+/**
+ * GetHotels all hotels
+ * @summary Get hotels
+ */
+const getHotel = <TData = AxiosResponse<DocsGetHotelsResponse>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8080/api/v1/hotel/`,options
+    );
+  }
+
+/**
+ * Creates offer with given info
+ * @summary Create hotel
+ */
+const postHotel = <TData = AxiosResponse<DocsCreateHotelResponse>>(
+    docsCreateHotelRequest: DocsCreateHotelRequest, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `http://localhost:8080/api/v1/hotel/`,
+      docsCreateHotelRequest,options
+    );
+  }
+
+/**
+ * GetLocations all locations
+ * @summary Get locations
+ */
+const getLocation = <TData = AxiosResponse<DocsGetLocationsResponse>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8080/api/v1/location/`,options
+    );
+  }
+
+/**
+ * Creates location with given info
+ * @summary Create location
+ */
+const postLocation = <TData = AxiosResponse<DocsCreateLocationResponse>>(
+    docsCreateLocationRequest: DocsCreateLocationRequest, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `http://localhost:8080/api/v1/location/`,
+      docsCreateLocationRequest,options
     );
   }
 
@@ -228,6 +287,31 @@ const patchReportIdConfirm = <TData = AxiosResponse<void>>(
   }
 
 /**
+ * GetRooms all rooms
+ * @summary Get rooms
+ */
+const getRoom = <TData = AxiosResponse<DocsGetRoomsResponse>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8080/api/v1/room/`,options
+    );
+  }
+
+/**
+ * Creates offer with given info
+ * @summary Create offer
+ */
+const postRoom = <TData = AxiosResponse<DocsCreateRoomResponse>>(
+    docsCreateRoomRequest: DocsCreateRoomRequest, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `http://localhost:8080/api/v1/room/`,
+      docsCreateRoomRequest,options
+    );
+  }
+
+/**
  * GetForPage data of current user
  * @summary GetForPage me
  */
@@ -278,10 +362,14 @@ const postUserSignUp = <TData = AxiosResponse<DocsAuthResponse>>(
     );
   }
 
-return {getApplication,postApplication,getApplicationId,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
+return {getApplication,postApplication,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
 export type GetApplicationResult = AxiosResponse<DocsGetApplicationsResponse>
 export type PostApplicationResult = AxiosResponse<DocsCreateApplicationResponse>
 export type GetApplicationIdResult = AxiosResponse<DocsApplicationResponse>
+export type GetHotelResult = AxiosResponse<DocsGetHotelsResponse>
+export type PostHotelResult = AxiosResponse<DocsCreateHotelResponse>
+export type GetLocationResult = AxiosResponse<DocsGetLocationsResponse>
+export type PostLocationResult = AxiosResponse<DocsCreateLocationResponse>
 export type GetOfferResult = AxiosResponse<DocsGetOffersResponse>
 export type PostOfferResult = AxiosResponse<DocsCreateOfferResponse>
 export type GetOfferSearchResult = AxiosResponse<DocsGetOffersResponse>
@@ -293,6 +381,8 @@ export type GetReportMyIdResult = AxiosResponse<DocsReportResponse>
 export type GetReportIdResult = AxiosResponse<DocsReportResponse>
 export type PatchReportIdResult = AxiosResponse<void>
 export type PatchReportIdConfirmResult = AxiosResponse<void>
+export type GetRoomResult = AxiosResponse<DocsGetRoomsResponse>
+export type PostRoomResult = AxiosResponse<DocsCreateRoomResponse>
 export type GetUserResult = AxiosResponse<DocsUserResponse>
 export type PostUserLogInResult = AxiosResponse<DocsAuthResponse>
 export type PostUserRefreshResult = AxiosResponse<DocsAuthResponse>
