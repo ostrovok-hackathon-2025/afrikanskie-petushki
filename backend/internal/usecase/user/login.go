@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 )
 
 func (u *useCase) Login(ctx context.Context, req *docs.LogInRequest) (*docs.AuthResponse, error) {
@@ -17,7 +18,7 @@ func (u *useCase) Login(ctx context.Context, req *docs.LogInRequest) (*docs.Auth
 		return nil, err
 	}
 
-	if hashPassword(req.Password) != storedPasswordHash {
+	if pkg.HashPassword(req.Password) != storedPasswordHash {
 		return nil, ErrIncorrectPassword
 	}
 

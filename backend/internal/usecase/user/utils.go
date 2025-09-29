@@ -1,8 +1,6 @@
 package user
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"os"
 	"time"
 
@@ -10,11 +8,6 @@ import (
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
 )
-
-func hashPassword(password string) string {
-	hash := sha256.Sum256([]byte(password))
-	return fmt.Sprintf("%x", hash)
-}
 
 func generateTokens(user *model.User, jwtSecret []byte) (*docs.AuthResponse, error) {
 	accessToken, err := generateToken(user, 24*time.Hour, "access", jwtSecret)

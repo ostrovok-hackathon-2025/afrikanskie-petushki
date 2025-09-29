@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 )
 
 type RegisterRequest struct {
@@ -29,7 +30,7 @@ func (u *useCase) Register(ctx context.Context, req *docs.SignUpRequest) (*docs.
 		return nil, errors.New("пользователь уже зарегистрирован")
 	}
 
-	passwordHash := hashPassword(req.Password)
+	passwordHash := pkg.HashPassword(req.Password)
 
 	user := &model.User{
 		ID:            uuid.New(),
