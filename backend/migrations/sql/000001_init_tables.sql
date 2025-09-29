@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "user"
 (
     id             UUID    NOT NULL PRIMARY KEY,
-    ostrovok_login TEXT    NOT NULL,
+    ostrovok_login TEXT    NOT NULL UNIQUE,
     password_hash  TEXT    NOT NULL,
     is_admin       BOOLEAN NOT NULL
 );
@@ -9,19 +9,19 @@ CREATE TABLE IF NOT EXISTS "user"
 CREATE TABLE IF NOT EXISTS location
 (
     id   UUID NOT NULL PRIMARY KEY,
-    name TEXT
+    name TEXT UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS room
 (
     id   UUID NOT NULL PRIMARY KEY,
-    name TEXT
+    name TEXT UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS hotel
 (
     id          UUID NOT NULL PRIMARY KEY,
-    name        TEXT,
+    name        TEXT UNIQUE,
     location_id UUID NOT NULL REFERENCES location (id)
 );
 
@@ -57,5 +57,5 @@ CREATE TABLE IF NOT EXISTS photo
 (
     id        UUID NOT NULL PRIMARY KEY,
     report_id UUID REFERENCES report (id),
-    s3_link   TEXT
+    s3_link   TEXT UNIQUE
 );

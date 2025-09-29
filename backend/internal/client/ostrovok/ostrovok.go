@@ -10,9 +10,29 @@ import (
 var (
 	ErrUserNotExists = errors.New("user don't found in ostrovok")
 	users            = map[string]*model.OstrovokUser{
+		"doverlof": {
+			Login: "doverlof",
+			Email: "doverlof@exampleemail.com",
+		},
+		"notblinkyet": {
+			Login: "notblinkyet",
+			Email: "notblinkyet@exampleemail.com",
+		},
+		"smokingElk": {
+			Login: "smokingElk",
+			Email: "chicherin@exampleemail.com",
+		},
+		"sophistik": {
+			Login: "sophistik",
+			Email: "chicherin@exampleemail.com",
+		},
 		"chicherin": {
 			Login: "chicherin",
-			Email: "yarik_vodila@gmail.com",
+			Email: "chicherin@exampleemail.com",
+		},
+		"root": {
+			Login: "root",
+			Email: "root@exampleemail.com",
 		},
 	}
 )
@@ -28,7 +48,7 @@ func NewClient() Client {
 	return &client{}
 }
 
-func (c *client) GetUserByLogin(ctx context.Context, login string) (*model.OstrovokUser, error) {
+func (c *client) GetUserByLogin(_ context.Context, login string) (*model.OstrovokUser, error) {
 	if user, ok := users[login]; ok {
 		return user, nil
 	}
