@@ -212,8 +212,8 @@ func (h *offerHandler) FindOffers(ctx *gin.Context) {
 
 	filter := model.Filter{
 		LocationID: pkg.NewWithValue(cityId),
-		Limit:      pkg.NewWithValue(pageSize),
-		Offset:     pkg.NewWithValue(pageNum * pageSize),
+		Limit:      pageSize,
+		Offset:     pageNum * pageSize,
 	}
 	ucOffers, pagesCount, err := h.useCase.GetByFilter(ctx, filter)
 

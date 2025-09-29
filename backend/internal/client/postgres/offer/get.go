@@ -38,13 +38,7 @@ func (r *repo) GetByFilter(
 	if locationID, ok := filter.LocationID.Get(); ok {
 		sql = sql.Where(sq.Eq{"h.location_id": locationID})
 	}
-	if limit, ok := filter.Limit.Get(); ok {
-		sql = sql.Limit(limit)
-	}
-	if offset, ok := filter.Offset.Get(); ok {
-		sql = sql.Limit(offset)
-	}
-	query, args, err := sql.PlaceholderFormat(sq.Dollar).ToSql()
+	query, args, err := sql.Limit(filter.Limit).Offset(filter.Offset).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -71,12 +65,6 @@ func (r *repo) GetCount(ctx context.Context, filter model.Filter) (int, error) {
 	err = r.sqlClient.GetContext(ctx, &count, query, args...)
 	if err != nil {
 		return 0, err
-	}
-	if limit, ok := filter.Limit.Get(); ok {
-		if count%int(limit) == 0 {
-			return count, nil
-		}
-		return count + 1, nil
 	}
 	return count, nil
 }
