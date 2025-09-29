@@ -25,8 +25,8 @@ type Offer struct {
 type Filter struct {
 	ID         pkg.Opt[uuid.UUID]
 	LocationID pkg.Opt[uuid.UUID]
-	Limit      pkg.Opt[uint64]
-	Offset     pkg.Opt[uint64]
+	Limit      uint64
+	Offset     uint64
 }
 
 type Create struct {

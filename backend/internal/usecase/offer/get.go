@@ -33,8 +33,8 @@ func (u *useCase) GetForPage(
 
 	//GET offers by filter use only limit and offset
 	filter := model.Filter{
-		Limit:  pkg.NewWithValue(pageSettings.Limit),
-		Offset: pkg.NewWithValue(pageSettings.Offset),
+		Limit:  pageSettings.Limit,
+		Offset: pageSettings.Offset,
 	}
 	offers, err = u.repo.GetByFilter(ctx, filter)
 	if err != nil {
@@ -46,13 +46,17 @@ func (u *useCase) GetForPage(
 	if err != nil {
 		return nil, 0, err
 	}
-	return offers, count, nil
+	pageCount = count / int(pageSettings.Limit)
+	if count%int(pageSettings.Limit) == 0 {
+		return offers, pageCount, nil
+	}
+	return offers, pageCount + 1, nil
 }
 
 func (u *useCase) GetByFilter(
 	ctx context.Context,
 	filter model.Filter,
-) (offers []model.Offer, pagesCount int, err error) {
+) (offers []model.Offer, pageCount int, err error) {
 	offers, err = u.repo.GetByFilter(ctx, filter)
 	if err != nil {
 		return nil, 0, err
@@ -63,5 +67,9 @@ func (u *useCase) GetByFilter(
 	if err != nil {
 		return nil, 0, err
 	}
-	return offers, count, nil
+	pageCount = count / int(filter.Limit)
+	if count%int(filter.Limit) == 0 {
+		return offers, pageCount, nil
+	}
+	return offers, pageCount + 1, nil
 }
