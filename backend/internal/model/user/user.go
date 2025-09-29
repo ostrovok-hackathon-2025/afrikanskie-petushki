@@ -7,4 +7,5 @@ type User struct {
 	OstrovokLogin string
 	Email         string
 	IsAdmin       bool
+	Rating        int
 }
