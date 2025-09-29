@@ -5,8 +5,8 @@ import (
 )
 
 type Hotel struct {
-	ID           uuid.UUID `db:"hotel_id"`
-	Name         string    `db:"hotel_name"`
+	ID           uuid.UUID `db:"id"`
+	Name         string    `db:"name"`
 	LocationID   uuid.UUID `db:"location_id"`
 	LocationName string    `db:"location_name"`
 }
