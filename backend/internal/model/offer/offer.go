@@ -22,8 +22,10 @@ type Offer struct {
 }
 
 type Filter struct {
-	LocationID   pkg.Opt[uuid.UUID]
-	PageSettings PageSettings
+	ID         pkg.Opt[uuid.UUID]
+	LocationID pkg.Opt[uuid.UUID]
+	Limit      pkg.Opt[uint64]
+	Offset     pkg.Opt[uint64]
 }
 
 type Create struct {
@@ -47,6 +49,6 @@ type Edit struct {
 }
 
 type PageSettings struct {
-	Limit  int
-	Offset int
+	Limit  uint64
+	Offset uint64
 }
