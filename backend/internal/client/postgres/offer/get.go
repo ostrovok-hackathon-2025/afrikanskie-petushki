@@ -44,7 +44,7 @@ func (r *repo) GetByFilter(
 	if offset, ok := filter.Offset.Get(); ok {
 		sql = sql.Limit(offset)
 	}
-	query, args, err := sql.ToSql()
+	query, args, err := sql.PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -57,11 +57,14 @@ func (r *repo) GetByFilter(
 
 func (r *repo) GetCount(ctx context.Context, filter model.Filter) (int, error) {
 	var count int
-	sql := sq.Select("COUNT(*)")
+	sql := sq.Select("COUNT(*)").
+		From("offer o").
+		Join("hotel h ON o.hotel_id = h.id").
+		Join("room r ON o.room_id = r.id")
 	if locationID, ok := filter.LocationID.Get(); ok {
 		sql = sql.Where(sq.Eq{"h.location_id": locationID})
 	}
-	query, args, err := sql.ToSql()
+	query, args, err := sql.PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return 0, err
 	}
@@ -81,6 +84,7 @@ func (r *repo) GetCount(ctx context.Context, filter model.Filter) (int, error) {
 func (r *repo) GetByExpirationTime(ctx context.Context) (offers []model.Offer, err error) { // поиск истекших оферов
 	sql := baseGetSql.Where(sq.LtOrEq{"o.expiration_at": time.Now()}). //истекшие оферы
 										Where(sq.Eq{"o.status": "created"}).
+										PlaceholderFormat(sq.Dollar).
 										Limit(10) // Берем по 10 оферов, позже запихну в воркер. Для равномерной нагрузки. А то можно надорвать мышцу если резко взять большой вес. А в приседе вообще геморрой может выскочить.
 	query, args, err := sql.ToSql()
 	if err != nil {
