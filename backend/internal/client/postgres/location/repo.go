@@ -25,7 +25,7 @@ func NewRepo(sqlClient *sqlx.DB) Repo {
 
 func (r *repo) GetAll(ctx context.Context) ([]*model.Location, error) {
 	var locations []*model.Location
-	sql := "SELECT * FROM location"
+	sql := "SELECT id, name FROM location"
 	err := r.sqlClient.SelectContext(ctx, &locations, sql)
 	if err != nil {
 		//TODO обработка похитрее

@@ -27,8 +27,8 @@ func (r *repo) GetAll(ctx context.Context) ([]*model.Hotel, error) {
 	var hotels []*model.Hotel
 	sql := `
         SELECT 
-    	h.id   AS hotel_id,
-    	h.name AS hotel_name,
+    	h.id   AS id,
+    	h.name AS name,
     	l.id   AS location_id,
     	l.name AS location_name
 		FROM hotel h
