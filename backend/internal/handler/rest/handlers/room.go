@@ -106,5 +106,5 @@ func (h *roomHandler) GetRooms(ginCtx *gin.Context) {
 			Name: ucRoom.Name,
 		}
 	}
-	ginCtx.JSON(http.StatusOK, apiRooms)
+	ginCtx.JSON(http.StatusOK, docs.GetRoomsResponse{Rooms: apiRooms})
 }

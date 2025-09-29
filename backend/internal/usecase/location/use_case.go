@@ -9,7 +9,7 @@ import (
 )
 
 type UseCase interface {
-	GetAll(ctx context.Context) ([]*model.Location, error)
+	GetAll(ctx context.Context) ([]model.Location, error)
 	Create(ctx context.Context, name string) (uuid.UUID, error)
 }
 
@@ -23,7 +23,7 @@ func NewUseCase(repo location.Repo) UseCase {
 	}
 }
 
-func (u *useCase) GetAll(ctx context.Context) ([]*model.Location, error) {
+func (u *useCase) GetAll(ctx context.Context) ([]model.Location, error) {
 	return u.repo.GetAll(ctx)
 }
 

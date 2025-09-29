@@ -9,8 +9,8 @@ import (
 )
 
 type UseCase interface {
-	GetAll(ctx context.Context) ([]*model.Hotel, error)
-	Create(ctx context.Context, create *model.Create) (uuid.UUID, error)
+	GetAll(ctx context.Context) ([]model.Hotel, error)
+	Create(ctx context.Context, create model.Create) (uuid.UUID, error)
 }
 
 type useCase struct {
@@ -23,10 +23,10 @@ func NewUseCase(repo hotel.Repo) UseCase {
 	}
 }
 
-func (u *useCase) GetAll(ctx context.Context) ([]*model.Hotel, error) {
+func (u *useCase) GetAll(ctx context.Context) ([]model.Hotel, error) {
 	return u.repo.GetAll(ctx)
 }
 
-func (u *useCase) Create(ctx context.Context, create *model.Create) (uuid.UUID, error) {
+func (u *useCase) Create(ctx context.Context, create model.Create) (uuid.UUID, error) {
 	return u.repo.Create(ctx, create)
 }

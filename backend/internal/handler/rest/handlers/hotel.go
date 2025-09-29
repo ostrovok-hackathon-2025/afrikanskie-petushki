@@ -60,7 +60,7 @@ func (h *hotelHandler) CreateHotel(ginCtx *gin.Context) {
 	}
 
 	create := model.Create{Name: request.Name, LocationID: locationID}
-	id, err := h.useCase.Create(ctx, &create)
+	id, err := h.useCase.Create(ctx, create)
 	if err != nil {
 		log.Println("Err to create location: ", err.Error())
 		ginCtx.String(http.StatusBadRequest, err.Error())
@@ -104,5 +104,5 @@ func (h *hotelHandler) GetHotels(ginCtx *gin.Context) {
 			LocationName: ucHotel.LocationName,
 		}
 	}
-	ginCtx.JSON(http.StatusOK, apiHotels)
+	ginCtx.JSON(http.StatusOK, docs.GetHotelsResponse{Hotels: apiHotels})
 }

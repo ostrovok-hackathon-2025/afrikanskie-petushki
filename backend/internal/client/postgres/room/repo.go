@@ -3,13 +3,14 @@ package room
 import (
 	"context"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/room"
 )
 
 type Repo interface {
-	GetAll(ctx context.Context) ([]*model.Room, error)
+	GetAll(ctx context.Context) ([]model.Room, error)
 	Create(ctx context.Context, name string) (uuid.UUID, error)
 }
 
@@ -23,10 +24,12 @@ func NewRepo(sqlClient *sqlx.DB) Repo {
 	}
 }
 
-func (r *repo) GetAll(ctx context.Context) ([]*model.Room, error) {
-	var rooms []*model.Room
-	sql := "SELECT id, name FROM room"
-	err := r.sqlClient.SelectContext(ctx, &rooms, sql)
+func (r *repo) GetAll(ctx context.Context) (rooms []model.Room, err error) {
+	query, _, err := sq.Select("id", "name").From("room").ToSql()
+	if err != nil {
+		return nil, err
+	}
+	err = r.sqlClient.SelectContext(ctx, &rooms, query)
 	if err != nil {
 		//TODO обработка похитрее
 		return nil, err
@@ -36,11 +39,21 @@ func (r *repo) GetAll(ctx context.Context) ([]*model.Room, error) {
 
 func (r *repo) Create(ctx context.Context, name string) (uuid.UUID, error) {
 	id := uuid.New()
-	sql := "INSERT INTO room (id, name) VALUES ($1, $2)"
-	err := r.sqlClient.QueryRowContext(ctx, sql, id, name).Scan()
+	query, args, err := sq.Insert("room").Columns(
+		"id",
+		"name",
+	).Values(
+		id,
+		name,
+	).ToSql()
 	if err != nil {
 		//TODO обработка похитрее
-		return uuid.UUID{}, err
+		return uuid.Nil, err
+	}
+	err = r.sqlClient.QueryRowContext(ctx, query, args...).Scan()
+	if err != nil {
+		//TODO обработка похитрее
+		return uuid.Nil, err
 	}
 	return id, nil
 }
