@@ -1,6 +1,6 @@
 rest:
-  port: 8080
-  allow_origin: http://localhost:8080,http://localhost:3000
+  port: 8081
+  allow_origin: http://localhost:8080,http://localhost:8081,http://localhost:3000
 
 postgres:
   user: admin

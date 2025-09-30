@@ -5,7 +5,7 @@ module.exports = {
       client: 'axios',
       target: './src/api/api.ts',
       schemas: './src/api/model',
-      baseUrl: 'http://localhost:8080/api/v1',
+      baseUrl: 'http://localhost:8081/api/v1',
     },
   }
 };
