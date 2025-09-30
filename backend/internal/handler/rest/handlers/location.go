@@ -91,5 +91,10 @@ func (h *locationHandler) GetLocations(ginCtx *gin.Context) {
 			Name: ucLocation.Name,
 		}
 	}
-	ginCtx.JSON(http.StatusOK, docs.GetLocationsResponse{Locations: apiLocations})
+
+	resp := &docs.GetLocationsResponse{
+		Locations: apiLocations,
+	}
+
+	ginCtx.JSON(http.StatusOK, resp)
 }
