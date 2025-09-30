@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AllOffers from "./AllOffers/all-offers";
 import CreateOffer from "./CreateOffer/create-offer";
 import Reports from "./Reports/reports";
+import Applications from "./Applications/applications";
 
 const tabsStyle = `transition-all duration-150 text-foreground hover:text-primary cursor-pointer py-2 border-b-transparent 
 border-b-2 hover:border-b-primary`;
@@ -45,6 +46,16 @@ export default function Admin({ page }: AdminProps) {
             </TabsTrigger>
 
             <TabsTrigger
+              value="applications"
+              className={cn(
+                tabsStyle,
+                page == "applications" && tabsActiveStyle
+              )}
+            >
+              Заявки
+            </TabsTrigger>
+
+            <TabsTrigger
               value="reports"
               className={cn(tabsStyle, page == "reports" && tabsActiveStyle)}
             >
@@ -56,6 +67,9 @@ export default function Admin({ page }: AdminProps) {
           </TabsContent>
           <TabsContent value="create-offer">
             <CreateOffer />
+          </TabsContent>
+          <TabsContent value="applications">
+            <Applications />
           </TabsContent>
           <TabsContent value="reports">
             <Reports />
