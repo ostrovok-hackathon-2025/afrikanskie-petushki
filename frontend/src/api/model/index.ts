@@ -25,6 +25,7 @@ export * from './docsGetLocationsResponse';
 export * from './docsGetOffersResponse';
 export * from './docsGetReportsResponse';
 export * from './docsGetRoomsResponse';
+export * from './docsGetUserAppLimitInfoResponse';
 export * from './docsHotelResponse';
 export * from './docsLocationResponse';
 export * from './docsLogInRequest';

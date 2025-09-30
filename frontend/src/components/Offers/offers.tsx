@@ -28,7 +28,8 @@ import {
 } from "@/components/ui/accordion";
 import { useRouter } from "next/navigation";
 
-const { getLocation, getOfferSearch, postApplication } = getSecretGuestAPI();
+const { getLocation, getOfferSearch, postApplication, getApplicationLimit } =
+  getSecretGuestAPI();
 
 const lerp = (a: number, b: number, c: number) => a + (b - a) * c;
 
@@ -134,15 +135,29 @@ export default function Offers() {
   const [locations, setLocations] = useState<DocsLocationResponse[]>([]);
   const [location, setLocation] = useState<DocsLocationResponse | null>(null);
 
+  const [appsLimit, setAppsLimit] = useState<{
+    count: number;
+    max: number;
+  } | null>(null);
+
   useEffect(() => {
     (async () => {
       const session = await getSession();
 
-      if (!session) return redirect("/log-in");
+      if (!session) return;
 
       const resp = await getLocation({ headers: withAuthHeader(session) });
 
       setLocations(resp.data.locations ?? []);
+
+      const respLimits = await getApplicationLimit({
+        headers: withAuthHeader(session),
+      });
+
+      setAppsLimit({
+        count: respLimits.data.active_app_count ?? 0,
+        max: respLimits.data.limit ?? 0,
+      });
     })();
   }, []);
 
@@ -209,6 +224,17 @@ export default function Offers() {
           <Button onClick={search}>
             <Search />
           </Button>
+
+          {appsLimit && (
+            <div
+              className={cn(
+                "font-gain font-medium h-9 rounded-sm bg-primary text-sm",
+                "flex items-center justify-center px-2 text-primary-foreground"
+              )}
+            >
+              Заявки: {appsLimit.count}/{appsLimit.max}
+            </div>
+          )}
         </div>
       </div>
 

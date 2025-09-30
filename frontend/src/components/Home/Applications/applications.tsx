@@ -16,13 +16,35 @@ import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-const { getApplication } = getSecretGuestAPI();
+const { getApplication, getApplicationLimit } = getSecretGuestAPI();
 
 export default function Applications() {
   const [pageNum, setPageNum] = useState(0);
   const [pagesCount, setPagesCount] = useState(0);
   const [apps, setApps] = useState<DocsApplicationResponse[]>([]);
   const router = useRouter();
+
+  const [appsLimit, setAppsLimit] = useState<{
+    count: number;
+    max: number;
+  } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const session = await getSession();
+
+      if (!session) return;
+
+      const respLimits = await getApplicationLimit({
+        headers: withAuthHeader(session),
+      });
+
+      setAppsLimit({
+        count: respLimits.data.active_app_count ?? 0,
+        max: respLimits.data.limit ?? 0,
+      });
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -47,7 +69,19 @@ export default function Applications() {
 
   return (
     <div className="w-full h-full">
-      <div className="font-gain text-2xl mb-5">Заявки</div>
+      <div className="flex w-full items-center justify-between font-gain text-2xl mb-5">
+        Заявки
+        {appsLimit && (
+          <div
+            className={cn(
+              "font-gain font-medium h-9 rounded-sm bg-primary text-sm",
+              "flex items-center justify-center px-2 text-primary-foreground"
+            )}
+          >
+            Активных: {appsLimit.count}/{appsLimit.max}
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-4 mb-5">
         {apps.map((e, i) => (
