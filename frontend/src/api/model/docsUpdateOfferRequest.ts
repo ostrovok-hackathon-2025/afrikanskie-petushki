@@ -7,6 +7,10 @@
  */
 
 export interface DocsUpdateOfferRequest {
+  check_in_at?: string;
+  check_out_at?: string;
   expiration_at?: string;
+  hotel_id?: string;
+  room_id?: string;
   task?: string;
 }

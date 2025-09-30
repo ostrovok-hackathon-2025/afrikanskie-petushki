@@ -24,6 +24,7 @@ func (r *repo) Create(ctx context.Context, id uuid.UUID, create model.Create) er
 		"check_out_at",
 		"expiration_at",
 		"task",
+		"participants_limit",
 	).Values(
 		id,
 		create.HotelID,
@@ -32,6 +33,7 @@ func (r *repo) Create(ctx context.Context, id uuid.UUID, create model.Create) er
 		create.CheckOut,
 		create.ExpirationAT,
 		create.Task,
+		create.ParticipantsLimit,
 	).ToSql()
 	if err != nil {
 		return err

@@ -7,8 +7,12 @@
  */
 
 export interface DocsCreateOfferRequest {
+  check_in: string;
+  check_out: string;
   expiration_at: string;
   hotel_id: string;
   location_id: string;
+  participants_limit: number;
+  room_id: string;
   task: string;
 }

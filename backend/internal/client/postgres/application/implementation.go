@@ -28,11 +28,45 @@ func (r *applicationRepo) CreateApplication(
 	ctx context.Context,
 	application *application.Application,
 ) error {
-	query := `
+	tx, err := r.db.Beginx()
+
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	query := `SELECT 
+		o.participants_limit,
+		(SELECT COUNT(*) FROM application a WHERE a.offer_id = o.id) as participants_count
+	FROM offer as o WHERE o.id = $1`
+
+	var Limits LimitsDTO
+
+	err = tx.GetContext(ctx, &Limits, query, application.OfferId)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrOfferNotExist
+		}
+
+		return fmt.Errorf("failed to get limits from db: %w", err)
+	}
+
+	if Limits.ParticipantsCount >= Limits.ParticipantsLimit {
+		err = ErrParticipantsLimit
+		return err
+	}
+
+	query = `
 	INSERT INTO application (id, user_id, offer_id, status) VALUES ($1, $2, $3, $4)
 	`
 
-	_, err := r.db.Exec(query, application.Id, application.UserId, application.OfferId, application.Status)
+	_, err = tx.ExecContext(ctx, query, application.Id, application.UserId, application.OfferId, application.Status)
 
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code.Name() == pgForeginKeyErr {
@@ -40,6 +74,10 @@ func (r *applicationRepo) CreateApplication(
 		}
 
 		return fmt.Errorf("failed to insert application into db: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit create application")
 	}
 
 	return nil

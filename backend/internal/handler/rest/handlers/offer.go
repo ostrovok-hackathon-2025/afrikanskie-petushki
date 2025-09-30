@@ -55,7 +55,40 @@ func (h *offerHandler) CreateOffer(ctx *gin.Context) {
 		return
 	}
 
-	create := model.Create{}
+	hotelId, err := uuid.Parse(request.HotelId)
+
+	if err != nil {
+		log.Println("Invalid hotel id")
+		ctx.String(http.StatusBadRequest, "invalid hotel id")
+		return
+	}
+
+	locationId, err := uuid.Parse(request.LocationId)
+
+	if err != nil {
+		log.Println("Invalid location id")
+		ctx.String(http.StatusBadRequest, "invalid location id")
+		return
+	}
+
+	roomId, err := uuid.Parse(request.RoomID)
+
+	if err != nil {
+		log.Println("Invalid room id")
+		ctx.String(http.StatusBadRequest, "invalid room id")
+		return
+	}
+
+	create := model.Create{
+		HotelID:           hotelId,
+		LocalID:           locationId,
+		ExpirationAT:      request.ExpirationAt,
+		Task:              request.Task,
+		ParticipantsLimit: request.ParticipantsLimit,
+		CheckIn:           request.CheckIn,
+		CheckOut:          request.CheckOut,
+		RoomID:            roomId,
+	}
 
 	id, err := h.useCase.Create(ctx, create)
 
@@ -318,14 +351,16 @@ func convertUcOffersToApi(ucOffers []model.Offer) []*docs.OfferResponse {
 
 func convertUcOfferToApi(ucOffer model.Offer) *docs.OfferResponse {
 	return &docs.OfferResponse{
-		ID:           ucOffer.ID.String(),
-		Task:         ucOffer.Task,
-		RoomID:       ucOffer.RoomID.String(),
-		RoomName:     ucOffer.RoomName,
-		HotelID:      ucOffer.HotelID.String(),
-		HotelName:    ucOffer.HotelName,
-		CheckIn:      ucOffer.CheckIn,
-		CheckOut:     ucOffer.CheckOut,
-		ExpirationAt: ucOffer.ExpirationAt,
+		ID:                ucOffer.ID.String(),
+		Task:              ucOffer.Task,
+		RoomID:            ucOffer.RoomID.String(),
+		RoomName:          ucOffer.RoomName,
+		HotelID:           ucOffer.HotelID.String(),
+		HotelName:         ucOffer.HotelName,
+		CheckIn:           ucOffer.CheckIn,
+		CheckOut:          ucOffer.CheckOut,
+		ExpirationAt:      ucOffer.ExpirationAt,
+		ParticipantsLimit: ucOffer.ParticipantsLimit,
+		ParticipantsCount: ucOffer.ParticipantsCount,
 	}
 }

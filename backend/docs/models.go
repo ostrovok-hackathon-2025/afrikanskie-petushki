@@ -42,22 +42,28 @@ type GetApplicationsResponse struct {
 }
 
 type OfferResponse struct {
-	ID           string    `json:"id"`
-	Task         string    `json:"task"`
-	RoomID       string    `json:"room_id"`
-	RoomName     string    `json:"room_name"`
-	HotelID      string    `json:"hotel_id"`
-	HotelName    string    `json:"hotel_name"`
-	CheckIn      time.Time `json:"check_in_at"`
-	CheckOut     time.Time `json:"check_out_at"`
-	ExpirationAt time.Time `json:"expiration_at"`
+	ID                string    `json:"id"`
+	Task              string    `json:"task"`
+	RoomID            string    `json:"room_id"`
+	RoomName          string    `json:"room_name"`
+	HotelID           string    `json:"hotel_id"`
+	HotelName         string    `json:"hotel_name"`
+	CheckIn           time.Time `json:"check_in_at"`
+	CheckOut          time.Time `json:"check_out_at"`
+	ExpirationAt      time.Time `json:"expiration_at"`
+	ParticipantsLimit uint      `json:"participants_limit"`
+	ParticipantsCount uint      `json:"participants_count"`
 }
 
 type CreateOfferRequest struct {
-	HotelId      string    `json:"hotel_id" binding:"required"`
-	LocationId   string    `json:"location_id" binding:"required"`
-	ExpirationAt time.Time `json:"expiration_at" binding:"required"`
-	Task         string    `json:"task" binding:"required"`
+	HotelId           string    `json:"hotel_id" binding:"required"`
+	LocationId        string    `json:"location_id" binding:"required"`
+	ExpirationAt      time.Time `json:"expiration_at" binding:"required"`
+	Task              string    `json:"task" binding:"required"`
+	ParticipantsLimit uint      `json:"participants_limit" binding:"required"`
+	RoomID            string    `json:"room_id" binding:"required"`
+	CheckIn           time.Time `json:"check_in" binding:"required"`
+	CheckOut          time.Time `json:"check_out" binding:"required"`
 }
 
 type CreateOfferResponse struct {

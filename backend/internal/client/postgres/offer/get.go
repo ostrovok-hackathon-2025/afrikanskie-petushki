@@ -20,6 +20,8 @@ var (
 		"o.expiration_at",
 		"o.task",
 		"o.status",
+		"o.participants_limit",
+		"(SELECT COUNT(*) FROM application a WHERE a.offer_id = o.id) as participants_count",
 	).From("offer o").
 		Join("hotel h ON o.hotel_id = h.id").
 		Join("room r ON o.room_id = r.id")

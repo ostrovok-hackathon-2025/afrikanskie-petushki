@@ -36,6 +36,10 @@ func (s *ApplicationService) CreateApplication(
 		return uuid.UUID{}, err
 	}
 
+	if err == applicationRepo.ErrParticipantsLimit {
+		return uuid.UUID{}, err
+	}
+
 	if err != nil {
 		return uuid.UUID{}, fmt.Errorf("failed to create application in repo: %w", err)
 	}
@@ -76,7 +80,7 @@ func (s *ApplicationService) GetApplicationById(
 		return nil, fmt.Errorf("failed to get application by id from repo: %w", err)
 	}
 
-	if app.Id != userId {
+	if app.UserId != userId {
 		return nil, ErrNotOwner
 	}
 

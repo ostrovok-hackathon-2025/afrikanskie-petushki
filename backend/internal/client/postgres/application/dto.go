@@ -7,6 +7,11 @@ import (
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
 )
 
+type LimitsDTO struct {
+	ParticipantsLimit uint `db:"participants_limit"`
+	ParticipantsCount uint `db:"participants_count"`
+}
+
 type ApplicationDTO struct {
 	Id           uuid.UUID `db:"id"`
 	UserId       uuid.UUID `db:"user_id"`

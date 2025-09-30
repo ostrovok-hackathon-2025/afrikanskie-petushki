@@ -7,11 +7,15 @@
  */
 
 export interface DocsOfferResponse {
-  check_date?: string;
+  check_in_at?: string;
+  check_out_at?: string;
   expiration_at?: string;
   hotel_id?: string;
+  hotel_name?: string;
   id?: string;
-  location_id?: string;
+  participants_count?: number;
+  participants_limit?: number;
+  room_id?: string;
+  room_name?: string;
   task?: string;
-  used?: boolean;
 }

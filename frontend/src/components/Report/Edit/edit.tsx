@@ -114,7 +114,7 @@ export default function ReportEdit({ id }: ReportEditProps) {
 
       <Accordion type="single" collapsible className="mb-8">
         <AccordionItem value="item-1">
-          <AccordionTrigger className="font-gain font-medium text-xl mb-2 ">
+          <AccordionTrigger className="font-gain font-medium text-xl mb-2 no-underline">
             Задание
           </AccordionTrigger>
           <AccordionContent className="font-gain whitespace-pre-wrap">
