@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useRouter } from "next/navigation";
 import AllOffers from "./AllOffers/all-offers";
 import CreateOffer from "./CreateOffer/create-offer";
+import Reports from "./Reports/reports";
 
 const tabsStyle = `transition-all duration-150 text-foreground hover:text-primary cursor-pointer py-2 border-b-transparent 
 border-b-2 hover:border-b-primary`;
@@ -57,7 +58,7 @@ export default function Admin({ page }: AdminProps) {
             <CreateOffer />
           </TabsContent>
           <TabsContent value="reports">
-            <div>Отчеты</div>
+            <Reports />
           </TabsContent>
         </Tabs>
       </div>
