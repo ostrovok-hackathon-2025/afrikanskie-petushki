@@ -157,7 +157,7 @@ export default function Offers() {
       const session = await getSession();
 
       if (!session) return redirect("/log-in");
-      console.log(location);
+
       const resp = await getOfferSearch(
         { pageNum: pageNum, pageSize: 5, cityId: location.id ?? "" },
         { headers: withAuthHeader(session) }

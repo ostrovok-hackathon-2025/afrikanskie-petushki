@@ -29,7 +29,7 @@ func (r *repo) Edit(ctx context.Context, edit model.Edit) error {
 	if expirationAt, ok := edit.ExpirationAT.Get(); ok {
 		sql = sql.Set("expiration_at", expirationAt)
 	}
-	query, args, err := sql.Where(sq.Eq{"id": edit.OfferID}).ToSql()
+	query, args, err := sql.Where(sq.Eq{"id": edit.OfferID}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return err
 	}

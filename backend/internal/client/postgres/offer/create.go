@@ -34,11 +34,12 @@ func (r *repo) Create(ctx context.Context, id uuid.UUID, create model.Create) er
 		create.ExpirationAT,
 		create.Task,
 		create.ParticipantsLimit,
-	).ToSql()
+	).PlaceholderFormat(sq.Dollar).ToSql()
+
 	if err != nil {
 		return err
 	}
-	err = r.sqlClient.QueryRowContext(ctx, query, args...).Scan()
+	_, err = r.sqlClient.ExecContext(ctx, query, args...)
 	switch {
 	case errors.Is(err, sql2.ErrNoRows):
 		log.Printf("no user with id %d\n", id)

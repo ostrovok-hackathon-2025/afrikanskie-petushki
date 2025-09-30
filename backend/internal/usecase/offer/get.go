@@ -15,7 +15,7 @@ var (
 )
 
 func (u *useCase) GetByID(ctx context.Context, id uuid.UUID) (model.Offer, error) {
-	filter := model.Filter{ID: pkg.NewWithValue(id)}
+	filter := model.Filter{ID: pkg.NewWithValue(id), Offset: 0, Limit: 1}
 	offers, err := u.repo.GetByFilter(ctx, filter)
 	if err != nil {
 		return model.Offer{}, err

@@ -44,7 +44,7 @@ func initAllEndpoints(
 	initReportHandler(router, authProvider, reportHandler)
 	initHotelHandler(router, authProvider, hotelHandler)
 	initLocationHandler(router, authProvider, locationHandler)
-
+	initRoomHandler(router, authProvider, roomHandler)
 }
 
 func initUserEndpoints(router *gin.RouterGroup, authProvider auth.Auth, h handlers.UserHandler) {

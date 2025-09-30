@@ -1,3 +1,6 @@
+import { Session } from "next-auth";
+import { jwtDecode } from "jwt-decode";
+
 export function formatDateTime(isoString: string, timeShift: number) {
   const months = [
     "января",
@@ -35,4 +38,16 @@ export function formatDateTime(isoString: string, timeShift: number) {
   });
 
   return `${dateString}, ${timeString}`;
+}
+
+export function isAdmin(session: Session | null) {
+  if (!session || !session.accessToken) return false;
+
+  const claims: { is_admin: boolean } = jwtDecode(session.accessToken);
+  return claims.is_admin ?? false;
+}
+
+export function toRGC3339(time: string) {
+  const date = new Date(time.replace(" ", "T") + "Z");
+  return date.toISOString();
 }
