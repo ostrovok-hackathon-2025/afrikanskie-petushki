@@ -9,22 +9,23 @@ import (
 )
 
 var (
-	pow = 0.01
+	alpha = 0.0149
+	gamma = 0.17628
 )
 
 func ChooseByRating(users []model.User) uuid.UUID {
-	probabilities := make([]float64, len(users))
+	contributions := make([]float64, len(users))
 
 	sum := 0.0
 	for i, user := range users {
-		probability := probabilityFromRating(user.Rating)
-		probabilities[i] = probability
-		sum += probability
+		contribution := transformRatingToContribution(user.Rating, alpha, gamma)
+		contributions[i] = contribution
+		sum += contribution
 	}
 
 	target := rand.Float64() * sum
-	for i, p := range probabilities {
-		target -= p
+	for i, c := range contributions {
+		target -= c
 		if target < 0 {
 			return users[i].ID
 		}
@@ -32,6 +33,9 @@ func ChooseByRating(users []model.User) uuid.UUID {
 	return uuid.Nil
 }
 
-func probabilityFromRating(rating int) float64 {
-	return math.Pow(float64(rating), pow)
+func transformRatingToContribution(rating int, alpha, gamma float64) float64 {
+	// f(r): в диапазон [10,100)
+	f := 100 - 90*math.Exp(-alpha*float64(rating))
+	// g(r): степень
+	return math.Pow(f, gamma)
 }
