@@ -145,7 +145,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Info about limit and active app",
                         "schema": {
-                            "$ref": "#/definitions/docs.ApplicationResponse"
+                            "$ref": "#/definitions/docs.GetUserAppLimitInfoResponse"
                         }
                     },
                     "400": {
@@ -1568,6 +1568,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/docs.RoomResponse"
                     }
+                }
+            }
+        },
+        "docs.GetUserAppLimitInfoResponse": {
+            "type": "object",
+            "properties": {
+                "active_app_count": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
                 }
             }
         },

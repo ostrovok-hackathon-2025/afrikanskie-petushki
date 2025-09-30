@@ -231,7 +231,7 @@ func (h *applicationHandler) GetApplicationById(ctx *gin.Context) {
 // @Tags Application
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} docs.ApplicationResponse "Info about limit and active app"
+// @Success 200 {object} docs.GetUserAppLimitInfoResponse "Info about limit and active app"
 // @Failure 400 {string} string "Invalid data for getting info"
 // @Failure 401 "Unauthorized"
 // @Failure 403 "User is not reviewer or application does not belong to user"

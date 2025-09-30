@@ -31,6 +31,7 @@ import type {
   DocsGetOffersResponse,
   DocsGetReportsResponse,
   DocsGetRoomsResponse,
+  DocsGetUserAppLimitInfoResponse,
   DocsLogInRequest,
   DocsOfferResponse,
   DocsRefreshRequest,
@@ -71,6 +72,18 @@ const postApplication = <TData = AxiosResponse<DocsCreateApplicationResponse>>(
     return axios.post(
       `http://localhost:8080/api/v1/application/`,
       docsCreateApplicationRequest,options
+    );
+  }
+
+/**
+ * GetUserAppLimitInfo get info about limit and active app
+ * @summary GetUserAppLimitInfo
+ */
+const getApplicationLimit = <TData = AxiosResponse<DocsGetUserAppLimitInfoResponse>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8080/api/v1/application/limit`,options
     );
   }
 
@@ -362,9 +375,10 @@ const postUserSignUp = <TData = AxiosResponse<DocsAuthResponse>>(
     );
   }
 
-return {getApplication,postApplication,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
+return {getApplication,postApplication,getApplicationLimit,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
 export type GetApplicationResult = AxiosResponse<DocsGetApplicationsResponse>
 export type PostApplicationResult = AxiosResponse<DocsCreateApplicationResponse>
+export type GetApplicationLimitResult = AxiosResponse<DocsGetUserAppLimitInfoResponse>
 export type GetApplicationIdResult = AxiosResponse<DocsApplicationResponse>
 export type GetHotelResult = AxiosResponse<DocsGetHotelsResponse>
 export type PostHotelResult = AxiosResponse<DocsCreateHotelResponse>
