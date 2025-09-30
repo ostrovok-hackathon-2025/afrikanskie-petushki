@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS offer
     check_out_at  TIMESTAMP NOT NULL,
     status        VARCHAR(20) DEFAULT 'created',
     expiration_at TIMESTAMP NOT NULL,
+    participants_limit NUMERIC NOT NULL,
     task          TEXT,
     CONSTRAINT uq_offer UNIQUE (hotel_id, room_id, check_in_at, check_out_at)
 );
@@ -43,7 +44,9 @@ CREATE TABLE IF NOT EXISTS application
     id       UUID NOT NULL PRIMARY KEY,
     user_id  UUID NOT NULL REFERENCES "user" (id),
     offer_id UUID NOT NULL REFERENCES offer (id),
-    status   VARCHAR(16)
+    status   VARCHAR(16),
+
+    CONSTRAINT uq_application UNIQUE (user_id, offer_id)
 );
 
 CREATE TABLE IF NOT EXISTS report

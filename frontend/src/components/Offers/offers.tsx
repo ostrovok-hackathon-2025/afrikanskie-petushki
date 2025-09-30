@@ -19,12 +19,114 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/helpers";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { useRouter } from "next/navigation";
 
-const { getLocation, getOfferSearch } = getSecretGuestAPI();
+const { getLocation, getOfferSearch, postApplication } = getSecretGuestAPI();
 
-function Offer({ hotel_id }: DocsOfferResponse) {
+const lerp = (a: number, b: number, c: number) => a + (b - a) * c;
+
+function Offer({
+  id,
+  hotel_name,
+  room_name,
+  check_in_at,
+  check_out_at,
+  task,
+  participants_count,
+  participants_limit,
+}: DocsOfferResponse) {
+  const router = useRouter();
+
+  const participateHandler = async () => {
+    const session = await getSession();
+
+    if (!session) return redirect("/log-in");
+
+    const resp = await postApplication(
+      {
+        offer_id: id ?? "",
+      },
+      {
+        headers: withAuthHeader(session),
+      }
+    );
+
+    const applicationId = resp.data.application_id;
+
+    router.replace(`/application/${applicationId}`);
+  };
+
+  const isOpen = (participants_count ?? 0) < (participants_limit ?? 0);
+  const rest = (participants_limit ?? 0) - (participants_count ?? 0);
+  const fill = rest / (participants_limit ?? 1);
+
+  const color = `rgb(${[
+    lerp(233, 0, fill),
+    lerp(0, 201, fill),
+    lerp(11, 80, fill),
+  ]
+    .map(Math.floor)
+    .join(", ")})`;
+
   return (
-    <div className="w-full box-border rounded-lg border p-4">{hotel_id}</div>
+    <div className="w-full box-border rounded-lg border p-4">
+      <div className="font-gain text-muted-foreground text-base mb-2">
+        Номер {room_name} в отеле
+      </div>
+      <div className="font-gain font-bold text-3xl mb-4">{hotel_name}</div>
+
+      <div className="font-gain rounded-sm bg-accent box-border p-2 mb-6">
+        Заезд:{" "}
+        <span className="font-medium">
+          {formatDateTime(check_in_at ?? "", 0)}
+        </span>{" "}
+        - Выезд:{" "}
+        <span className="font-medium">
+          {formatDateTime(check_out_at ?? "", 0)}
+        </span>
+      </div>
+
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <AccordionTrigger className="font-gain font-medium text-xl items-center mb-2 no-underline">
+            Задание
+          </AccordionTrigger>
+          <AccordionContent className="font-gain whitespace-pre-wrap">
+            {task}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <div className="w-full flex items-center justify-between">
+        <div className="font-gain">
+          {isOpen ? (
+            <>
+              Осталось мест на розыгрыш{" "}
+              <span className="font-bold" style={{ color }}>
+                {rest}
+              </span>{" "}
+            </>
+          ) : (
+            <>Места на розыгрыш закончились</>
+          )}
+        </div>
+
+        {isOpen ? (
+          <Button onClick={() => participateHandler()}>участвовать</Button>
+        ) : (
+          <div className="rounded-sm bg-accent box-border p-2">
+            набор закрыт
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -48,7 +150,7 @@ export default function Offers() {
   const [pageNum, setPageNum] = useState(0);
   const [pagesCount, setPagesCount] = useState(0);
 
-  useEffect(() => {
+  const search = () => {
     if (location === null) return;
 
     (async () => {
@@ -57,14 +159,18 @@ export default function Offers() {
       if (!session) return redirect("/log-in");
       console.log(location);
       const resp = await getOfferSearch(
-        { pageNum: pageNum, pageSize: 10, cityId: location.id ?? "" },
+        { pageNum: pageNum, pageSize: 5, cityId: location.id ?? "" },
         { headers: withAuthHeader(session) }
       );
 
       setPagesCount(resp.data.pages_count ?? 0);
       setOffers(resp.data.offers ?? []);
     })();
-  }, [pageNum, location]);
+  };
+
+  useEffect(() => {
+    search();
+  }, [pageNum]);
 
   return (
     <div className="w-full h-full box-border px-2">
@@ -100,13 +206,13 @@ export default function Offers() {
             Город: {location?.name ?? "не выбран"}
           </div>
 
-          <Button>
+          <Button onClick={search}>
             <Search />
           </Button>
         </div>
       </div>
 
-      <div className="max-w-1/2 mx-auto box-border pt-20">
+      <div className="max-w-1/2 mx-auto box-border pt-34">
         <div className="flex flex-col gap-4 mb-5">
           {offers.map((e, i) => (
             <Offer key={i} {...e} />

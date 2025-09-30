@@ -7,4 +7,5 @@ var (
 	ErrUserNotExist        = errors.New("user for this application not exists")
 	ErrApplicationNotFound = errors.New("application not found")
 	ErrPageNotFound        = errors.New("page not found")
+	ErrParticipantsLimit   = errors.New("all places for participants taken")
 )

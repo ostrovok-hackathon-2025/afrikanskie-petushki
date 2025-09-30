@@ -1390,12 +1390,22 @@ const docTemplate = `{
         "docs.CreateOfferRequest": {
             "type": "object",
             "required": [
+                "check_in",
+                "check_out",
                 "expiration_at",
                 "hotel_id",
                 "location_id",
+                "participants_limit",
+                "room_id",
                 "task"
             ],
             "properties": {
+                "check_in": {
+                    "type": "string"
+                },
+                "check_out": {
+                    "type": "string"
+                },
                 "expiration_at": {
                     "type": "string"
                 },
@@ -1403,6 +1413,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location_id": {
+                    "type": "string"
+                },
+                "participants_limit": {
+                    "type": "integer"
+                },
+                "room_id": {
                     "type": "string"
                 },
                 "task": {
@@ -1558,7 +1574,10 @@ const docTemplate = `{
         "docs.OfferResponse": {
             "type": "object",
             "properties": {
-                "check_date": {
+                "check_in_at": {
+                    "type": "string"
+                },
+                "check_out_at": {
                     "type": "string"
                 },
                 "expiration_at": {
@@ -1567,17 +1586,26 @@ const docTemplate = `{
                 "hotel_id": {
                     "type": "string"
                 },
+                "hotel_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
-                "location_id": {
+                "participants_count": {
+                    "type": "integer"
+                },
+                "participants_limit": {
+                    "type": "integer"
+                },
+                "room_id": {
+                    "type": "string"
+                },
+                "room_name": {
                     "type": "string"
                 },
                 "task": {
                     "type": "string"
-                },
-                "used": {
-                    "type": "boolean"
                 }
             }
         },
@@ -1659,7 +1687,19 @@ const docTemplate = `{
         "docs.UpdateOfferRequest": {
             "type": "object",
             "properties": {
+                "check_in_at": {
+                    "type": "string"
+                },
+                "check_out_at": {
+                    "type": "string"
+                },
                 "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_id": {
+                    "type": "string"
+                },
+                "room_id": {
                     "type": "string"
                 },
                 "task": {

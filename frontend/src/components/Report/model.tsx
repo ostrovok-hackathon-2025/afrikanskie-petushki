@@ -38,6 +38,6 @@ export const loadReport = async (id: string): Promise<ReportInfo> => {
     ],
     text: "Все понравилось\n\nОтличное место\nПравдивые отзывы\nВкусная еда",
 
-    status: "created",
+    status: "accepted",
   };
 };

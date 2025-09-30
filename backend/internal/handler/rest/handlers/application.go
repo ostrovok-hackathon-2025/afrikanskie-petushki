@@ -80,6 +80,8 @@ func (h *applicationHandler) CreateApplication(ctx *gin.Context) {
 			ctx.String(http.StatusBadRequest, "offer does not exist")
 		case errors.Is(err, applicationRepo.ErrUserNotExist):
 			ctx.String(http.StatusBadRequest, "user does not exist")
+		case errors.Is(err, applicationRepo.ErrParticipantsLimit):
+			ctx.String(http.StatusBadRequest, "out of places")
 		default:
 			ctx.Status(http.StatusInternalServerError)
 		}
