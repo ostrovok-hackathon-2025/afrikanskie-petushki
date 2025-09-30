@@ -1,4 +1,4 @@
-import Home from "@/components/Home/home";
+import Admin from "@/components/Admin/admin";
 import { isAdmin } from "@/lib/helpers";
 import { authConfig } from "@/lib/next-auth/auth.config";
 import { getServerSession } from "next-auth";
@@ -8,12 +8,11 @@ interface HomePageProps {
   params: Promise<{ page: string }>;
 }
 
-export default async function HomePage({ params }: HomePageProps) {
+export default async function AdminPage({ params }: HomePageProps) {
+  const session = await getServerSession(authConfig);
+  if (!isAdmin(session)) return redirect("/log-in");
+
   const { page } = await params;
 
-  const session = await getServerSession(authConfig);
-  if (!session) return redirect("/log-in");
-  if (isAdmin(session)) return redirect("/admin/offers");
-
-  return <Home page={page} />;
+  return <Admin page={page} />;
 }

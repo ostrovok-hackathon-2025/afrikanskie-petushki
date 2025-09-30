@@ -41,6 +41,7 @@ func (r *repo) GetByFilter(
 		sql = sql.Where(sq.Eq{"h.location_id": locationID})
 	}
 	query, args, err := sql.Limit(filter.Limit).Offset(filter.Offset).PlaceholderFormat(sq.Dollar).ToSql()
+
 	if err != nil {
 		return nil, err
 	}
