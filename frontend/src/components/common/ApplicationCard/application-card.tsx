@@ -4,17 +4,22 @@ import { formatDateTime } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
-const STATUS_MAP = new Map<string, string>([
+export const STATUS_MAP = new Map<string, string>([
   ["__app_created", "создана"],
   ["__app_accepted", "принята"],
   ["__app_declined", "отклонена"],
 ]);
 
+interface ApplicationCardProps extends DocsApplicationResponse {
+  showViewReport?: boolean;
+}
+
 export default function ApplicationCard({
   hotel_name,
   expiration_at,
   status,
-}: DocsApplicationResponse) {
+  showViewReport = true,
+}: ApplicationCardProps) {
   const statusName = STATUS_MAP.get(status ?? "");
 
   const statusCol = useMemo(() => {
@@ -29,7 +34,7 @@ export default function ApplicationCard({
       <div
         className={cn(
           "w-full flex justify-between",
-          status === "__app_accepted" && "mb-9"
+          status === "__app_accepted" && showViewReport && "mb-9"
         )}
       >
         <div className="text-foreground-muted">
@@ -37,7 +42,7 @@ export default function ApplicationCard({
         </div>
         <div className={cn("font-bold", statusCol)}>{statusName}</div>
       </div>
-      {status === "__app_accepted" && (
+      {status === "__app_accepted" && showViewReport && (
         <div className="w-full flex justify-start">
           <Button>перейти к отчету</Button>
         </div>
