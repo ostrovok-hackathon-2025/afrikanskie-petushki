@@ -8,6 +8,10 @@ import (
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
 )
 
+var (
+	pow = 0.01
+)
+
 func ChooseByRating(users []model.User) uuid.UUID {
 	probabilities := make([]float64, len(users))
 
@@ -29,5 +33,5 @@ func ChooseByRating(users []model.User) uuid.UUID {
 }
 
 func probabilityFromRating(rating int) float64 {
-	return math.Sqrt(float64(rating))
+	return math.Pow(float64(rating), pow)
 }
