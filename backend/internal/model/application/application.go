@@ -23,6 +23,11 @@ type Application struct {
 	HotelName    string
 }
 
+type UserAppLimitInfo struct {
+	Limit          uint
+	ActiveAppCount uint
+}
+
 func NewApplication(userId, offerId uuid.UUID) *Application {
 	return &Application{
 		Id:      uuid.New(),

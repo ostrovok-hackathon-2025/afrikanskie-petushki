@@ -8,4 +8,5 @@ var (
 	ErrApplicationNotFound = errors.New("application not found")
 	ErrPageNotFound        = errors.New("page not found")
 	ErrParticipantsLimit   = errors.New("all places for participants taken")
+	ErrAppLimit            = errors.New("user application limit reached")
 )
