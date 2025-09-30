@@ -1,4 +1,23 @@
 services:
+  frontend:
+    container_name: frontend
+    image: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - main
+    stdin_open: true
+    tty: true
+    depends_on:
+      backend-app:
+        condition: service_started
+    env_file:
+      - .env.example
+
   backend-app:
     container_name: backend-app
     image: backend-app
@@ -9,7 +28,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - 8080:8080
+      - 8081:8081
     networks:
       - main
     stdin_open: true
