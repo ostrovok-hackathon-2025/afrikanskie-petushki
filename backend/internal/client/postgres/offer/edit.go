@@ -2,6 +2,7 @@ package offer
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 
 	sq "github.com/Masterminds/squirrel"

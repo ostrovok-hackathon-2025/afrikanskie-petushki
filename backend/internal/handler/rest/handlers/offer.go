@@ -196,7 +196,7 @@ func (h *offerHandler) FindOffers(ctx *gin.Context) {
 		return
 	}
 
-	cityIdStr := ctx.Query("pageSize")
+	cityIdStr := ctx.Query("cityId")
 
 	if cityIdStr == "" {
 		log.Println("Invalid cityId: ", cityIdStr)

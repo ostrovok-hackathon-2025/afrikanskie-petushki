@@ -2,7 +2,9 @@
 import { getSecretGuestAPI } from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { withAuthHeader } from "@/lib/next-auth/with-auth-header";
+import { Search } from "lucide-react";
 import { getSession, signOut } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -42,6 +44,11 @@ export default function Header() {
 
   return (
     <div className="w-full h-16 fixed top-0 left-0 flex gap-3 items-center justify-end bg-[#F0F0F0] px-6 z-[100]">
+      <Button asChild>
+        <Link href="/offers">
+          <Search />
+        </Link>
+      </Button>
       {username && username !== "$empty" && (
         <Button onClick={handleExit}>Выйти</Button>
       )}
