@@ -17,6 +17,11 @@ type ApplicationResponse struct {
 	HotelName    string    `json:"hotel_name"`
 }
 
+type GetUserAppLimitInfoResponse struct {
+	Limit          uint `json:"limit"`
+	ActiveAppCount uint `json:"active_app_count"`
+}
+
 func ApplicationModelToResponse(model *application.Application) *ApplicationResponse {
 	return &ApplicationResponse{
 		Id:           model.Id.String(),

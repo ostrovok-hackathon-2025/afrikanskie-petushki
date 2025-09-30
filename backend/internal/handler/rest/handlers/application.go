@@ -19,6 +19,7 @@ type ApplicationHandler interface {
 	CreateApplication(ctx *gin.Context)
 	GetApplications(ctx *gin.Context)
 	GetApplicationById(ctx *gin.Context)
+	GetUserAppLimitInfo(ctx *gin.Context)
 }
 
 type applicationHandler struct {
@@ -82,6 +83,8 @@ func (h *applicationHandler) CreateApplication(ctx *gin.Context) {
 			ctx.String(http.StatusBadRequest, "user does not exist")
 		case errors.Is(err, applicationRepo.ErrParticipantsLimit):
 			ctx.String(http.StatusBadRequest, "out of places")
+		case errors.Is(err, applicationRepo.ErrAppLimit):
+			ctx.String(http.StatusBadRequest, "reach limit of app")
 		default:
 			ctx.Status(http.StatusInternalServerError)
 		}
@@ -217,6 +220,41 @@ func (h *applicationHandler) GetApplicationById(ctx *gin.Context) {
 	}
 
 	resp := docs.ApplicationModelToResponse(app)
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// GetUserAppLimitInfo
+// Add godoc
+// @Summary GetUserAppLimitInfo
+// @Description GetUserAppLimitInfo get info about limit and active app
+// @Tags Application
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.ApplicationResponse "Info about limit and active app"
+// @Failure 400 {string} string "Invalid data for getting info"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "User is not reviewer or application does not belong to user"
+// @Failure 404 "User not found"
+// @Failure 500 "Internal server error"
+// @Router /application/limit [get]
+func (h *applicationHandler) GetUserAppLimitInfo(ctx *gin.Context) {
+	userId, err := auth.GetUserId(ctx)
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+	info, err := h.useCase.GetUserAppLimitInfo(ctx, userId)
+	if err != nil {
+		log.Printf("failed to get limit info of user with id %d: %v\n", err, userId)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+	resp := &docs.GetUserAppLimitInfoResponse{
+		Limit:          info.Limit,
+		ActiveAppCount: info.ActiveAppCount,
+	}
 
 	ctx.JSON(http.StatusOK, resp)
 }

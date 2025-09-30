@@ -18,6 +18,10 @@ type applicationRepo struct {
 	db *sqlx.DB
 }
 
+type Getter interface {
+	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+}
+
 func NewApplicationRepo(db *sqlx.DB) ApplicationRepo {
 	return &applicationRepo{
 		db: db,
@@ -60,6 +64,15 @@ func (r *applicationRepo) CreateApplication(
 	if Limits.ParticipantsCount >= Limits.ParticipantsLimit {
 		err = ErrParticipantsLimit
 		return err
+	}
+
+	userAppLimitInfo, err := getUserAppLimitInfo(tx, ctx, application.UserId)
+	if err != nil {
+		return fmt.Errorf("failed to get user app limit info: %w", err)
+	}
+	if userAppLimitInfo == nil || userAppLimitInfo.Limit-userAppLimitInfo.ActiveAppCount <= 0 {
+		err = ErrAppLimit
+		return ErrAppLimit
 	}
 
 	query = `
@@ -192,4 +205,32 @@ func (r *applicationRepo) GetByOfferID(
 	}
 
 	return res, nil
+}
+
+func (r *applicationRepo) GetUserAppLimitInfo(ctx context.Context, userID uuid.UUID) (*application.UserAppLimitInfo, error) {
+
+	dto, err := getUserAppLimitInfo(r.db, ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return dto.ToModel(), nil
+}
+
+func getUserAppLimitInfo(s Getter, ctx context.Context, userID uuid.UUID) (*UserAppLimitInfoDTO, error) {
+	query := `
+	SELECT u.app_limit, (
+    	SELECT COUNT(*)
+    	FROM application a
+    	WHERE a.user_id = u.id AND a.status = $2
+	) AS active_app_count
+	FROM "user" u
+	WHERE u.id = $1;
+	`
+	var userLimitInfo UserAppLimitInfoDTO
+
+	err := s.GetContext(ctx, &userLimitInfo, query, userID, application.APPLICATION_CREATED)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get count of user applications: %w", err)
+	}
+	return &userLimitInfo, nil
 }

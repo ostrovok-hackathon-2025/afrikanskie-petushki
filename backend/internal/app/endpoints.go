@@ -67,6 +67,7 @@ func initApplicationHandler(router *gin.RouterGroup, authProvider auth.Auth, h h
 	{
 		group.POST("/", h.CreateApplication)
 		group.GET("/", h.GetApplications)
+		group.GET("/limit", h.GetUserAppLimitInfo)
 		group.GET("/:id", h.GetApplicationById)
 	}
 }

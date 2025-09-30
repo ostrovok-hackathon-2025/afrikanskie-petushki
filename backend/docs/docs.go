@@ -126,6 +126,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/application/limit": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetUserAppLimitInfo get info about limit and active app",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "GetUserAppLimitInfo",
+                "responses": {
+                    "200": {
+                        "description": "Info about limit and active app",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ApplicationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting info",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "User is not reviewer or application does not belong to user"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/application/{id}": {
             "get": {
                 "security": [

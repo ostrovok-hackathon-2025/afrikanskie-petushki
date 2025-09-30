@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS "user"
     id             UUID    NOT NULL PRIMARY KEY,
     ostrovok_login TEXT    NOT NULL UNIQUE,
     password_hash  TEXT    NOT NULL,
-    is_admin       BOOLEAN NOT NULL
+    is_admin       BOOLEAN NOT NULL,
+    app_limit      INTEGER NOT NULL DEFAULT 5
 );
 
 CREATE TABLE IF NOT EXISTS location
@@ -27,15 +28,15 @@ CREATE TABLE IF NOT EXISTS hotel
 
 CREATE TABLE IF NOT EXISTS offer
 (
-    id            UUID      NOT NULL PRIMARY KEY,
-    hotel_id      UUID      NOT NULL REFERENCES hotel (id),
-    room_id       UUID      NOT NULL REFERENCES room (id),
-    check_in_at   TIMESTAMP NOT NULL,
-    check_out_at  TIMESTAMP NOT NULL,
-    status        VARCHAR(20) DEFAULT 'created',
-    expiration_at TIMESTAMP NOT NULL,
-    participants_limit NUMERIC NOT NULL,
-    task          TEXT,
+    id                 UUID      NOT NULL PRIMARY KEY,
+    hotel_id           UUID      NOT NULL REFERENCES hotel (id),
+    room_id            UUID      NOT NULL REFERENCES room (id),
+    check_in_at        TIMESTAMP NOT NULL,
+    check_out_at       TIMESTAMP NOT NULL,
+    status             VARCHAR(20) DEFAULT 'created',
+    expiration_at      TIMESTAMP NOT NULL,
+    participants_limit NUMERIC   NOT NULL,
+    task               TEXT,
     CONSTRAINT uq_offer UNIQUE (hotel_id, room_id, check_in_at, check_out_at)
 );
 

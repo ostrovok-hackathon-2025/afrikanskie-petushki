@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -28,19 +29,13 @@ func (s *ApplicationService) CreateApplication(
 
 	err := s.repo.CreateApplication(ctx, newApplication)
 
-	if err == applicationRepo.ErrOfferNotExist {
+	switch {
+	case errors.Is(err, applicationRepo.ErrOfferNotExist) ||
+		errors.Is(err, applicationRepo.ErrUserNotExist) ||
+		errors.Is(err, applicationRepo.ErrParticipantsLimit) ||
+		errors.Is(err, applicationRepo.ErrAppLimit):
 		return uuid.UUID{}, err
-	}
-
-	if err == applicationRepo.ErrUserNotExist {
-		return uuid.UUID{}, err
-	}
-
-	if err == applicationRepo.ErrParticipantsLimit {
-		return uuid.UUID{}, err
-	}
-
-	if err != nil {
+	case err != nil:
 		return uuid.UUID{}, fmt.Errorf("failed to create application in repo: %w", err)
 	}
 
@@ -85,4 +80,12 @@ func (s *ApplicationService) GetApplicationById(
 	}
 
 	return app, nil
+}
+
+func (s *ApplicationService) GetUserAppLimitInfo(ctx context.Context, userID uuid.UUID) (*application.UserAppLimitInfo, error) {
+	info, err := s.repo.GetUserAppLimitInfo(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user app limit info from repo: %w", err)
+	}
+	return info, nil
 }

@@ -12,6 +12,11 @@ type LimitsDTO struct {
 	ParticipantsCount uint `db:"participants_count"`
 }
 
+type UserAppLimitInfoDTO struct {
+	Limit          uint `db:"app_limit"`
+	ActiveAppCount uint `db:"active_app_count"`
+}
+
 type ApplicationDTO struct {
 	Id           uuid.UUID `db:"id"`
 	UserId       uuid.UUID `db:"user_id"`
@@ -29,5 +34,12 @@ func (d *ApplicationDTO) ToApplicationModel() *application.Application {
 		Status:       application.ApplicationStatus(d.Status),
 		ExpirationAt: d.ExpirationAt,
 		HotelName:    d.HotelName,
+	}
+}
+
+func (d *UserAppLimitInfoDTO) ToModel() *application.UserAppLimitInfo {
+	return &application.UserAppLimitInfo{
+		Limit:          d.Limit,
+		ActiveAppCount: d.ActiveAppCount,
 	}
 }
