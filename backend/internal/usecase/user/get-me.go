@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 
 	"github.com/google/uuid"
@@ -23,6 +24,13 @@ func (u *useCase) GetMe(ctx context.Context, userId uuid.UUID) (*model.User, err
 	}
 
 	validation.ValidateRating(user.Rating)
+
+	ostrovokUser, err := u.ostrovokClient.GetUserByLogin(ctx, user.OstrovokLogin)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Email = ostrovokUser.Email
 
 	return user, err
 }
