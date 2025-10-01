@@ -3,6 +3,7 @@ import {
   DocsHotelResponse,
   DocsLocationResponse,
   DocsRoomResponse,
+  GetApplicationSearchParams,
 } from "@/api/model";
 import { useEffect, useState } from "react";
 import { withAuthHeader } from "@/lib/next-auth/with-auth-header";
@@ -30,7 +31,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const { getHotel, getRoom, getLocation } = getSecretGuestAPI();
+const { getHotel, getRoom, getLocation, getApplicationSearch } =
+  getSecretGuestAPI();
 
 export default function Applications() {
   const [hotels, setHotels] = useState<DocsHotelResponse[]>([]);
@@ -82,13 +84,7 @@ export default function Applications() {
 
   const [pageNum, setPageNum] = useState(0);
   const [pagesCount, setPagesCount] = useState(0);
-  const [apps, setApps] = useState<DocsApplicationResponse[]>([
-    {
-      expiration_at: "2025-10-01 23:59:59",
-      hotel_name: "mock_hotel",
-      status: "__app_accepted",
-    },
-  ]);
+  const [apps, setApps] = useState<DocsApplicationResponse[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -97,20 +93,24 @@ export default function Applications() {
 
       if (!session) return router.replace("/log-in");
 
-      //   const resp = await getApplication(
-      //     {
-      //       pageNum: pageNum,
-      //       pageSize: 10,
-      //     },
-      //     {
-      //       headers: withAuthHeader(session),
-      //     }
-      //   );
+      const filters: GetApplicationSearchParams = {
+        pageNum: pageNum,
+        pageSize: 3,
+      };
 
-      //   setPagesCount(resp.data.pages_count ?? 0);
-      //   setApps(resp.data.applications ?? []);
+      if (location) filters.cityId = location.id;
+      if (hotel) filters.hotelId = hotel.id;
+      if (room) filters.roomId = room.id;
+      if (status) filters.status = status;
+
+      const resp = await getApplicationSearch(filters, {
+        headers: withAuthHeader(session),
+      });
+
+      setPagesCount(resp.data.pages_count ?? 0);
+      setApps(resp.data.applications ?? []);
     })();
-  }, [pageNum]);
+  }, [pageNum, location, hotel, room, status]);
 
   return (
     <div className="w-full">
@@ -120,7 +120,7 @@ export default function Applications() {
 
           <Popover>
             <PopoverTrigger asChild className="flex-shrink-0">
-              <Button>выбрать</Button>
+              <Button onClick={() => setHotel(null)}>выбрать</Button>
             </PopoverTrigger>
 
             <PopoverContent>
@@ -150,7 +150,7 @@ export default function Applications() {
 
           <Popover>
             <PopoverTrigger asChild className="flex-shrink-0">
-              <Button>выбрать</Button>
+              <Button onClick={() => setRoom(null)}>выбрать</Button>
             </PopoverTrigger>
 
             <PopoverContent>
@@ -184,7 +184,7 @@ export default function Applications() {
 
           <Popover>
             <PopoverTrigger asChild className="flex-shrink-0">
-              <Button>выбрать</Button>
+              <Button onClick={() => setLocation(null)}>выбрать</Button>
             </PopoverTrigger>
 
             <PopoverContent>
@@ -216,7 +216,7 @@ export default function Applications() {
 
           <Popover>
             <PopoverTrigger asChild className="flex-shrink-0">
-              <Button>выбрать</Button>
+              <Button onClick={() => setStatus(null)}>выбрать</Button>
             </PopoverTrigger>
 
             <PopoverContent>

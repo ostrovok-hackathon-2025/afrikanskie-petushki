@@ -39,6 +39,7 @@ export * from './docsSignUpRequest';
 export * from './docsUpdateOfferRequest';
 export * from './docsUserResponse';
 export * from './getApplicationParams';
+export * from './getApplicationSearchParams';
 export * from './getOfferParams';
 export * from './getOfferSearchParams';
 export * from './getReportMyParams';
