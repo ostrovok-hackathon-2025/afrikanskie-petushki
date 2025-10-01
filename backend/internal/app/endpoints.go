@@ -33,6 +33,7 @@ func initAllEndpoints(
 	hotelHandler handlers.HotelHandler,
 	locationHandler handlers.LocationHandler,
 	roomHandler handlers.RoomHandler,
+	analyticsHandler handlers.AnalyticsHandler,
 	healthHandler handlers.HealthHandler,
 	client *sqlx.DB,
 ) {
@@ -49,6 +50,7 @@ func initAllEndpoints(
 	initHotelHandler(router, authProvider, hotelHandler)
 	initLocationHandler(router, authProvider, locationHandler)
 	initRoomHandler(router, authProvider, roomHandler)
+	initAnalyticsHandler(router, authProvider, analyticsHandler)
 
 	router.POST("test", InitDataHandler(client))
 }
@@ -131,5 +133,12 @@ func initRoomHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers
 	{
 		group.POST("/", authProvider.RoleProtected("admin"), h.CreateRoom)
 		group.GET("/", h.GetRooms)
+	}
+}
+
+func initAnalyticsHandler(router *gin.RouterGroup, authProvider auth.Auth, h handlers.AnalyticsHandler) {
+	group := router.Group("/analytics")
+	{
+		group.GET("/", authProvider.RoleProtected("admin"), h.GetAnalytics)
 	}
 }
