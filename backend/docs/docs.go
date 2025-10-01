@@ -2012,6 +2012,9 @@ const docTemplate = `{
                 },
                 "ostrovok_login": {
                     "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
                 }
             }
         }

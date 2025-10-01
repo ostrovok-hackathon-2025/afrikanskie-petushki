@@ -29,7 +29,7 @@ func NewUserRepo(sqlClient *sqlx.DB) Repo {
 }
 
 func (r *repo) FindUserByLogin(ctx context.Context, login string) (*model.User, string, error) {
-	query := `SELECT id, ostrovok_login, password_hash, is_admin FROM "user" WHERE ostrovok_login = $1`
+	query := `SELECT id, ostrovok_login, password_hash, is_admin, rating FROM "user" WHERE ostrovok_login = $1`
 
 	var user model.User
 	var passwordHash string
@@ -39,6 +39,7 @@ func (r *repo) FindUserByLogin(ctx context.Context, login string) (*model.User, 
 		&user.OstrovokLogin,
 		&passwordHash,
 		&user.IsAdmin,
+		&user.Rating,
 	)
 
 	if err != nil {
@@ -67,7 +68,7 @@ func (r *repo) UserExists(ctx context.Context, login string) (bool, error) {
 }
 
 func (r *repo) GetUserById(ctx context.Context, userId uuid.UUID) (*model.User, error) {
-	query := `SELECT id, ostrovok_login, is_admin FROM "user" WHERE id = $1`
+	query := `SELECT id, ostrovok_login, is_admin, rating FROM "user" WHERE id = $1`
 
 	var user UserDTO
 

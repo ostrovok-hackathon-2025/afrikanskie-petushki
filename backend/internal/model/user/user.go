@@ -7,5 +7,5 @@ type User struct {
 	OstrovokLogin string
 	Email         string
 	IsAdmin       bool
-	Rating        int
+	Rating        int // Сделал проверку на <0 в usecase
 }

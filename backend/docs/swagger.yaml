@@ -318,6 +318,8 @@ definitions:
         type: boolean
       ostrovok_login:
         type: string
+      rating:
+        type: integer
     type: object
 host: localhost:8081
 info:

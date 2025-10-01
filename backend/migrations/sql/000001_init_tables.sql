@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS "user"
     ostrovok_login TEXT    NOT NULL UNIQUE,
     password_hash  TEXT    NOT NULL,
     is_admin       BOOLEAN NOT NULL,
-    app_limit      INTEGER NOT NULL DEFAULT 5
+    app_limit      INTEGER NOT NULL DEFAULT 5,
+    rating         INTEGER NOT NULL DEFAULT 5
 );
 
 CREATE TABLE IF NOT EXISTS location
