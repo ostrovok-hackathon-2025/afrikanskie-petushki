@@ -72,6 +72,7 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 	hotelHandler := handlers.NewHotelHandler(hotelUseCase)
 	locationHandler := handlers.NewLocationHandler(locationUseCase)
 	roomHandler := handlers.NewRoomHandler(roomUseCase)
+	heathHandler := handlers.NewHealthHandler(sqlClient, minioClient)
 
 	//MiddleWare
 	authMiddleWare := auth.NewAuth(userUseCase)
@@ -88,6 +89,7 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 		hotelHandler,
 		locationHandler,
 		roomHandler,
+		heathHandler,
 		sqlClient,
 	)
 

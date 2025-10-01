@@ -16,4 +16,7 @@ type ApplicationRepo interface {
 	GetUserAppLimitInfo(ctx context.Context, userID uuid.UUID) (*application.UserAppLimitInfo, error)
 
 	UpdateApplicationStatus(ctx context.Context, application *application.Application) error
+
+	GetByFilter(ctx context.Context, filter *application.Filter) ([]*application.Application, error)
+	GetCountByFilter(ctx context.Context, filter *application.Filter) (int, error)
 }

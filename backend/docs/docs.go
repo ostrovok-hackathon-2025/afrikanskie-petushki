@@ -169,6 +169,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/application/search": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetAppsByFilter applications by filter with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "GetAppsByFilter applications",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of required city",
+                        "name": "cityId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Id of required hotel",
+                        "name": "hotelId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Id of required room",
+                        "name": "roomId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "status of app",
+                        "name": "string",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of applications by filter",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetApplicationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting applications",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for reviewer"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/application/{id}": {
             "get": {
                 "security": [

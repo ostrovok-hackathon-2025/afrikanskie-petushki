@@ -26,6 +26,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: always
     ports:
       - 8081:8081

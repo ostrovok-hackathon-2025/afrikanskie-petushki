@@ -12,4 +12,5 @@ type ApplicationUseCase interface {
 	GetApplications(ctx context.Context, userId uuid.UUID, pageNum, pageSize int) ([]*application.Application, int, error)
 	GetApplicationById(ctx context.Context, userId uuid.UUID, applicationId uuid.UUID) (*application.Application, error)
 	GetUserAppLimitInfo(ctx context.Context, userID uuid.UUID) (*application.UserAppLimitInfo, error)
+	GetByFilter(ctx context.Context, filter *application.Filter) ([]*application.Application, int, error)
 }

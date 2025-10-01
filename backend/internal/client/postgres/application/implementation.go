@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -245,4 +246,78 @@ func (r *applicationRepo) UpdateApplicationStatus(ctx context.Context, applicati
 	}
 
 	return nil
+}
+
+func (r *applicationRepo) GetByFilter(
+	ctx context.Context,
+	filter *application.Filter,
+) ([]*application.Application, error) {
+	sql := sq.Select(
+		"a.id",
+		"a.user_id",
+		"a.offer_id",
+		"a.status",
+		"o.expiration_at",
+		"h.name",
+	).From("application as a").
+		Join("offer as o ON a.offer_id = o.id").
+		Join("hotel as h ON o.hotel_id = h.id")
+	if locationID, ok := filter.LocationID.Get(); ok {
+		sql = sql.Where(sq.Eq{"h.location_id": locationID})
+	}
+	if roomID, ok := filter.RoomID.Get(); ok {
+		sql = sql.Where(sq.Eq{"o.room_id": roomID})
+	}
+	if hotelID, ok := filter.HotelID.Get(); ok {
+		sql = sql.Where(sq.Eq{"o.hotel_id": hotelID})
+	}
+	if status, ok := filter.Status.Get(); ok {
+		sql = sql.Where(sq.Eq{"a.status": status})
+	}
+	query, args, err := sql.Limit(filter.Limit).Offset(filter.Offset).PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build sql query: %w", err)
+	}
+	var dtos []*ApplicationDTO
+	err = r.db.SelectContext(ctx, &dtos, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get applications by filter: %w", err)
+	}
+
+	applications := make([]*application.Application, len(dtos))
+	for i, dto := range dtos {
+		applications[i] = dto.ToApplicationModel()
+	}
+	return applications, nil
+}
+
+func (r *applicationRepo) GetCountByFilter(
+	ctx context.Context,
+	filter *application.Filter,
+) (int, error) {
+	sql := sq.Select("COUNT(*)").From("application as a").
+		Join("offer as o ON a.offer_id = o.id").
+		Join("hotel as h ON o.hotel_id = h.id")
+	if locationID, ok := filter.LocationID.Get(); ok {
+		sql = sql.Where(sq.Eq{"h.location_id": locationID})
+	}
+	if roomID, ok := filter.RoomID.Get(); ok {
+		sql = sql.Where(sq.Eq{"o.room_id": roomID})
+	}
+	if hotelID, ok := filter.HotelID.Get(); ok {
+		sql = sql.Where(sq.Eq{"o.hotel_id": hotelID})
+	}
+	if status, ok := filter.Status.Get(); ok {
+		sql = sql.Where(sq.Eq{"a.status": status})
+	}
+	query, args, err := sql.PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("failed to build sql query: %w", err)
+	}
+	var count int
+	err = r.db.GetContext(ctx, &count, query, args...)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get count of applications: %w", err)
+	}
+	return count, nil
 }
