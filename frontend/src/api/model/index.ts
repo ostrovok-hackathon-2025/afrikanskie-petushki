@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './docsAnalyticsResponse';
 export * from './docsApplicationResponse';
 export * from './docsAuthResponse';
 export * from './docsConfirmReport';

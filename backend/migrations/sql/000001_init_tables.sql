@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS application
     user_id  UUID NOT NULL REFERENCES "user" (id),
     offer_id UUID NOT NULL REFERENCES offer (id),
     status   VARCHAR(16),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
     CONSTRAINT uq_application UNIQUE (user_id, offer_id)
 );
@@ -56,7 +57,8 @@ CREATE TABLE IF NOT EXISTS report
     application_id UUID NOT NULL REFERENCES application (id),
     expiration_at  TIMESTAMP WITH TIME ZONE,
     status         VARCHAR(16),
-    text           TEXT
+    text           TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS photo

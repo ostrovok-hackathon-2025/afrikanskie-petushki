@@ -13,6 +13,40 @@
     "host": "localhost:8081",
     "basePath": "/api/v1",
     "paths": {
+        "/analytics/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Calc and return metrics for analytics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get analytics",
+                "responses": {
+                    "200": {
+                        "description": "Page of applications",
+                        "schema": {
+                            "$ref": "#/definitions/docs.AnalyticsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/application/": {
             "get": {
                 "security": [
@@ -1524,6 +1558,20 @@
         }
     },
     "definitions": {
+        "docs.AnalyticsResponse": {
+            "type": "object",
+            "properties": {
+                "accepted_reports": {
+                    "type": "integer"
+                },
+                "applications_received": {
+                    "type": "integer"
+                },
+                "completed_offers": {
+                    "type": "integer"
+                }
+            }
+        },
         "docs.ApplicationResponse": {
             "type": "object",
             "properties": {

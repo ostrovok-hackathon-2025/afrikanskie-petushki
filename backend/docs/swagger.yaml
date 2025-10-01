@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  docs.AnalyticsResponse:
+    properties:
+      accepted_reports:
+        type: integer
+      applications_received:
+        type: integer
+      completed_offers:
+        type: integer
+    type: object
   docs.ApplicationResponse:
     properties:
       expiration_at:
@@ -326,6 +335,27 @@ info:
   title: Secret Guest API
   version: "1.0"
 paths:
+  /analytics/:
+    get:
+      description: Calc and return metrics for analytics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of applications
+          schema:
+            $ref: '#/definitions/docs.AnalyticsResponse'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get analytics
+      tags:
+      - Analytics
   /application/:
     get:
       description: GetForPage all applications with pagination

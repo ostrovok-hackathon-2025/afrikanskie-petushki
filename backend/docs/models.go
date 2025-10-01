@@ -218,3 +218,9 @@ type GetRoomsResponse struct {
 type GetByApplicationIdResponse struct {
 	Id string `json:"id"`
 }
+
+type AnalyticsResponse struct {
+	CompletedOffers      uint64 `json:"completed_offers"`
+	ApplicationsReceived uint64 `json:"applications_received"`
+	AcceptedReports      uint64 `json:"accepted_reports"`
+}

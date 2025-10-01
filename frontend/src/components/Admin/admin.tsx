@@ -7,6 +7,7 @@ import AllOffers from "./AllOffers/all-offers";
 import CreateOffer from "./CreateOffer/create-offer";
 import Reports from "./Reports/reports";
 import Applications from "./Applications/applications";
+import Analytics from "./Analytics/analytics";
 
 const tabsStyle = `transition-all duration-150 text-foreground hover:text-primary cursor-pointer py-2 border-b-transparent 
 border-b-2 hover:border-b-primary`;
@@ -61,6 +62,13 @@ export default function Admin({ page }: AdminProps) {
             >
               Отчеты
             </TabsTrigger>
+
+            <TabsTrigger
+              value="analytics"
+              className={cn(tabsStyle, page == "analytics" && tabsActiveStyle)}
+            >
+              Общая аналитика
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="offers">
             <AllOffers />
@@ -73,6 +81,9 @@ export default function Admin({ page }: AdminProps) {
           </TabsContent>
           <TabsContent value="reports">
             <Reports />
+          </TabsContent>
+          <TabsContent value="analytics">
+            <Analytics />
           </TabsContent>
         </Tabs>
       </div>
