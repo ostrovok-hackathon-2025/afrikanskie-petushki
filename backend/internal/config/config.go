@@ -20,11 +20,11 @@ type RestConfig struct {
 }
 
 type PostgresConfig struct {
-	User     string `yaml:"user" env-required:"true"`
-	Password string `yaml:"password" env-required:"true"`
+	User     string `yaml:"user" env-required:"true" env:"POSTGRES_USER"`
+	Password string `yaml:"password" env-required:"true" env:"POSTGRES_PASSWORD"`
 	Host     string `yaml:"host" env-required:"true"`
 	Port     int    `yaml:"port" env-required:"true"`
-	Database string `yaml:"database" env-required:"true"`
+	Database string `yaml:"database" env-required:"true" env:"POSTGRES_DB"`
 }
 
 type LoggerConfig struct {
@@ -34,10 +34,9 @@ type LoggerConfig struct {
 
 type MinioConfig struct {
 	Endpoint       string `yaml:"endpoint" env-required:"true"`
-	RootUser       string `yaml:"root-user" env-required:"true"`
-	RootPassword   string `yaml:"root-password" env-required:"true"`
+	RootUser       string `yaml:"root-user" env-required:"true" env:"MINIO_ROOT_USER"`
+	RootPassword   string `yaml:"root-password" env-required:"true" env:"MINIO_ROOT_PASSWORD"`
 	BucketName     string `yaml:"bucket-name" env-required:"true"`
-	UseSSL         bool   `yaml:"usessl"`
 	PublicEndpoint string `yaml:"public-endpoint" env-required:"true"`
 }
 

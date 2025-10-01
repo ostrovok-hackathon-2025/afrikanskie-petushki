@@ -3,20 +3,14 @@ rest:
   allow_origin: http://localhost:8080,http://localhost:8081,http://localhost:3000
 
 postgres:
-  user: admin
-  password: admin
   host: postgres_secret_guest
   port: 5432
-  database: secret-guest
 
 logger:
   prefix: "app."
   flag: 19
 
 minio:
-  root-user: adminuser
-  root-password: admin1234
-  usessl: false
   endpoint: minio:9000
   bucket-name: report-images
   public-endpoint: http://localhost:9000

@@ -90,6 +90,7 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 		locationHandler,
 		roomHandler,
 		heathHandler,
+		sqlClient,
 	)
 
 	secretGuestWorker := worker.NewSecretGuestWorker(offerRepository, applicationRepository, reportRepository)
