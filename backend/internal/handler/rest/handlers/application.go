@@ -10,7 +10,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
+	appModel "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/application"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 
 	applicationRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 )
@@ -20,6 +22,7 @@ type ApplicationHandler interface {
 	GetApplications(ctx *gin.Context)
 	GetApplicationById(ctx *gin.Context)
 	GetUserAppLimitInfo(ctx *gin.Context)
+	GetAppsByFilter(ctx *gin.Context)
 }
 
 type applicationHandler struct {
@@ -127,7 +130,7 @@ func (h *applicationHandler) GetApplications(ctx *gin.Context) {
 	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
 
-	if pageNumStr == "" || err != nil {
+	if pageSizeStr == "" || err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
@@ -254,6 +257,116 @@ func (h *applicationHandler) GetUserAppLimitInfo(ctx *gin.Context) {
 	resp := &docs.GetUserAppLimitInfoResponse{
 		Limit:          info.Limit,
 		ActiveAppCount: info.ActiveAppCount,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// GetAppsByFilter
+// Add godoc
+// @Summary GetAppsByFilter applications
+// @Description GetAppsByFilter applications by filter with pagination
+// @Tags Application
+// @Param cityId query string false "Id of required city"
+// @Param hotelId query string false "Id of required hotel"
+// @Param roomId query string false "Id of required room"
+// @Param string query string false "status of app"
+// @Param pageNum query int true "Number of page"
+// @Param pageSize query int true "Size of page"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.GetApplicationsResponse "Page of applications by filter"
+// @Failure 400 {string} string "Invalid data for getting applications"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for reviewer"
+// @Failure 404 "Page with given number not found"
+// @Failure 500 "Internal server error"
+// @Router /application/search [get]
+func (h *applicationHandler) GetAppsByFilter(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageSizeStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+	cityIdStr := ctx.Query("cityId")
+	var cityIdOpt pkg.Opt[uuid.UUID]
+	if cityIdStr != "" {
+		cityId, err := uuid.Parse(cityIdStr)
+
+		if err != nil {
+			log.Println("Invalid cityId: ", cityIdStr)
+			ctx.String(http.StatusBadRequest, "invalid cityId")
+			return
+		}
+		cityIdOpt = pkg.NewWithValue(cityId)
+	}
+
+	hotelIdStr := ctx.Query("hotelId")
+	var hotelIdOpt pkg.Opt[uuid.UUID]
+	if hotelIdStr != "" {
+		hotelId, err := uuid.Parse(hotelIdStr)
+
+		if err != nil {
+			log.Println("Invalid hotelId: ", hotelIdStr)
+			ctx.String(http.StatusBadRequest, "invalid hotelId")
+			return
+		}
+		hotelIdOpt = pkg.NewWithValue(hotelId)
+	}
+
+	roomIdStr := ctx.Query("roomId")
+	var roomIdOpt pkg.Opt[uuid.UUID]
+	if roomIdStr != "" {
+		roomId, err := uuid.Parse(roomIdStr)
+
+		if err != nil {
+			log.Println("Invalid roomId: ", roomIdStr)
+			ctx.String(http.StatusBadRequest, "invalid roomId")
+			return
+		}
+		roomIdOpt = pkg.NewWithValue(roomId)
+	}
+
+	status := ctx.Query("status")
+	var statusOpt pkg.Opt[appModel.ApplicationStatus]
+	if status != "" {
+		statusOpt = pkg.NewWithValue(appModel.ApplicationStatus(status))
+	}
+
+	filter := &appModel.Filter{
+		LocationID: cityIdOpt,
+		HotelID:    hotelIdOpt,
+		RoomID:     roomIdOpt,
+		Status:     statusOpt,
+		Limit:      uint64(pageSize),
+		Offset:     uint64(pageNum * pageSize),
+	}
+	apps, count, err := h.useCase.GetByFilter(ctx, filter)
+	if err != nil {
+		log.Println("failed to get applications by filter", err)
+		ctx.Status(http.StatusInternalServerError)
+	}
+	appsResp := make([]*docs.ApplicationResponse, len(apps))
+
+	for i, app := range apps {
+		appsResp[i] = docs.ApplicationModelToResponse(app)
+	}
+
+	resp := &docs.GetApplicationsResponse{
+		Applications: appsResp,
+		PagesCount:   count,
 	}
 
 	ctx.JSON(http.StatusOK, resp)

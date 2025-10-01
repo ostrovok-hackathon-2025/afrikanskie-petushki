@@ -62,13 +62,12 @@ func initApplicationHandler(router *gin.RouterGroup, authProvider auth.Auth, h h
 
 	group := router.Group("/application")
 
-	group.Use(authProvider.RoleProtected("reviewer"))
-
 	{
-		group.POST("/", h.CreateApplication)
-		group.GET("/", h.GetApplications)
-		group.GET("/limit", h.GetUserAppLimitInfo)
-		group.GET("/:id", h.GetApplicationById)
+		group.POST("/", authProvider.RoleProtected("reviewer"), h.CreateApplication)
+		group.GET("/", authProvider.RoleProtected("reviewer"), h.GetApplications)
+		group.GET("/limit", authProvider.RoleProtected("reviewer"), h.GetUserAppLimitInfo)
+		group.GET("/:id", authProvider.RoleProtected("reviewer"), h.GetApplicationById)
+		group.GET("/search", authProvider.RoleProtected("admin"), h.GetAppsByFilter)
 	}
 }
 

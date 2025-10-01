@@ -457,6 +457,60 @@ paths:
       summary: GetUserAppLimitInfo
       tags:
       - Application
+  /application/search:
+    get:
+      description: GetAppsByFilter applications by filter with pagination
+      parameters:
+      - description: Id of required city
+        in: query
+        name: cityId
+        type: string
+      - description: Id of required hotel
+        in: query
+        name: hotelId
+        type: string
+      - description: Id of required room
+        in: query
+        name: roomId
+        type: string
+      - description: status of app
+        in: query
+        name: string
+        type: string
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of applications by filter
+          schema:
+            $ref: '#/definitions/docs.GetApplicationsResponse'
+        "400":
+          description: Invalid data for getting applications
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for reviewer
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: GetAppsByFilter applications
+      tags:
+      - Application
   /hotel/:
     get:
       description: GetHotels all hotels

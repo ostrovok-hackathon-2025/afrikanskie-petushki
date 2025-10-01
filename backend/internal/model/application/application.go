@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 )
 
 type ApplicationStatus string
@@ -35,4 +36,12 @@ func NewApplication(userId, offerId uuid.UUID) *Application {
 		OfferId: offerId,
 		Status:  APPLICATION_CREATED,
 	}
+}
+
+type Filter struct {
+	HotelID       pkg.Opt[uuid.UUID]
+	LocationID    pkg.Opt[uuid.UUID]
+	RoomID        pkg.Opt[uuid.UUID]
+	Status        pkg.Opt[ApplicationStatus]
+	Limit, Offset uint64
 }

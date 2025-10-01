@@ -89,3 +89,18 @@ func (s *ApplicationService) GetUserAppLimitInfo(ctx context.Context, userID uui
 	}
 	return info, nil
 }
+
+func (s *ApplicationService) GetByFilter(ctx context.Context, filter *application.Filter) ([]*application.Application, int, error) {
+	app, err := s.repo.GetByFilter(ctx, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	count, err := s.repo.GetCountByFilter(ctx, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	if count%int(filter.Limit) == 0 {
+		return app, count / int(filter.Limit), nil
+	}
+	return app, count/int(filter.Limit) + 1, nil
+}
