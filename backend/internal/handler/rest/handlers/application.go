@@ -270,7 +270,7 @@ func (h *applicationHandler) GetUserAppLimitInfo(ctx *gin.Context) {
 // @Param cityId query string false "Id of required city"
 // @Param hotelId query string false "Id of required hotel"
 // @Param roomId query string false "Id of required room"
-// @Param string query string false "status of app"
+// @Param status query string false "status of app"
 // @Param pageNum query int true "Number of page"
 // @Param pageSize query int true "Size of page"
 // @Produce json

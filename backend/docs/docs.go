@@ -206,7 +206,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "status of app",
-                        "name": "string",
+                        "name": "status",
                         "in": "query"
                     },
                     {

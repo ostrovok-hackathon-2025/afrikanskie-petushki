@@ -475,7 +475,7 @@ paths:
         type: string
       - description: status of app
         in: query
-        name: string
+        name: status
         type: string
       - description: Number of page
         in: query

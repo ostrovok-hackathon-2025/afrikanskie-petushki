@@ -41,6 +41,7 @@ import type {
   DocsUpdateOfferRequest,
   DocsUserResponse,
   GetApplicationParams,
+  GetApplicationSearchParams,
   GetOfferParams,
   GetOfferSearchParams,
   GetReportMyParams,
@@ -85,6 +86,20 @@ const getApplicationLimit = <TData = AxiosResponse<DocsGetUserAppLimitInfoRespon
  ): Promise<TData> => {
     return axios.get(
       `http://localhost:8081/api/v1/application/limit`,options
+    );
+  }
+
+/**
+ * GetAppsByFilter applications by filter with pagination
+ * @summary GetAppsByFilter applications
+ */
+const getApplicationSearch = <TData = AxiosResponse<DocsGetApplicationsResponse>>(
+    params: GetApplicationSearchParams, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8081/api/v1/application/search`,{
+    ...options,
+        params: {...params, ...options?.params},}
     );
   }
 
@@ -387,10 +402,11 @@ const postUserSignUp = <TData = AxiosResponse<DocsAuthResponse>>(
     );
   }
 
-return {getApplication,postApplication,getApplicationLimit,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyApplicationId,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
+return {getApplication,postApplication,getApplicationLimit,getApplicationSearch,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyApplicationId,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
 export type GetApplicationResult = AxiosResponse<DocsGetApplicationsResponse>
 export type PostApplicationResult = AxiosResponse<DocsCreateApplicationResponse>
 export type GetApplicationLimitResult = AxiosResponse<DocsGetUserAppLimitInfoResponse>
+export type GetApplicationSearchResult = AxiosResponse<DocsGetApplicationsResponse>
 export type GetApplicationIdResult = AxiosResponse<DocsApplicationResponse>
 export type GetHotelResult = AxiosResponse<DocsGetHotelsResponse>
 export type PostHotelResult = AxiosResponse<DocsCreateHotelResponse>
