@@ -1,6 +1,7 @@
 "use client";
 import { getSecretGuestAPI } from "@/api/api";
 import { Button } from "@/components/ui/button";
+import { isAdmin } from "@/lib/helpers";
 import { withAuthHeader } from "@/lib/next-auth/with-auth-header";
 import { Search } from "lucide-react";
 import { getSession, signOut } from "next-auth/react";
@@ -15,6 +16,8 @@ export default function Header() {
   const [username, setUsername] = useState("");
   const router = useRouter();
 
+  const [isAdminAccount, setIsAdmin] = useState(false);
+
   const pathname = usePathname();
 
   useEffect(() => {
@@ -25,6 +28,8 @@ export default function Header() {
         setUsername("$empty");
         return;
       }
+
+      setIsAdmin(isAdmin(session));
 
       const resp = await getUser({ headers: withAuthHeader(session) });
 
@@ -55,7 +60,10 @@ export default function Header() {
           src={"/logo.png"}
           alt="logo"
         ></Image>
-        <h1 className="text-2xl font-bold">Инкогнито</h1>
+        <div className="text-2xl font-bold">Инкогнито</div>
+        {isAdminAccount && (
+          <div className="text-2xl font-bold text-primary">Админ</div>
+        )}
       </div>
 
       <div className="flex gap-3 items-center">
