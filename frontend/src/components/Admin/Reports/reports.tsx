@@ -1,5 +1,11 @@
 import { getSecretGuestAPI } from "@/api/api";
-import { DocsOfferResponse, DocsReportResponse } from "@/api/model";
+import {
+  DocsHotelResponse,
+  DocsLocationResponse,
+  DocsOfferResponse,
+  DocsReportResponse,
+  GetReportSearchParams,
+} from "@/api/model";
 import { withAuthHeader } from "@/lib/next-auth/with-auth-header";
 import { getSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
@@ -21,8 +27,24 @@ import {
 } from "@/components/ui/accordion";
 import { formatDateTime } from "@/lib/helpers";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../../ui/command";
 
-const { getReport, patchReportIdConfirm } = getSecretGuestAPI();
+const { getReportSearch, patchReportIdConfirm, getHotel, getLocation } =
+  getSecretGuestAPI();
+
+const STATUS_MAP = new Map<string, string>([
+  ["created", "создан"],
+  ["filled", "заполнен"],
+  ["accepted", "принят"],
+  ["declined", "отклонен"],
+]);
 
 function ReportCard({
   id,
@@ -169,37 +191,171 @@ function ReportCard({
 }
 
 export default function Reports() {
-  const [reports, setReports] = useState<DocsReportResponse[]>([]);
-  const [pageNum, setPageNum] = useState(0);
-  const [pagesCount, setPagesCount] = useState(1);
+  const [hotels, setHotels] = useState<DocsHotelResponse[]>([]);
+  const [hotel, setHotel] = useState<DocsHotelResponse | null>(null);
 
-  const search = () => {
-    if (location === null) return;
-
+  useEffect(() => {
     (async () => {
       const session = await getSession();
 
       if (!session) return redirect("/log-in");
 
-      const resp = await getReport(
-        { pageNum: pageNum, pageSize: 5 },
-        { headers: withAuthHeader(session) }
-      );
+      const resp = await getHotel({ headers: withAuthHeader(session) });
+
+      setHotels(resp.data.hotels ?? []);
+    })();
+  }, []);
+  const [locations, setLocations] = useState<DocsLocationResponse[]>([]);
+  const [location, setLocation] = useState<DocsLocationResponse | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const session = await getSession();
+
+      if (!session) return;
+
+      const resp = await getLocation({ headers: withAuthHeader(session) });
+
+      setLocations(resp.data.locations ?? []);
+    })();
+  }, []);
+  const [status, setStatus] = useState<string | null>(null);
+
+  const [reports, setReports] = useState<DocsReportResponse[]>([]);
+  const [pageNum, setPageNum] = useState(0);
+  const [pagesCount, setPagesCount] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      const session = await getSession();
+
+      if (!session) return redirect("/log-in");
+
+      const filters: GetReportSearchParams = {
+        pageNum: pageNum,
+        pageSize: 3,
+      };
+
+      if (location) filters.cityId = location.id;
+      if (hotel) filters.hotelId = hotel.id;
+      if (status) filters.status = status;
+
+      console.log(filters);
+
+      const resp = await getReportSearch(filters, {
+        headers: withAuthHeader(session),
+      });
 
       setPagesCount(resp.data.pages_count ?? 0);
       setReports(resp.data.reports ?? []);
     })();
-  };
-
-  useEffect(() => {
-    search();
-  }, [pageNum]);
+  }, [pageNum, location, hotel, status]);
 
   return (
     <div className="w-full h-full">
+      <div className="flex w-full mb-4 gap-4">
+        <div className="w-full rounded-lg bg-accent box-border p-2 flex items-center justify-between">
+          <div className="font-gain">Отель: {hotel?.name ?? "не выбран"}</div>
+
+          <Popover>
+            <PopoverTrigger asChild className="flex-shrink-0">
+              <Button onClick={() => setHotel(null)}>выбрать</Button>
+            </PopoverTrigger>
+
+            <PopoverContent>
+              <Command>
+                <CommandInput placeholder="введите название отеля..."></CommandInput>
+
+                <CommandList>
+                  <CommandGroup>
+                    {hotels.map((e, i) => (
+                      <CommandItem
+                        key={e.id}
+                        value={e.name}
+                        onSelect={() => setHotel(e)}
+                      >
+                        {e.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      <div className="flex w-full mb-12 gap-4">
+        <div className="w-1/2 rounded-lg bg-accent box-border p-2 flex items-center justify-between">
+          <div className="font-gain">
+            Город: {location?.name ?? "не выбран"}
+          </div>
+
+          <Popover>
+            <PopoverTrigger asChild className="flex-shrink-0">
+              <Button onClick={() => setLocation(null)}>выбрать</Button>
+            </PopoverTrigger>
+
+            <PopoverContent>
+              <Command>
+                <CommandInput placeholder="введите город..."></CommandInput>
+
+                <CommandList>
+                  <CommandGroup>
+                    {locations.map((e, i) => (
+                      <CommandItem
+                        key={e.id}
+                        value={e.name}
+                        onSelect={() => setLocation(e)}
+                      >
+                        {e.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="w-1/2 rounded-lg bg-accent box-border p-2 flex items-center justify-between">
+          <div className="font-gain">
+            Статус: {STATUS_MAP.get(status ?? "") ?? "не выбран"}
+          </div>
+
+          <Popover>
+            <PopoverTrigger asChild className="flex-shrink-0">
+              <Button onClick={() => setStatus(null)}>выбрать</Button>
+            </PopoverTrigger>
+
+            <PopoverContent>
+              <Command>
+                <CommandInput placeholder="введите город..."></CommandInput>
+
+                <CommandList>
+                  <CommandGroup>
+                    {Array.from(
+                      STATUS_MAP.keys().map((e, i) => (
+                        <CommandItem
+                          key={e}
+                          value={e}
+                          onSelect={() => setStatus(e)}
+                        >
+                          {STATUS_MAP.get(e)}
+                        </CommandItem>
+                      ))
+                    )}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-4 mb-5">
         {reports.map((e, i) => (
-          <ReportCard key={i} {...e} />
+          <ReportCard key={e.id} {...e} />
         ))}
       </div>
 

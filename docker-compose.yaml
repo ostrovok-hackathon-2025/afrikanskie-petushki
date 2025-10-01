@@ -91,7 +91,7 @@ services:
     networks:
       - main
     volumes:
-      - 'minio-data:/data'
+      - 'minio-data:/mnt/data'
 
 networks:
   main:
