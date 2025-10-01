@@ -43,8 +43,7 @@ func (r *repo) Edit(ctx context.Context, edit model.Edit) error {
 func (r *repo) EditStatus(ctx context.Context, offerID uuid.UUID, status string) error {
 	query, args, err := sq.Update("offer").
 		Set("status", status).
-		Where(sq.Eq{"id": offerID}).
-		ToSql()
+		Where(sq.Eq{"id": offerID}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return err
 	}

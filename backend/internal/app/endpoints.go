@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/config"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/handlers"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
@@ -32,6 +33,8 @@ func initAllEndpoints(
 	hotelHandler handlers.HotelHandler,
 	locationHandler handlers.LocationHandler,
 	roomHandler handlers.RoomHandler,
+
+	client *sqlx.DB,
 ) {
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	engine.Use(cors.CORS(cfg.AllowOrigin))
@@ -45,6 +48,8 @@ func initAllEndpoints(
 	initHotelHandler(router, authProvider, hotelHandler)
 	initLocationHandler(router, authProvider, locationHandler)
 	initRoomHandler(router, authProvider, roomHandler)
+
+	router.POST("test", InitDataHandler(client))
 }
 
 func initUserEndpoints(router *gin.RouterGroup, authProvider auth.Auth, h handlers.UserHandler) {

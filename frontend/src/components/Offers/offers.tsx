@@ -42,6 +42,7 @@ function Offer({
   task,
   participants_count,
   participants_limit,
+  expiration_at,
 }: DocsOfferResponse) {
   const router = useRouter();
 
@@ -79,7 +80,8 @@ function Offer({
   return (
     <div className="w-full box-border rounded-lg border p-4">
       <div className="font-gain text-muted-foreground text-base mb-2">
-        Номер {room_name} в отеле
+        Розыгрыш {formatDateTime(expiration_at ?? "", 0)} номера {room_name} в
+        отеле
       </div>
       <div className="font-gain font-bold text-3xl mb-4">{hotel_name}</div>
 

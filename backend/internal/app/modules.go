@@ -26,7 +26,7 @@ func initMinioConnection(cfg *config.MinioConfig) (*minio.Client, error) {
 
 	client, err := minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.RootUser, cfg.RootPassword, ""),
-		Secure: cfg.UseSSL,
+		Secure: false,
 	})
 
 	if err != nil {

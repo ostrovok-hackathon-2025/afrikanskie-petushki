@@ -56,7 +56,7 @@ export default function ApplicationCard({
       <div className="font-gain font-bold text-3xl mb-5">{hotel_name}</div>
       <div
         className={cn(
-          "w-full flex justify-between",
+          "w-full flex justify-between mb-1",
           status === "__app_accepted" && showViewReport && "mb-9"
         )}
       >
@@ -65,6 +65,13 @@ export default function ApplicationCard({
         </div>
         <div className={cn("font-bold", statusCol)}>{statusName}</div>
       </div>
+      {status === "__app_created" && (
+        <div className="text-foreground-muted text-[12px]">
+          результаты станут доступны в течение 1-й минуты после времени
+          розыгрыша
+        </div>
+      )}
+
       {status === "__app_accepted" && showViewReport && (
         <div className="w-full flex justify-start">
           <Button onClick={handleRedirect}>перейти к отчету</Button>

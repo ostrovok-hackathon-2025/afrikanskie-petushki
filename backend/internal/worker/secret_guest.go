@@ -36,7 +36,7 @@ func NewSecretGuestWorker(
 func (w *SecretGuestWorker) Start() {
 	log.Println("Worker started")
 
-	_, err := w.scheduler.Every(5).Minutes().Do(func() {
+	_, err := w.scheduler.Every(1).Minutes().Do(func() {
 		w.process()
 	})
 	if err != nil {
@@ -74,7 +74,7 @@ func (w *SecretGuestWorker) process() {
 
 	for _, i := range offers {
 		if err := w.offerRepo.EditStatus(ctx, i.ID, "in_progress"); err != nil {
-			log.Printf("❌ Error chance status %v", err)
+			log.Printf("❌ Error change status %v", err)
 			continue
 		}
 

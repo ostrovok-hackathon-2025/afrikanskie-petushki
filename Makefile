@@ -38,3 +38,8 @@ backend_rebuild: down backend_build backend_up
 deploy_local:
 	docker compose --env-file ./.env.example build --no-cache
 	docker compose --env-file ./.env.example up -d
+
+.PHONY: create_test_data
+create_test_data:
+	docker exec -i postgres_secret_guest psql -U admin -d secret-guest -f /var/lib/testdata/fill-all.sql
+	echo "A drawing for a room at the Moscow Grand Hotel has been launched. The results are in 5 minutes. Hurry up to submit an application."
