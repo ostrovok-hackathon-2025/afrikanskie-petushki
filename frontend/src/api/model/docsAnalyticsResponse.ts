@@ -6,10 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface DocsUserResponse {
-  email?: string;
-  id?: string;
-  is_admin?: boolean;
-  ostrovok_login?: string;
-  rating?: number;
+export interface DocsAnalyticsResponse {
+  accepted_reports?: number;
+  applications_received?: number;
+  completed_offers?: number;
 }

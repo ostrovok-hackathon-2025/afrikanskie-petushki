@@ -12,6 +12,7 @@ import type {
 } from 'axios';
 
 import type {
+  DocsAnalyticsResponse,
   DocsApplicationResponse,
   DocsAuthResponse,
   DocsConfirmReport,
@@ -51,6 +52,18 @@ import type {
 } from './model';
 
 export const getSecretGuestAPI = () => {
+/**
+ * Calc and return metrics for analytics
+ * @summary Get analytics
+ */
+const getAnalytics = <TData = AxiosResponse<DocsAnalyticsResponse>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8081/api/v1/analytics/`,options
+    );
+  }
+
 /**
  * GetForPage all applications with pagination
  * @summary GetForPage applications
@@ -417,7 +430,8 @@ const postUserSignUp = <TData = AxiosResponse<DocsAuthResponse>>(
     );
   }
 
-return {getApplication,postApplication,getApplicationLimit,getApplicationSearch,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyApplicationId,getReportMyId,getReportSearch,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
+return {getAnalytics,getApplication,postApplication,getApplicationLimit,getApplicationSearch,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyApplicationId,getReportMyId,getReportSearch,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
+export type GetAnalyticsResult = AxiosResponse<DocsAnalyticsResponse>
 export type GetApplicationResult = AxiosResponse<DocsGetApplicationsResponse>
 export type PostApplicationResult = AxiosResponse<DocsCreateApplicationResponse>
 export type GetApplicationLimitResult = AxiosResponse<DocsGetUserAppLimitInfoResponse>
