@@ -14,6 +14,9 @@ FROM alpine:latest
 
 WORKDIR /root
 
+# Устанавливаем curl
+RUN apk --no-cache add curl
+
 # copy compiled service from previous stage
 COPY --from=builder /app/backend-app .
 
