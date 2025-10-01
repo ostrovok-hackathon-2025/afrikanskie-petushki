@@ -46,6 +46,7 @@ import type {
   GetOfferSearchParams,
   GetReportMyParams,
   GetReportParams,
+  GetReportSearchParams,
   PatchReportIdBody
 } from './model';
 
@@ -285,6 +286,20 @@ const getReportMyId = <TData = AxiosResponse<DocsReportResponse>>(
   }
 
 /**
+ * GetReportsByFilter reports by filter with pagination
+ * @summary GetReportsByFilter reports by filter
+ */
+const getReportSearch = <TData = AxiosResponse<DocsGetReportsResponse>>(
+    params: GetReportSearchParams, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8081/api/v1/report/search`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+/**
  * GetForPage report by id
  * @summary GetForPage by id
  */
@@ -402,7 +417,7 @@ const postUserSignUp = <TData = AxiosResponse<DocsAuthResponse>>(
     );
   }
 
-return {getApplication,postApplication,getApplicationLimit,getApplicationSearch,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyApplicationId,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
+return {getApplication,postApplication,getApplicationLimit,getApplicationSearch,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyApplicationId,getReportMyId,getReportSearch,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
 export type GetApplicationResult = AxiosResponse<DocsGetApplicationsResponse>
 export type PostApplicationResult = AxiosResponse<DocsCreateApplicationResponse>
 export type GetApplicationLimitResult = AxiosResponse<DocsGetUserAppLimitInfoResponse>
@@ -421,6 +436,7 @@ export type GetReportResult = AxiosResponse<DocsGetReportsResponse>
 export type GetReportMyResult = AxiosResponse<DocsGetReportsResponse>
 export type GetReportMyApplicationIdResult = AxiosResponse<DocsGetByApplicationIdResponse>
 export type GetReportMyIdResult = AxiosResponse<DocsReportResponse>
+export type GetReportSearchResult = AxiosResponse<DocsGetReportsResponse>
 export type GetReportIdResult = AxiosResponse<DocsReportResponse>
 export type PatchReportIdResult = AxiosResponse<void>
 export type PatchReportIdConfirmResult = AxiosResponse<void>

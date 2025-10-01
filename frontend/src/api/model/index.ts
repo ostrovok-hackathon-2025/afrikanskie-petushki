@@ -44,4 +44,5 @@ export * from './getOfferParams';
 export * from './getOfferSearchParams';
 export * from './getReportMyParams';
 export * from './getReportParams';
+export * from './getReportSearchParams';
 export * from './patchReportIdBody';

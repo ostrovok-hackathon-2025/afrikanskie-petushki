@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -479,15 +480,16 @@ func (r *repo) GetByFilter(ctx context.Context, filter model.Filter) ([]model.Re
 		Join("room m ON m.id = o.room_id").
 		OrderBy("r.expiration_at DESC, p.id")
 	if status, ok := filter.Status.Get(); ok {
-		sql.Where(sq.Eq{"r.status": status})
+		sql = sql.Where(sq.Eq{"r.status": status})
 	}
 	if hotelID, ok := filter.HotelID.Get(); ok {
-		sql.Where(sq.Eq{"o.hotel_id": hotelID})
+		sql = sql.Where(sq.Eq{"o.hotel_id": hotelID})
 	}
 	if locationID, ok := filter.LocationID.Get(); ok {
-		sql.Where(sq.Eq{"h.location_id": locationID})
+		sql = sql.Where(sq.Eq{"h.location_id": locationID})
 	}
 	query, args, err := sql.Limit(filter.Limit).Offset(filter.Offset).PlaceholderFormat(sq.Dollar).ToSql()
+	log.Println(query)
 	if err != nil {
 		return nil, err
 	}
