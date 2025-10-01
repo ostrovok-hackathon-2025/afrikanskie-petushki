@@ -3,6 +3,7 @@ import "ldrs/react/Bouncy.css";
 import { useEffect, useMemo, useState } from "react";
 import { loadReport, ReportInfo } from "../model";
 import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
 
 interface Grade {
   result: string;
@@ -45,7 +46,7 @@ export default function ReportView({ id, goToEdit }: ReportViewProps) {
   useEffect(() => {
     (async () => {
       const res = await loadReport(id);
-
+      if (!res) return redirect("/log-in");
       setReportInfo(res);
     })();
   }, []);
@@ -105,12 +106,16 @@ export default function ReportView({ id, goToEdit }: ReportViewProps) {
 
           <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 mb-8">
             {reportInfo.images.map((e, i) => (
-              <img
+              <div
                 key={i}
-                src={e.url}
-                alt="image"
-                className="cover w-full h-[175px] rounded-lg"
-              />
+                className="h-[200px] relative overflow-hidden rounded-lg"
+              >
+                <img
+                  src={e.url}
+                  alt="image"
+                  className="absolute top-1/2 left-1/2 cover rounded-lg -translate-x-1/2 -translate-y-1/2"
+                />
+              </div>
             ))}
           </div>
         </>

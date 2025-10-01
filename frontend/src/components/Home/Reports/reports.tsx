@@ -56,33 +56,8 @@ function ReportCard({ status, expiration_at, id }: DocsReportResponse) {
 
 export default function Reports() {
   const [pageNum, setPageNum] = useState(0);
-  const [pagesCount, setPagesCount] = useState(10);
-  const [reports, setReports] = useState<DocsReportResponse[]>([
-    {
-      expiration_at: "1990-03-02 08:30:00",
-      id: "1",
-      images: [],
-      status: "created",
-    },
-    {
-      expiration_at: "1990-04-03 08:30:00",
-      id: "2",
-      images: [],
-      status: "filled",
-    },
-    {
-      expiration_at: "1990-05-04 08:30:00",
-      id: "3",
-      images: [],
-      status: "accepted",
-    },
-    {
-      expiration_at: "1990-06-05 08:30:00",
-      id: "4",
-      images: [],
-      status: "declined",
-    },
-  ]);
+  const [pagesCount, setPagesCount] = useState(0);
+  const [reports, setReports] = useState<DocsReportResponse[]>([]);
 
   const router = useRouter();
 

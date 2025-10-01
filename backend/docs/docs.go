@@ -817,6 +817,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/report/my/application/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get my report by application id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get by application id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of corresponding application",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requested report",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetByApplicationIdResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting report by id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "User is not reviewer or this report does not belong to user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Report with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/report/my/{id}": {
             "get": {
                 "security": [
@@ -952,13 +1007,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Report text",
                         "name": "text",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Report images",
-                        "name": "images",
                         "in": "formData",
                         "required": true
                     }
@@ -1510,6 +1558,14 @@ const docTemplate = `{
                 }
             }
         },
+        "docs.GetByApplicationIdResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.GetHotelsResponse": {
             "type": "object",
             "properties": {
@@ -1688,7 +1744,16 @@ const docTemplate = `{
         "docs.ReportResponse": {
             "type": "object",
             "properties": {
+                "check_in_at": {
+                    "type": "string"
+                },
+                "check_out_at": {
+                    "type": "string"
+                },
                 "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_name": {
                     "type": "string"
                 },
                 "id": {
@@ -1700,10 +1765,22 @@ const docTemplate = `{
                         "$ref": "#/definitions/docs.ReportImageResponse"
                     }
                 },
+                "location_name": {
+                    "type": "string"
+                },
+                "room_name": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 },
+                "task": {
+                    "type": "string"
+                },
                 "text": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -1791,7 +1868,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8081",
 	BasePath:         "/api/v1",
 	Schemes:          []string{"http", "https"},
 	Title:            "Secret Guest API",

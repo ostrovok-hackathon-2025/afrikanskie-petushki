@@ -11,6 +11,7 @@ type Config struct {
 	LoggerConfig   `yaml:"logger" env-required:"true"`
 	RestConfig     `yaml:"rest" env-required:"true"`
 	PostgresConfig `yaml:"postgres" env-required:"true"`
+	MinioConfig    `yaml:"minio" env-required:"true"`
 }
 
 type RestConfig struct {
@@ -29,6 +30,15 @@ type PostgresConfig struct {
 type LoggerConfig struct {
 	Prefix string `yaml:"prefix" env-required:"false"`
 	Flag   int    `yaml:"flag" env-required:"false"`
+}
+
+type MinioConfig struct {
+	Endpoint       string `yaml:"endpoint" env-required:"true"`
+	RootUser       string `yaml:"root-user" env-required:"true"`
+	RootPassword   string `yaml:"root-password" env-required:"true"`
+	BucketName     string `yaml:"bucket-name" env-required:"true"`
+	UseSSL         bool   `yaml:"usessl"`
+	PublicEndpoint string `yaml:"public-endpoint" env-required:"true"`
 }
 
 func MustLoadConfig() *Config {

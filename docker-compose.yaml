@@ -79,6 +79,7 @@ services:
       retries: 3
     ports:
       - "9090:9090"
+      - "9000:9000"
     networks:
       - main
     volumes:
@@ -89,4 +90,4 @@ networks:
 
 volumes:
   secret-guest-pgdata: { }
-  minio-data: {}
+  minio-data: { }

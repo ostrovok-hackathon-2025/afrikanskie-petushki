@@ -24,13 +24,17 @@ import { Button } from "@/components/ui/button";
 
 const { getReport, patchReportIdConfirm } = getSecretGuestAPI();
 
-function ReportCard({ id, text, status, images }: DocsReportResponse) {
-  const room_name = "mock_room";
-  const hotel_name = "mock_hotel";
-  const check_in_at = "2025-12-22 14:00:00";
-  const check_out_at = "2025-12-22 14:00:00";
-  const task = "mock_task";
-
+function ReportCard({
+  id,
+  text,
+  status,
+  images,
+  check_in_at,
+  check_out_at,
+  room_name,
+  hotel_name,
+  task,
+}: DocsReportResponse) {
   const [statusText, setStatusText] = useState(status);
 
   const waiting = useMemo(
@@ -110,12 +114,16 @@ function ReportCard({ id, text, status, images }: DocsReportResponse) {
           <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 mb-8">
             {images &&
               images.map((e, i) => (
-                <img
+                <div
                   key={i}
-                  src={e.link}
-                  alt="image"
-                  className="cover w-full h-[175px] rounded-lg"
-                />
+                  className="h-[200px] relative overflow-hidden rounded-lg"
+                >
+                  <img
+                    src={e.link}
+                    alt="image"
+                    className="absolute top-1/2 left-1/2 cover rounded-lg -translate-x-1/2 -translate-y-1/2"
+                  />
+                </div>
               ))}
           </div>
         </>
