@@ -32,9 +32,11 @@ func initAllEndpoints(
 	hotelHandler handlers.HotelHandler,
 	locationHandler handlers.LocationHandler,
 	roomHandler handlers.RoomHandler,
+	healthHandler handlers.HealthHandler,
 ) {
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	engine.Use(cors.CORS(cfg.AllowOrigin))
+	engine.GET("/health", healthHandler.Health)
 
 	router := engine.Group("/api/v1")
 
