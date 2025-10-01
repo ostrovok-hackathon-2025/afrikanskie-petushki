@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -16,6 +17,7 @@ type Repo interface {
 	CreateUser(ctx context.Context, user *model.User, passwordHash string) error
 	UserExists(ctx context.Context, login string) (bool, error)
 	GetUserById(ctx context.Context, userId uuid.UUID) (*model.User, error)
+	UpdateRating(ctx context.Context, userId uuid.UUID, rating int) error
 }
 
 type repo struct {
@@ -83,4 +85,27 @@ func (r *repo) GetUserById(ctx context.Context, userId uuid.UUID) (*model.User, 
 	}
 
 	return user.ToUserModel(), nil
+}
+
+func (r *repo) UpdateRating(ctx context.Context, userId uuid.UUID, rating int) error {
+
+	rating = validation.ValidateRating(rating)
+
+	query := `UPDATE "user" SET rating = $1 WHERE id = $2`
+
+	result, err := r.sqlClient.ExecContext(ctx, query, rating, userId)
+	if err != nil {
+		return fmt.Errorf("failed to update rating: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
 }
