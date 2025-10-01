@@ -93,6 +93,7 @@ func initReportHandler(router *gin.RouterGroup, authProvider auth.Auth, h handle
 
 	{
 		group.GET("/", authProvider.RoleProtected("admin"), h.GetReports)
+		group.GET("/search", authProvider.RoleProtected("admin"), h.GetReportsByFilter)
 		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetReportById)
 		group.PATCH("/:id/confirm", authProvider.RoleProtected("admin"), h.ConfirmReport)
 

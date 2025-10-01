@@ -26,6 +26,7 @@ type Usecase interface {
 	Update(ctx context.Context, report report2.Report, images []*multipart.FileHeader) error
 	UpdateStatus(ctx context.Context, report report2.Report) error
 	GetByApplicationId(ctx context.Context, applicationId, userId uuid.UUID) (uuid.UUID, error)
+	GetByFilter(ctx context.Context, filter report2.Filter) ([]report2.Report, int, error)
 }
 
 type usecase struct {
@@ -144,4 +145,21 @@ func (u *usecase) GetByApplicationId(ctx context.Context, applicationId, userId 
 	}
 
 	return id, nil
+}
+
+func (u *usecase) GetByFilter(ctx context.Context, filter report2.Filter) ([]report2.Report, int, error) {
+	reports, err := u.db.GetByFilter(ctx, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	count, err := u.db.GetCountByFilter(ctx, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	// Не считая остаток
+	withOutRemainder := count / int(filter.Limit)
+	if count%int(filter.Limit) == 0 {
+		return reports, withOutRemainder, nil
+	}
+	return reports, withOutRemainder + 1, nil
 }

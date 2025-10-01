@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/report"
@@ -23,6 +24,8 @@ type Repo interface {
 	GetImagesByReportID(ctx context.Context, reportID uuid.UUID) ([]model.Image, error)
 	UpdateStatus(ctx context.Context, report model.Report) error
 	GetByApplicationId(ctx context.Context, applicationId uuid.UUID) (uuid.UUID, uuid.UUID, error)
+	GetByFilter(ctx context.Context, filter model.Filter) ([]model.Report, error)
+	GetCountByFilter(ctx context.Context, filter model.Filter) (int, error)
 }
 
 type repo struct {
@@ -37,6 +40,23 @@ const queryCreate = `
 	INSERT INTO report (id, application_id, expiration_at, status, text)
 	VALUES ($1, $2, $3, $4, $5)
 `
+
+type getRow struct {
+	ID            uuid.UUID  `db:"id"`
+	UserID        uuid.UUID  `db:"user_id"`
+	ApplicationID uuid.UUID  `db:"application_id"`
+	ExpirationAt  time.Time  `db:"expiration_at"`
+	Status        string     `db:"status"`
+	Text          string     `db:"text"`
+	ImageID       *uuid.UUID `db:"image_id"`
+	ImageLink     *string    `db:"image_link"`
+	HotelName     string     `db:"hotel_name"`
+	LocationName  string     `db:"location_name"`
+	RoomName      string     `db:"room_name"`
+	Task          string     `db:"task"`
+	CheckInAt     time.Time  `db:"check_in_at"`
+	CheckOutAt    time.Time  `db:"check_out_at"`
+}
 
 func (r *repo) Create(ctx context.Context, createData model.Report) error {
 	_, err := r.db.ExecContext(
@@ -266,22 +286,7 @@ const queryGet = `
     `
 
 func (r *repo) Get(ctx context.Context, limit, offset int64) ([]model.Report, error) {
-	var rows []struct {
-		ID            uuid.UUID  `db:"id"`
-		UserID        uuid.UUID  `db:"user_id"`
-		ApplicationID uuid.UUID  `db:"application_id"`
-		ExpirationAt  time.Time  `db:"expiration_at"`
-		Status        string     `db:"status"`
-		Text          string     `db:"text"`
-		ImageID       *uuid.UUID `db:"image_id"`
-		ImageLink     *string    `db:"image_link"`
-		HotelName     string     `db:"hotel_name"`
-		LocationName  string     `db:"location_name"`
-		RoomName      string     `db:"room_name"`
-		Task          string     `db:"task"`
-		CheckInAt     time.Time  `db:"check_in_at"`
-		CheckOutAt    time.Time  `db:"check_out_at"`
-	}
+	var rows []getRow
 
 	err := sqlx.SelectContext(ctx, r.db, &rows, queryGet, limit, offset)
 	if err != nil {
@@ -292,47 +297,7 @@ func (r *repo) Get(ctx context.Context, limit, offset int64) ([]model.Report, er
 		return []model.Report{}, nil
 	}
 
-	// Группируем строки по отчетам
-	reportsMap := make(map[uuid.UUID]*model.Report)
-	reportOrder := make([]uuid.UUID, 0, len(rows)) // Для сохранения порядка
-
-	for _, row := range rows {
-		if _, exists := reportsMap[row.ID]; !exists {
-			reportsMap[row.ID] = &model.Report{
-				ID:            row.ID,
-				UserID:        row.UserID,
-				ApplicationID: row.ApplicationID,
-				ExpirationAt:  row.ExpirationAt,
-				Status:        row.Status,
-				Text:          row.Text,
-				LocationName:  row.LocationName,
-				HotelName:     row.HotelName,
-				RoomName:      row.RoomName,
-				Task:          row.Task,
-				Images:        make([]model.Image, 0),
-			}
-			reportOrder = append(reportOrder, row.ID)
-		}
-
-		// Добавляем фото, если оно есть
-		if row.ImageID != nil && row.ImageLink != nil {
-			report := reportsMap[row.ID]
-			report.Images = append(report.Images, model.Image{
-				ID:   *row.ImageID,
-				Link: *row.ImageLink,
-			})
-		}
-	}
-
-	// Восстанавливаем порядок из запроса
-	reports := make([]model.Report, 0, len(reportOrder))
-	for _, reportID := range reportOrder {
-		if report, exists := reportsMap[reportID]; exists {
-			reports = append(reports, *report)
-		}
-	}
-
-	return reports, nil
+	return convertGetDtoToModel(rows), nil
 }
 
 const queryCount = `SELECT COUNT(*) FROM report`
@@ -487,4 +452,121 @@ func (r *repo) GetByApplicationId(ctx context.Context, applicationId uuid.UUID) 
 	}
 
 	return res.Id, res.UserId, nil
+}
+
+func (r *repo) GetByFilter(ctx context.Context, filter model.Filter) ([]model.Report, error) {
+	sql := sq.Select(
+		"r.id",
+		"a.user_id",
+		"r.application_id",
+		"r.expiration_at",
+		"r.status",
+		"r.text",
+		"p.id as image_id",
+		"p.s3_link as image_link",
+		"h.name as hotel_name",
+		"l.name as location_name",
+		"o.task as task",
+		"o.check_in_at",
+		"o.check_out_at",
+		"m.name as room_name").
+		From("report r").
+		LeftJoin("photo p ON r.id = p.report_id").
+		LeftJoin("application a ON a.id = r.application_id").
+		Join("offer o ON o.id = a.offer_id").
+		Join("hotel h ON h.id = o.hotel_id").
+		Join("location l ON l.id = h.location_id").
+		Join("room m ON m.id = o.room_id").
+		OrderBy("r.expiration_at DESC, p.id")
+	if status, ok := filter.Status.Get(); ok {
+		sql.Where(sq.Eq{"r.status": status})
+	}
+	if hotelID, ok := filter.HotelID.Get(); ok {
+		sql.Where(sq.Eq{"o.hotel_id": hotelID})
+	}
+	if locationID, ok := filter.LocationID.Get(); ok {
+		sql.Where(sq.Eq{"h.location_id": locationID})
+	}
+	query, args, err := sql.Limit(filter.Limit).Offset(filter.Offset).PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var rows []getRow
+	err = r.db.SelectContext(ctx, &rows, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return []model.Report{}, nil
+	}
+	return convertGetDtoToModel(rows), nil
+}
+
+func (r *repo) GetCountByFilter(ctx context.Context, filter model.Filter) (int, error) {
+	sql := sq.Select("count(*)").
+		From("report r").
+		LeftJoin("photo p ON r.id = p.report_id").
+		LeftJoin("application a ON a.id = r.application_id").
+		Join("offer o ON o.id = a.offer_id").
+		Join("hotel h ON h.id = o.hotel_id").
+		Join("location l ON l.id = h.location_id").
+		Join("room m ON m.id = o.room_id")
+	if status, ok := filter.Status.Get(); ok {
+		sql = sql.Where(sq.Eq{"r.status": status})
+	}
+	if hotelID, ok := filter.HotelID.Get(); ok {
+		sql = sql.Where(sq.Eq{"o.hotel_id": hotelID})
+	}
+	if locationID, ok := filter.LocationID.Get(); ok {
+		sql = sql.Where(sq.Eq{"h.location_id": locationID})
+	}
+	query, args, err := sql.PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return 0, err
+	}
+	var count int
+	err = r.db.GetContext(ctx, &count, query, args...)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func convertGetDtoToModel(rows []getRow) []model.Report {
+	// Группируем строки по отчетам
+	reportsMap := make(map[uuid.UUID]*model.Report)
+
+	for _, row := range rows {
+		if _, exists := reportsMap[row.ID]; !exists {
+			reportsMap[row.ID] = &model.Report{
+				ID:            row.ID,
+				ApplicationID: row.ApplicationID,
+				UserID:        row.UserID,
+				ExpirationAt:  row.ExpirationAt,
+				Status:        row.Status,
+				Text:          row.Text,
+				LocationName:  row.LocationName,
+				HotelName:     row.HotelName,
+				RoomName:      row.RoomName,
+				Task:          row.Task,
+				Images:        make([]model.Image, 0),
+			}
+		}
+
+		// Добавляем фото, если оно есть
+		if row.ImageID != nil && row.ImageLink != nil {
+			report := reportsMap[row.ID]
+			report.Images = append(report.Images, model.Image{
+				ID:   *row.ImageID,
+				Link: *row.ImageLink,
+			})
+		}
+	}
+
+	// Конвертируем map в slice
+	reports := make([]model.Report, 0, len(reportsMap))
+	for _, report := range reportsMap {
+		reports = append(reports, *report)
+	}
+	return reports
 }
