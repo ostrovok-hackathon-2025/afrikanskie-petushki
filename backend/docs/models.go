@@ -101,6 +101,7 @@ type UserResponse struct {
 	OstrovokLogin string `json:"ostrovok_login"`
 	Email         string `json:"email"`
 	IsAdmin       bool   `json:"is_admin"`
+	Rating        int    `json:"rating"`
 }
 
 func UserModelToResponse(u *user.User) *UserResponse {
@@ -109,6 +110,7 @@ func UserModelToResponse(u *user.User) *UserResponse {
 		OstrovokLogin: u.OstrovokLogin,
 		Email:         u.Email,
 		IsAdmin:       u.IsAdmin,
+		Rating:        u.Rating,
 	}
 }
 

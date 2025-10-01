@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 
 	"github.com/google/uuid"
 	repo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
@@ -20,6 +21,8 @@ func (u *useCase) GetMe(ctx context.Context, userId uuid.UUID) (*model.User, err
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user from repo: %w", err)
 	}
+
+	validation.ValidateRating(user.Rating)
 
 	return user, err
 }
