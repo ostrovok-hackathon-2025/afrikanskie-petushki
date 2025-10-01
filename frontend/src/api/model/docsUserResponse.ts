@@ -11,4 +11,5 @@ export interface DocsUserResponse {
   id?: string;
   is_admin?: boolean;
   ostrovok_login?: string;
+  rating?: number;
 }
