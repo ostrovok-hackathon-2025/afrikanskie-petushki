@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 )
 
 type ImageURL string
@@ -36,4 +37,11 @@ func NewReport(applicationId uuid.UUID, ExpirationAt time.Time) Report {
 		ExpirationAt:  ExpirationAt,
 		Status:        "created",
 	}
+}
+
+type Filter struct {
+	Status        pkg.Opt[string]
+	HotelID       pkg.Opt[uuid.UUID]
+	LocationID    pkg.Opt[uuid.UUID]
+	Limit, Offset uint64
 }

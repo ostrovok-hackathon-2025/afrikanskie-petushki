@@ -13,6 +13,7 @@ import (
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 	report2 "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/report"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/report"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 )
 
 type ReportHandler interface {
@@ -23,6 +24,7 @@ type ReportHandler interface {
 	UpdateReport(ctx *gin.Context)
 	ConfirmReport(ctx *gin.Context)
 	GetMyReportByApplicationId(ctx *gin.Context)
+	GetReportsByFilter(ctx *gin.Context)
 }
 
 type reportHandler struct {
@@ -382,20 +384,90 @@ func (h *reportHandler) ConfirmReport(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func InitReportHandlers(router *gin.RouterGroup, authProvider auth.Auth) {
-	h := &reportHandler{}
+// GetReportsByFilter
+// Add godoc
+// @Summary GetReportsByFilter reports by filter
+// @Description GetReportsByFilter reports by filter with pagination
+// @Tags Report
+// @Param cityId query string false "cityId if report"
+// @Param hotelId query string false "hotelId of report"
+// @Param status query string false "Status of report"
+// @Param pageNum query int true "Number of page"
+// @Param pageSize query int true "Size of page"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.GetReportsResponse "Page of reports"
+// @Failure 400 {string} string "Invalid data for getting reports"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for admin"
+// @Failure 404 "Page with given number not found"
+// @Failure 500 "Internal server error"
+// @Router /report/search [get]
+func (h *reportHandler) GetReportsByFilter(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
 
-	group := router.Group("/report")
-
-	{
-		group.GET("/", authProvider.RoleProtected("admin"), h.GetReports)
-		group.GET("/:id", authProvider.RoleProtected("admin"), h.GetReportById)
-		group.PATCH("/:id/confirm", authProvider.RoleProtected("admin"), h.ConfirmReport)
-
-		group.GET("/my", authProvider.RoleProtected("reviewer"), h.GetMyReports)
-		group.GET("/my/:id", authProvider.RoleProtected("reviewer"), h.GetMyReportById)
-		group.PATCH("/:id", authProvider.RoleProtected("reviewer"), h.UpdateReport)
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
 	}
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageSizeStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+	cityIdStr := ctx.Query("cityId")
+	var cityIdOpt pkg.Opt[uuid.UUID]
+	if cityIdStr != "" {
+		cityId, err := uuid.Parse(cityIdStr)
+
+		if err != nil {
+			log.Println("Invalid cityId: ", cityIdStr)
+			ctx.String(http.StatusBadRequest, "invalid cityId")
+			return
+		}
+		cityIdOpt = pkg.NewWithValue(cityId)
+	}
+
+	hotelIdStr := ctx.Query("hotelId")
+	var hotelIdOpt pkg.Opt[uuid.UUID]
+	if hotelIdStr != "" {
+		hotelId, err := uuid.Parse(hotelIdStr)
+
+		if err != nil {
+			log.Println("Invalid hotelId: ", hotelIdStr)
+			ctx.String(http.StatusBadRequest, "invalid hotelId")
+			return
+		}
+		hotelIdOpt = pkg.NewWithValue(hotelId)
+	}
+
+	status := ctx.Query("status")
+	var statusOpt pkg.Opt[string]
+	if status != "" {
+		statusOpt = pkg.NewWithValue(status)
+	}
+	filter := report2.Filter{
+		Status:     statusOpt,
+		HotelID:    hotelIdOpt,
+		LocationID: cityIdOpt,
+		Limit:      uint64(pageSize),
+		Offset:     uint64(pageSize * pageNum),
+	}
+	reports, cnt, err := h.uc.GetByFilter(ctx, filter)
+	if err != nil {
+		log.Println("Err to get reports by filter: ", err)
+		ctx.String(http.StatusBadRequest, "failed to get reports by filter")
+		return
+	}
+	resp := h.convertToReportsResp(reports, int64(cnt), int64(pageSize))
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func (h *reportHandler) convertFromReqImages(images []*multipart.FileHeader) []*docs.ReportImageResponse {

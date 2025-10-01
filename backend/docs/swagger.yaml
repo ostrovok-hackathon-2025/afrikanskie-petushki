@@ -1067,6 +1067,56 @@ paths:
       summary: Get by application id
       tags:
       - Report
+  /report/search:
+    get:
+      description: GetReportsByFilter reports by filter with pagination
+      parameters:
+      - description: cityId if report
+        in: query
+        name: cityId
+        type: string
+      - description: hotelId of report
+        in: query
+        name: hotelId
+        type: string
+      - description: Status of report
+        in: query
+        name: status
+        type: string
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of reports
+          schema:
+            $ref: '#/definitions/docs.GetReportsResponse'
+        "400":
+          description: Invalid data for getting reports
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: GetReportsByFilter reports by filter
+      tags:
+      - Report
   /room/:
     get:
       description: GetRooms all rooms
