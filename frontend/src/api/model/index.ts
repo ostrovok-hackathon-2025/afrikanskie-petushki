@@ -20,6 +20,7 @@ export * from './docsCreateOfferResponse';
 export * from './docsCreateRoomRequest';
 export * from './docsCreateRoomResponse';
 export * from './docsGetApplicationsResponse';
+export * from './docsGetByApplicationIdResponse';
 export * from './docsGetHotelsResponse';
 export * from './docsGetLocationsResponse';
 export * from './docsGetOffersResponse';

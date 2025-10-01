@@ -22,6 +22,7 @@ type ReportHandler interface {
 	GetMyReportById(ctx *gin.Context)
 	UpdateReport(ctx *gin.Context)
 	ConfirmReport(ctx *gin.Context)
+	GetMyReportByApplicationId(ctx *gin.Context)
 }
 
 type reportHandler struct {
@@ -167,13 +168,15 @@ func (h *reportHandler) GetMyReports(ctx *gin.Context) {
 	limit := int64(pageSize)
 	offset := int64(pageNum) * int64(pageSize)
 
-	reports, err := h.uc.GetByUserID(ctx, userId, limit, offset)
+	reports, err := h.uc.GetByUserID(ctx.Request.Context(), userId, limit, offset)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "something went wrong")
 		return
 	}
 
-	resp := h.convertToReportsResp(reports, limit, offset)
+	cnt, err := h.uc.CountByUserId(ctx.Request.Context(), userId)
+
+	resp := h.convertToReportsResp(reports, cnt, limit)
 
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -225,13 +228,56 @@ func (h *reportHandler) GetMyReportById(ctx *gin.Context) {
 }
 
 // Add godoc
+// @Summary Get by application id
+// @Description Get my report by application id
+// @Tags Report
+// @Param id path string true "Id of corresponding application"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.GetByApplicationIdResponse "Requested report"
+// @Failure 400 {string} string "Invalid data for getting report by id"
+// @Failure 401 "Unauthorized"
+// @Failure 403 {string} string "User is not reviewer or this report does not belong to user"
+// @Failure 404 "Report with given id not found"
+// @Failure 500 "Internal server error"
+// @Router /report/my/application/{id} [get]
+func (h *reportHandler) GetMyReportByApplicationId(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
+	if idStr == "" || err != nil {
+		log.Println("invalid application id", idStr)
+		ctx.String(http.StatusBadRequest, "invalid application id")
+		return
+	}
+
+	userId, err := auth.GetUserId(ctx)
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	reportId, err := h.uc.GetByApplicationId(ctx, id, userId)
+	if err != nil {
+		log.Println("failed to get report by application id", err.Error())
+		ctx.String(http.StatusInternalServerError, "something went wrong")
+		return
+	}
+
+	resp := &docs.GetByApplicationIdResponse{
+		Id: reportId.String(),
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// Add godoc
 // @Summary Update report
 // @Description Updates report with given text and photos
 // @Tags Report
 // @Accept multipart/form-data
 // @Param id path string true "Id of report to update"
 // @Param text formData string true "Report text"
-// @Param images formData file true "Report images" collectionFormat multi
 // @Produce json
 // @Security BearerAuth
 // @Success 200 "Successfully update report"
@@ -257,6 +303,12 @@ func (h *reportHandler) UpdateReport(ctx *gin.Context) {
 		return
 	}
 
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "invalid form data")
+		return
+	}
+
 	var request docs.UpdateReportRequest
 	if err := ctx.ShouldBind(&request); err != nil {
 		log.Println("invalid form data")
@@ -264,12 +316,18 @@ func (h *reportHandler) UpdateReport(ctx *gin.Context) {
 		return
 	}
 
+	log.Println(1)
+	log.Println(len(form.File["images"]))
+	log.Println(2)
+
 	if err := h.uc.Update(ctx, report2.Report{
 		ID:     id,
 		UserID: userId,
 		Text:   request.Text,
+		Status: "filled",
 		Images: nil,
-	}, request.Images); err != nil {
+	}, form.File["images"]); err != nil {
+		log.Println(err)
 		ctx.String(http.StatusInternalServerError, "something went wrong")
 		return
 	}
@@ -310,7 +368,16 @@ func (h *reportHandler) ConfirmReport(ctx *gin.Context) {
 		return
 	}
 
-	_ = id
+	err = h.uc.UpdateStatus(ctx, report2.Report{
+		ID:     id,
+		Status: request.Status,
+	})
+
+	if err != nil {
+		log.Println("failed to update status", err)
+		ctx.String(http.StatusBadRequest, "invalid status")
+		return
+	}
 
 	ctx.Status(http.StatusOK)
 }
@@ -359,6 +426,10 @@ func (h *reportHandler) convertToReportsResp(reports []report2.Report, cnt int64
 		PagesCount: int(cnt / limit),
 	}
 
+	if cnt%limit != 0 {
+		resp.PagesCount++
+	}
+
 	for i, r := range reports {
 		resp.Reports[i] = h.convertToReportResp(r)
 	}
@@ -371,6 +442,12 @@ func (h *reportHandler) convertToReportResp(r report2.Report) *docs.ReportRespon
 		ExpirationAt: r.ExpirationAt.Format(time.RFC3339),
 		Status:       r.Status,
 		Text:         r.Text,
+		HotelName:    r.HotelName,
+		LocationName: r.LocationName,
+		RoomName:     r.RoomName,
+		CheckInAt:    r.CheckInAt,
+		CheckOutAt:   r.CheckOutAt,
+		Task:         r.Task,
 		Images:       h.convertToRespImages(r.Images),
 	}
 }

@@ -5,7 +5,7 @@ import { withAuthHeader } from "@/lib/next-auth/with-auth-header";
 import { Search } from "lucide-react";
 import { getSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const { getUser } = getSecretGuestAPI();
@@ -13,6 +13,8 @@ const { getUser } = getSecretGuestAPI();
 export default function Header() {
   const [username, setUsername] = useState("");
   const router = useRouter();
+
+  const pathname = usePathname();
 
   useEffect(() => {
     (async () => {
@@ -27,7 +29,7 @@ export default function Header() {
 
       setUsername(resp.data.ostrovok_login ?? "");
     })();
-  }, []);
+  }, [pathname]);
 
   const handleRedirect = useCallback(() => {
     if (username === "$empty") {

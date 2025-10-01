@@ -26,6 +26,7 @@ import type {
   DocsCreateRoomRequest,
   DocsCreateRoomResponse,
   DocsGetApplicationsResponse,
+  DocsGetByApplicationIdResponse,
   DocsGetHotelsResponse,
   DocsGetLocationsResponse,
   DocsGetOffersResponse,
@@ -245,6 +246,18 @@ const getReportMy = <TData = AxiosResponse<DocsGetReportsResponse>>(
   }
 
 /**
+ * Get my report by application id
+ * @summary Get by application id
+ */
+const getReportMyApplicationId = <TData = AxiosResponse<DocsGetByApplicationIdResponse>>(
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `http://localhost:8081/api/v1/report/my/application/${id}`,options
+    );
+  }
+
+/**
  * GetForPage report of current user by id
  * @summary GetForPage my by id
  */
@@ -277,7 +290,6 @@ const patchReportId = <TData = AxiosResponse<void>>(
     patchReportIdBody: PatchReportIdBody, options?: AxiosRequestConfig
  ): Promise<TData> => {const formData = new FormData();
 formData.append(`text`, patchReportIdBody.text)
-formData.append(`images`, patchReportIdBody.images)
 
     return axios.patch(
       `http://localhost:8081/api/v1/report/${id}`,
@@ -375,7 +387,7 @@ const postUserSignUp = <TData = AxiosResponse<DocsAuthResponse>>(
     );
   }
 
-return {getApplication,postApplication,getApplicationLimit,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
+return {getApplication,postApplication,getApplicationLimit,getApplicationId,getHotel,postHotel,getLocation,postLocation,getOffer,postOffer,getOfferSearch,getOfferId,patchOfferId,getReport,getReportMy,getReportMyApplicationId,getReportMyId,getReportId,patchReportId,patchReportIdConfirm,getRoom,postRoom,getUser,postUserLogIn,postUserRefresh,postUserSignUp}};
 export type GetApplicationResult = AxiosResponse<DocsGetApplicationsResponse>
 export type PostApplicationResult = AxiosResponse<DocsCreateApplicationResponse>
 export type GetApplicationLimitResult = AxiosResponse<DocsGetUserAppLimitInfoResponse>
@@ -391,6 +403,7 @@ export type GetOfferIdResult = AxiosResponse<DocsOfferResponse>
 export type PatchOfferIdResult = AxiosResponse<void>
 export type GetReportResult = AxiosResponse<DocsGetReportsResponse>
 export type GetReportMyResult = AxiosResponse<DocsGetReportsResponse>
+export type GetReportMyApplicationIdResult = AxiosResponse<DocsGetByApplicationIdResponse>
 export type GetReportMyIdResult = AxiosResponse<DocsReportResponse>
 export type GetReportIdResult = AxiosResponse<DocsReportResponse>
 export type PatchReportIdResult = AxiosResponse<void>

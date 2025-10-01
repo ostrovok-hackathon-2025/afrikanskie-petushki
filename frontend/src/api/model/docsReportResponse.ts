@@ -8,9 +8,16 @@
 import type { DocsReportImageResponse } from './docsReportImageResponse';
 
 export interface DocsReportResponse {
+  check_in_at?: string;
+  check_out_at?: string;
   expiration_at?: string;
+  hotel_name?: string;
   id?: string;
   images?: DocsReportImageResponse[];
+  location_name?: string;
+  room_name?: string;
   status?: string;
+  task?: string;
   text?: string;
+  user_id?: string;
 }

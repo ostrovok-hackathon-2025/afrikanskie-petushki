@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PatchReportIdBody = {
-  /** Report text */
-  text: string;
-};
+export interface DocsGetByApplicationIdResponse {
+  id?: string;
+}

@@ -8,21 +8,27 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/offer"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/report"
+	appModel "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
+	reportModel "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/report"
 )
 
 type SecretGuestWorker struct {
 	offerRepo       offer.Repo
 	applicationRepo application.ApplicationRepo
+	reportRepo      report.Repo
 	scheduler       *gocron.Scheduler
 }
 
 func NewSecretGuestWorker(
 	offerRepo offer.Repo,
 	applicationRepo application.ApplicationRepo,
+	reportRepo report.Repo,
 ) *SecretGuestWorker {
 	return &SecretGuestWorker{
 		offerRepo:       offerRepo,
 		applicationRepo: applicationRepo,
+		reportRepo:      reportRepo,
 		scheduler:       gocron.NewScheduler(time.UTC),
 	}
 }
@@ -97,6 +103,20 @@ func (w *SecretGuestWorker) process() {
 
 		if err := w.offerRepo.EditStatus(ctx, i.ID, "done"); err != nil {
 			log.Printf("❌ Error end offer: %v", err)
+			continue
+		}
+
+		report := reportModel.NewReport(winner.Id, winner.ExpirationAt)
+
+		if err := w.reportRepo.Create(ctx, report); err != nil {
+			log.Printf("❌ Error create report: %v", err)
+			continue
+		}
+
+		winner.Status = appModel.APPLICATION_ACCEPTED
+
+		if err := w.applicationRepo.UpdateApplicationStatus(ctx, winner); err != nil {
+			log.Printf("❌ Error update application status: %v", err)
 			continue
 		}
 	}

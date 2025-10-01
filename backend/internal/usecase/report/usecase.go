@@ -22,7 +22,10 @@ type Usecase interface {
 	Get(ctx context.Context, limit, offset int64) ([]report2.Report, error)
 	GetByIDAndUserID(ctx context.Context, id, userID uuid.UUID) (report2.Report, bool, error)
 	Count(ctx context.Context) (int64, error)
+	CountByUserId(ctx context.Context, userId uuid.UUID) (int64, error)
 	Update(ctx context.Context, report report2.Report, images []*multipart.FileHeader) error
+	UpdateStatus(ctx context.Context, report report2.Report) error
+	GetByApplicationId(ctx context.Context, applicationId, userId uuid.UUID) (uuid.UUID, error)
 }
 
 type usecase struct {
@@ -30,8 +33,8 @@ type usecase struct {
 	s3 image.Repo
 }
 
-func New(db report.Repo) Usecase {
-	return &usecase{db: db}
+func New(db report.Repo, s3 image.Repo) Usecase {
+	return &usecase{db: db, s3: s3}
 }
 
 func (u *usecase) Get(ctx context.Context, limit, offset int64) ([]report2.Report, error) {
@@ -40,6 +43,10 @@ func (u *usecase) Get(ctx context.Context, limit, offset int64) ([]report2.Repor
 
 func (u *usecase) Count(ctx context.Context) (int64, error) {
 	return u.db.Count(ctx)
+}
+
+func (u *usecase) CountByUserId(ctx context.Context, userId uuid.UUID) (int64, error) {
+	return u.db.CountByUserId(ctx, userId)
 }
 
 func (u *usecase) GetByID(ctx context.Context, id uuid.UUID) (report2.Report, bool, error) {
@@ -87,6 +94,14 @@ func (u *usecase) Update(ctx context.Context, report report2.Report, images []*m
 	return u.db.Upsert(ctx, report)
 }
 
+func (u *usecase) UpdateStatus(ctx context.Context, report report2.Report) error {
+	if report.Status != "accepted" && report.Status != "declined" {
+		return errors.New("invalid status")
+	}
+
+	return u.db.UpdateStatus(ctx, report)
+}
+
 func (u *usecase) removeOldImages(ctx context.Context, report report2.Report) error {
 	oldImages, err := u.db.GetImagesByReportID(ctx, report.ID)
 	if err != nil {
@@ -115,4 +130,18 @@ func (u *usecase) saveImage(ctx context.Context, image *multipart.FileHeader) (r
 		return "", err
 	}
 	return url, nil
+}
+
+func (u *usecase) GetByApplicationId(ctx context.Context, applicationId, userId uuid.UUID) (uuid.UUID, error) {
+	id, actualUserId, err := u.db.GetByApplicationId(ctx, applicationId)
+
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+
+	if actualUserId != userId {
+		return uuid.UUID{}, errors.New("not owner of application")
+	}
+
+	return id, nil
 }

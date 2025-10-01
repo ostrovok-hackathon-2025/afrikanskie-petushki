@@ -20,5 +20,20 @@ type Report struct {
 	ExpirationAt  time.Time
 	Status        string
 	Text          string
+	HotelName     string
+	LocationName  string
+	Task          string
+	CheckInAt     time.Time
+	CheckOutAt    time.Time
+	RoomName      string
 	Images        []Image
+}
+
+func NewReport(applicationId uuid.UUID, ExpirationAt time.Time) Report {
+	return Report{
+		ID:            uuid.New(),
+		ApplicationID: applicationId,
+		ExpirationAt:  ExpirationAt,
+		Status:        "created",
+	}
 }

@@ -137,6 +137,13 @@ type ReportResponse struct {
 	ExpirationAt string                 `json:"expiration_at"`
 	Status       string                 `json:"status"`
 	Text         string                 `json:"text"`
+	UserId       string                 `json:"user_id"`
+	HotelName    string                 `json:"hotel_name"`
+	LocationName string                 `json:"location_name"`
+	RoomName     string                 `json:"room_name"`
+	Task         string                 `json:"task"`
+	CheckInAt    time.Time              `json:"check_in_at"`
+	CheckOutAt   time.Time              `json:"check_out_at"`
 	Images       []*ReportImageResponse `json:"images"`
 }
 
@@ -206,4 +213,8 @@ type RoomResponse struct {
 
 type GetRoomsResponse struct {
 	Rooms []*RoomResponse `json:"rooms"`
+}
+
+type GetByApplicationIdResponse struct {
+	Id string `json:"id"`
 }

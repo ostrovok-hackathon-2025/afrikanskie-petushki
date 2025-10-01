@@ -11,6 +11,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AccordionContent } from "@radix-ui/react-accordion";
+import { redirect, useRouter } from "next/navigation";
+import { getSecretGuestAPI } from "@/api/api";
+import { getSession } from "next-auth/react";
+import { withAuthHeader } from "@/lib/next-auth/with-auth-header";
+import axios from "axios";
+
+const { patchReportId } = getSecretGuestAPI();
 
 interface ReportEditProps {
   id: string;
@@ -24,8 +31,10 @@ export default function ReportEdit({ id }: ReportEditProps) {
     (async () => {
       const res = await loadReport(id);
 
+      if (!res) return redirect("/log-in");
+
       setReportInfo(res);
-      setReportText(res.text);
+      setReportText(res?.text ?? "");
     })();
   }, []);
 
@@ -94,7 +103,26 @@ export default function ReportEdit({ id }: ReportEditProps) {
     setSelectedImages(images);
   };
 
-  const handleSubmit = () => {};
+  const router = useRouter();
+
+  const handleSubmit = async () => {
+    const session = await getSession();
+
+    if (!session) return redirect("/log-in");
+
+    const formData = new FormData();
+    formData.append("text", reportText);
+
+    for (let i of selectedImages) {
+      formData.append("images", new Blob([i], { type: i.type }));
+    }
+
+    await axios.patch(`http://localhost:8081/api/v1/report/${id}`, formData, {
+      headers: withAuthHeader(session),
+    });
+
+    router.replace(`/report/${id}/view`);
+  };
 
   if (!reportInfo)
     return (
@@ -192,12 +220,16 @@ export default function ReportEdit({ id }: ReportEditProps) {
         ) : (
           <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 mb-8">
             {reportInfo.images.map((e, i) => (
-              <img
+              <div
                 key={i}
-                src={e.url}
-                alt="image"
-                className="cover w-full h-[175px] rounded-lg"
-              />
+                className="h-[200px] relative overflow-hidden rounded-lg"
+              >
+                <img
+                  src={e.url}
+                  alt="image"
+                  className="absolute top-1/2 left-1/2 cover rounded-lg -translate-x-1/2 -translate-y-1/2"
+                />
+              </div>
             ))}
           </div>
         )}

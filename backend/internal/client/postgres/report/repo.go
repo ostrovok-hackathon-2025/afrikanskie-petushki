@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,12 +13,16 @@ import (
 )
 
 type Repo interface {
+	Create(ctx context.Context, createData model.Report) error
 	GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, error)
 	GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset int64) ([]model.Report, error)
 	Get(ctx context.Context, limit, offset int64) ([]model.Report, error)
 	Count(ctx context.Context) (int64, error)
+	CountByUserId(ctx context.Context, userId uuid.UUID) (int64, error)
 	Upsert(ctx context.Context, report model.Report) error
 	GetImagesByReportID(ctx context.Context, reportID uuid.UUID) ([]model.Image, error)
+	UpdateStatus(ctx context.Context, report model.Report) error
+	GetByApplicationId(ctx context.Context, applicationId uuid.UUID) (uuid.UUID, uuid.UUID, error)
 }
 
 type repo struct {
@@ -26,6 +31,29 @@ type repo struct {
 
 func NewRepo(db *sqlx.DB) Repo {
 	return &repo{db: db}
+}
+
+const queryCreate = `
+	INSERT INTO report (id, application_id, expiration_at, status, text)
+	VALUES ($1, $2, $3, $4, $5)
+`
+
+func (r *repo) Create(ctx context.Context, createData model.Report) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		queryCreate,
+		createData.ID,
+		createData.ApplicationID,
+		createData.ExpirationAt,
+		createData.Status,
+		createData.Text,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to create report: %w", err)
+	}
+
+	return nil
 }
 
 const queryGetByID = `
@@ -38,10 +66,20 @@ const queryGetByID = `
             r.text,
             p.id as "image_id",
             p.s3_link as "image_link",
-            a.user_id as "user_id"
+            a.user_id as "user_id",
+			h.name as "hotel_name",
+			l.name as "location_name",
+			o.task as "task",
+			o.check_in_at,
+			o.check_out_at,
+			m.name as "room_name"
         FROM report r
         LEFT JOIN photo p ON r.id = p.report_id
         LEFT JOIN application a ON a.id = r.application_id
+		INNER JOIN offer o ON o.id = a.offer_id
+		INNER JOIN hotel h ON h.id = o.hotel_id
+		INNER JOIN location l ON l.id = h.location_id   
+		INNER JOIN room m ON m.id = o.room_id
         WHERE r.id = $1
     `
 
@@ -55,6 +93,12 @@ func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, e
 		Text          string     `db:"text"`
 		ImageID       *uuid.UUID `db:"image_id"`
 		ImageLink     *string    `db:"image_link"`
+		HotelName     string     `db:"hotel_name"`
+		LocationName  string     `db:"location_name"`
+		RoomName      string     `db:"room_name"`
+		Task          string     `db:"task"`
+		CheckInAt     time.Time  `db:"check_in_at"`
+		CheckOutAt    time.Time  `db:"check_out_at"`
 	}
 
 	err := sqlx.SelectContext(ctx, r.db, &rows, queryGetByID, id)
@@ -77,6 +121,10 @@ func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, e
 		ExpirationAt:  rows[0].ExpirationAt,
 		Status:        rows[0].Status,
 		Text:          rows[0].Text,
+		LocationName:  rows[0].LocationName,
+		HotelName:     rows[0].HotelName,
+		RoomName:      rows[0].RoomName,
+		Task:          rows[0].Task,
 		Images:        make([]model.Image, 0),
 	}
 
@@ -101,10 +149,20 @@ const queryGetByUserID = `
             r.status,
             r.text,
             p.id as "image_id",
-            p.s3_link as "image_link"
+            p.s3_link as "image_link",
+			h.name as "hotel_name",
+			l.name as "location_name",
+			o.task as "task",
+			o.check_in_at,
+			o.check_out_at,
+			m.name as "room_name"
         FROM report r
         LEFT JOIN photo p ON r.id = p.report_id
         LEFT JOIN application a ON a.id = r.application_id
+		INNER JOIN offer o ON o.id = a.offer_id
+		INNER JOIN hotel h ON h.id = o.hotel_id
+		INNER JOIN location l ON l.id = h.location_id   
+		INNER JOIN room m ON m.id = o.room_id
         WHERE a.user_id = $1
         ORDER BY r.expiration_at DESC
         LIMIT $2 OFFSET $3
@@ -115,10 +173,17 @@ func (r *repo) GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset 
 		ID            uuid.UUID  `db:"id"`
 		ApplicationID uuid.UUID  `db:"application_id"`
 		ExpirationAt  time.Time  `db:"expiration_at"`
+		UserID        uuid.UUID  `db:"user_id"`
 		Status        string     `db:"status"`
 		Text          string     `db:"text"`
 		ImageID       *uuid.UUID `db:"image_id"`
 		ImageLink     *string    `db:"image_link"`
+		HotelName     string     `db:"hotel_name"`
+		LocationName  string     `db:"location_name"`
+		RoomName      string     `db:"room_name"`
+		Task          string     `db:"task"`
+		CheckInAt     time.Time  `db:"check_in_at"`
+		CheckOutAt    time.Time  `db:"check_out_at"`
 	}
 
 	err := sqlx.SelectContext(ctx, r.db, &rows, queryGetByUserID, userID, limit, offset)
@@ -142,6 +207,10 @@ func (r *repo) GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset 
 				ExpirationAt:  row.ExpirationAt,
 				Status:        row.Status,
 				Text:          row.Text,
+				LocationName:  row.LocationName,
+				HotelName:     row.HotelName,
+				RoomName:      row.RoomName,
+				Task:          row.Task,
 				Images:        make([]model.Image, 0),
 			}
 		}
@@ -174,10 +243,20 @@ const queryGet = `
             r.status,
             r.text,
             p.id as "image_id",
-            p.s3_link as "image_link"
+            p.s3_link as "image_link",
+			h.name as "hotel_name",
+			l.name as "location_name",
+			o.task as "task",
+			o.check_in_at,
+			o.check_out_at,
+			m.name as "room_name"
         FROM report r
         LEFT JOIN photo p ON r.id = p.report_id
         LEFT JOIN application a ON a.id = r.application_id
+		INNER JOIN offer o ON o.id = a.offer_id
+		INNER JOIN hotel h ON h.id = o.hotel_id
+		INNER JOIN location l ON l.id = h.location_id   
+		INNER JOIN room m ON m.id = o.room_id
         WHERE r.id IN (
             SELECT id FROM report 
             ORDER BY expiration_at DESC 
@@ -196,6 +275,12 @@ func (r *repo) Get(ctx context.Context, limit, offset int64) ([]model.Report, er
 		Text          string     `db:"text"`
 		ImageID       *uuid.UUID `db:"image_id"`
 		ImageLink     *string    `db:"image_link"`
+		HotelName     string     `db:"hotel_name"`
+		LocationName  string     `db:"location_name"`
+		RoomName      string     `db:"room_name"`
+		Task          string     `db:"task"`
+		CheckInAt     time.Time  `db:"check_in_at"`
+		CheckOutAt    time.Time  `db:"check_out_at"`
 	}
 
 	err := sqlx.SelectContext(ctx, r.db, &rows, queryGet, limit, offset)
@@ -220,6 +305,10 @@ func (r *repo) Get(ctx context.Context, limit, offset int64) ([]model.Report, er
 				ExpirationAt:  row.ExpirationAt,
 				Status:        row.Status,
 				Text:          row.Text,
+				LocationName:  row.LocationName,
+				HotelName:     row.HotelName,
+				RoomName:      row.RoomName,
+				Task:          row.Task,
 				Images:        make([]model.Image, 0),
 			}
 			reportOrder = append(reportOrder, row.ID)
@@ -258,14 +347,24 @@ func (r *repo) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
+const queryCountByUserId = `
+SELECT COUNT(*) 
+FROM report r 
+INNER JOIN application a ON a.id = r.application_id
+WHERE a.user_id = $1`
+
+func (r *repo) CountByUserId(ctx context.Context, userId uuid.UUID) (int64, error) {
+	var count int64
+	err := sqlx.GetContext(ctx, r.db, &count, queryCountByUserId, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 const reportUpsertQuery = `
-        INSERT INTO report (id, application_id, expiration_at, status, text)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (id) DO UPDATE SET
-            application_id = EXCLUDED.application_id,
-            expiration_at = EXCLUDED.expiration_at,
-            status = EXCLUDED.status,
-            text = EXCLUDED.text
+        UPDATE report SET text = $1, status = $2 WHERE id = $3
     `
 const deletePhotosQuery = `DELETE FROM photo WHERE report_id = $1`
 const insertPhotoQuery = `
@@ -286,11 +385,9 @@ func (r *repo) Upsert(ctx context.Context, report model.Report) error {
 
 	// Upsert для отчета
 	_, err = tx.ExecContext(ctx, reportUpsertQuery,
-		report.ID,
-		report.ApplicationID,
-		report.ExpirationAt,
-		report.Status,
 		report.Text,
+		report.Status,
+		report.ID,
 	)
 	if err != nil {
 		return err
@@ -352,4 +449,42 @@ func (r *repo) GetImagesByReportID(ctx context.Context, reportID uuid.UUID) ([]m
 	}
 
 	return images, nil
+}
+
+const reportUpdateStatusQuery = `
+        UPDATE report SET status = $1 WHERE id = $2
+    `
+
+func (r *repo) UpdateStatus(ctx context.Context, report model.Report) error {
+	// TODO: check if status is "created" or "filled"
+	_, err := r.db.ExecContext(ctx, reportUpdateStatusQuery,
+		report.Status,
+		report.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+const reportGetByApplicationIdQuery = `
+        SELECT r.id, a.user_id 
+		FROM report r
+		JOIN application a ON a.id = r.application_id 
+		WHERE a.id = $1
+    `
+
+func (r *repo) GetByApplicationId(ctx context.Context, applicationId uuid.UUID) (uuid.UUID, uuid.UUID, error) {
+	var res struct {
+		Id     uuid.UUID `db:"id"`
+		UserId uuid.UUID `db:"user_id"`
+	}
+
+	err := r.db.GetContext(ctx, &res, reportGetByApplicationIdQuery, applicationId)
+	if err != nil {
+		return uuid.UUID{}, uuid.UUID{}, err
+	}
+
+	return res.Id, res.UserId, nil
 }

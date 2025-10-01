@@ -28,6 +28,9 @@ backend_up:
 backend_build:
 	docker compose --env-file ./.env.example build backend-app
 
+.PHONY: backend_restart
+backend_restart: down clean backend_build backend_up
+
 .PHONY: backend_rebuild
 backend_rebuild: down backend_build backend_up
 

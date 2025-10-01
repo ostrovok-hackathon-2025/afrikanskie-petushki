@@ -234,3 +234,15 @@ func getUserAppLimitInfo(s Getter, ctx context.Context, userID uuid.UUID) (*User
 	}
 	return &userLimitInfo, nil
 }
+
+func (r *applicationRepo) UpdateApplicationStatus(ctx context.Context, application *application.Application) error {
+	query := `UPDATE application SET status = $1 WHERE id = $2`
+
+	_, err := r.db.ExecContext(ctx, query, application.Status, application.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

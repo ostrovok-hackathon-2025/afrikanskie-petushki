@@ -14,4 +14,6 @@ type ApplicationRepo interface {
 	GetByOfferID(ctx context.Context, offerID uuid.UUID) ([]*application.Application, error)
 
 	GetUserAppLimitInfo(ctx context.Context, userID uuid.UUID) (*application.UserAppLimitInfo, error)
+
+	UpdateApplicationStatus(ctx context.Context, application *application.Application) error
 }
