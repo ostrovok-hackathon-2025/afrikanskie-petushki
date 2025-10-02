@@ -52,7 +52,7 @@ export default function Header() {
 
   return (
     <div className="w-full h-16 fixed top-0 left-0 flex gap-3 items-center justify-between bg-[#F0F0F0] px-6 z-[100]">
-      <div className="flex gap-3 items-center">
+      <Link href={"/"} className="flex gap-3 items-center">
         <Image
           className="h-full aspect-square"
           width={60}
@@ -64,7 +64,7 @@ export default function Header() {
         {isAdminAccount && (
           <div className="text-2xl font-bold text-primary">Админ</div>
         )}
-      </div>
+      </Link>
 
       <div className="flex gap-3 items-center">
         <Button asChild>

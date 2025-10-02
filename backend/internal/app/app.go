@@ -100,7 +100,7 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 		sqlClient,
 	)
 
-	secretGuestWorker := worker.NewSecretGuestWorker(offerRepository, applicationRepository, reportRepository)
+	secretGuestWorker := worker.NewSecretGuestWorker(offerRepository, applicationRepository, reportRepository, userRepository)
 	secretGuestWorker.Start()
 
 	return func() {
