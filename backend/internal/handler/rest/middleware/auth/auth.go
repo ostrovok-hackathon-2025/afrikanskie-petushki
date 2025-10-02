@@ -1,33 +1,49 @@
 package auth
 
 import (
+	"errors"
+	"fmt"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth/dto"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/user"
 )
 
 const _AUTH_USER_ID = "__auth_user_id"
 const _AUTH_USER_ROLE = "__auth_user_role"
 
-type Auth struct {
+type Auth interface {
+	LoginProtected() gin.HandlerFunc
+	RoleProtected(role string) gin.HandlerFunc
+	parseToken(token string) (string, string, error)
 }
 
-func NewAuth() *Auth {
-	return &Auth{}
+type auth struct {
+	uc user.UseCase
 }
 
-func (a *Auth) LoginProtected() gin.HandlerFunc {
+func NewAuth(uc user.UseCase) Auth {
+	return &auth{
+		uc: uc,
+	}
+}
+
+func (a *auth) LoginProtected() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dto.TokenRequest
 
-		if err := ctx.BindHeader(req); err != nil {
+		if err := ctx.BindHeader(&req); err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		userId, userRole, err := a.parseToken(req.Auth)
 		if err != nil {
+			log.Println("failed to read token", err.Error())
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -39,11 +55,11 @@ func (a *Auth) LoginProtected() gin.HandlerFunc {
 	}
 }
 
-func (a *Auth) RoleProtected(role string) gin.HandlerFunc {
+func (a *auth) RoleProtected(role string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dto.TokenRequest
 
-		if err := ctx.BindHeader(req); err != nil {
+		if err := ctx.BindHeader(&req); err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 		}
 
@@ -65,13 +81,38 @@ func (a *Auth) RoleProtected(role string) gin.HandlerFunc {
 	}
 }
 
-func (a *Auth) parseToken(token string) (int, string, error) {
-	// валидации токена
-	return 0, "", nil
+func (a *auth) parseToken(tokenQuery string) (string, string, error) {
+	const bearerPrefix = "Bearer "
+	if !strings.HasPrefix(tokenQuery, bearerPrefix) {
+		return "", "", errors.New("invalid token")
+	}
+
+	token := strings.TrimPrefix(tokenQuery, bearerPrefix)
+	if token == "" {
+		return "", "", errors.New("invalid token")
+	}
+
+	claims, err := a.uc.ValidateToken(token)
+
+	if err != nil {
+		return "", "", fmt.Errorf("failed to validate token: %w", err)
+	}
+
+	role := "reviewer"
+	if claims.IsAdmin {
+		role = "admin"
+	}
+
+	return claims.UserID, role, nil
 }
 
-func GetUserId(ctx *gin.Context) (int, error) {
-	id := ctx.GetInt(_AUTH_USER_ID)
+func GetUserId(ctx *gin.Context) (uuid.UUID, error) {
+	idStr := ctx.GetString(_AUTH_USER_ID)
+	id, err := uuid.Parse(idStr)
+
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to parse user uuid: %w", err)
+	}
 
 	return id, nil
 }

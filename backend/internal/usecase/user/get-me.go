@@ -1,0 +1,39 @@
+package user
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"github.com/google/uuid"
+	repo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
+	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
+)
+
+func (u *useCase) GetMe(ctx context.Context, userId uuid.UUID) (*model.User, error) {
+	user, err := u.repo.GetUserById(ctx, userId)
+
+	if errors.Is(err, repo.ErrUserNotFound) {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user from repo: %w", err)
+	}
+
+	achievements, err := u.achievementRepo.GetAchievementsByUserId(ctx, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	user.Achievements = achievements
+
+	ostrovokUser, err := u.ostrovokClient.GetUserByLogin(ctx, user.OstrovokLogin)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Email = ostrovokUser.Email
+	return user, err
+}

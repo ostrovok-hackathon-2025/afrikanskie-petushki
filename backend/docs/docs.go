@@ -15,6 +15,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/analytics/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Calc and return metrics for analytics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get analytics",
+                "responses": {
+                    "200": {
+                        "description": "Page of applications",
+                        "schema": {
+                            "$ref": "#/definitions/docs.AnalyticsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/application/": {
             "get": {
                 "security": [
@@ -22,14 +56,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all applications with pagination",
+                "description": "GetForPage all applications with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Application"
                 ],
-                "summary": "Get applications",
+                "summary": "GetForPage applications",
                 "parameters": [
                     {
                         "type": "integer",
@@ -126,6 +160,132 @@ const docTemplate = `{
                 }
             }
         },
+        "/application/limit": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetUserAppLimitInfo get info about limit and active app",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "GetUserAppLimitInfo",
+                "responses": {
+                    "200": {
+                        "description": "Info about limit and active app",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetUserAppLimitInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting info",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "User is not reviewer or application does not belong to user"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/application/search": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetAppsByFilter applications by filter with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "GetAppsByFilter applications",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of required city",
+                        "name": "cityId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Id of required hotel",
+                        "name": "hotelId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Id of required room",
+                        "name": "roomId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "status of app",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of applications by filter",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetApplicationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting applications",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for reviewer"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/application/{id}": {
             "get": {
                 "security": [
@@ -133,14 +293,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get application by id",
+                "description": "GetForPage application by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Application"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -167,10 +327,200 @@ const docTemplate = `{
                         "description": "Unauthorized"
                     },
                     "403": {
-                        "description": "Only available for reviewer"
+                        "description": "User is not reviewer or application does not belong to user"
                     },
                     "404": {
                         "description": "Application with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/hotel/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetHotels all hotels",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hotel"
+                ],
+                "summary": "Get hotels",
+                "responses": {
+                    "200": {
+                        "description": "Page of hotels",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetHotelsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting hotels",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates offer with given info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hotel"
+                ],
+                "summary": "Create hotel",
+                "parameters": [
+                    {
+                        "description": "Data for creating hotel",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateHotelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created hotel data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateHotelResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating hotel",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/location/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetLocations all locations",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Get locations",
+                "responses": {
+                    "200": {
+                        "description": "Page of locations",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetLocationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting locations",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates location with given info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Create location",
+                "parameters": [
+                    {
+                        "description": "Data for creating location",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created location data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateLocationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating location",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
                     },
                     "500": {
                         "description": "Internal server error"
@@ -185,14 +535,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all offers with pagination",
+                "description": "GetForPage all offers with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Offer"
                 ],
-                "summary": "Get offers",
+                "summary": "GetForPage offers",
                 "parameters": [
                     {
                         "type": "integer",
@@ -362,14 +712,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get offer by id",
+                "description": "GetForPage offer by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Offer"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -473,14 +823,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all reports with pagination",
+                "description": "GetForPage all reports with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get reports",
+                "summary": "GetForPage reports",
                 "parameters": [
                     {
                         "type": "integer",
@@ -532,14 +882,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all reports of current user with pagination",
+                "description": "GetForPage all reports of current user with pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get my reports",
+                "summary": "GetForPage my reports",
                 "parameters": [
                     {
                         "type": "integer",
@@ -584,6 +934,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/report/my/application/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get my report by application id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get by application id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of corresponding application",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requested report",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetByApplicationIdResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting report by id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "User is not reviewer or this report does not belong to user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Report with given id not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/report/my/{id}": {
             "get": {
                 "security": [
@@ -591,14 +996,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get report of current user by id",
+                "description": "GetForPage report of current user by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get my by id",
+                "summary": "GetForPage my by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -639,6 +1044,83 @@ const docTemplate = `{
                 }
             }
         },
+        "/report/search": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetReportsByFilter reports by filter with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "GetReportsByFilter reports by filter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "cityId if report",
+                        "name": "cityId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "hotelId of report",
+                        "name": "hotelId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status of report",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of page",
+                        "name": "pageNum",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size of page",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page of reports",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetReportsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting reports",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/report/{id}": {
             "get": {
                 "security": [
@@ -646,14 +1128,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get report by id",
+                "description": "GetForPage report by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Report"
                 ],
-                "summary": "Get by id",
+                "summary": "GetForPage by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -716,18 +1198,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Data for updating report",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/docs.UpdateReportRequest"
-                        }
-                    },
-                    {
-                        "type": "file",
-                        "description": "Report images",
-                        "name": "images",
+                        "type": "string",
+                        "description": "Report text",
+                        "name": "text",
                         "in": "formData",
                         "required": true
                     }
@@ -774,6 +1247,13 @@ const docTemplate = `{
                 "summary": "Confirm report",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Id of report to update",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "Data for updating report",
                         "name": "input",
                         "in": "body",
@@ -805,6 +1285,101 @@ const docTemplate = `{
                 }
             }
         },
+        "/room/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "GetRooms all rooms",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Get rooms",
+                "responses": {
+                    "200": {
+                        "description": "Page of rooms",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetRoomsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for getting rooms",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "404": {
+                        "description": "Page with given number not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates offer with given info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Create offer",
+                "parameters": [
+                    {
+                        "description": "Data for creating room",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateRoomRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created room data",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreateRoomResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data for creating room",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only available for admin"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/user/": {
             "get": {
                 "security": [
@@ -812,14 +1387,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get data of current user",
+                "description": "GetForPage data of current user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User"
                 ],
-                "summary": "Get me",
+                "summary": "GetForPage me",
                 "responses": {
                     "200": {
                         "description": "User data",
@@ -827,8 +1402,17 @@ const docTemplate = `{
                             "$ref": "#/definitions/docs.UserResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad request to get user data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "User not found"
                     },
                     "500": {
                         "description": "Internal server error"
@@ -976,9 +1560,40 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "docs.AchievementResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "raiting_limit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "docs.AnalyticsResponse": {
+            "type": "object",
+            "properties": {
+                "accepted_reports": {
+                    "type": "integer"
+                },
+                "applications_received": {
+                    "type": "integer"
+                },
+                "completed_offers": {
+                    "type": "integer"
+                }
+            }
+        },
         "docs.ApplicationResponse": {
             "type": "object",
             "properties": {
+                "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1040,15 +1655,67 @@ const docTemplate = `{
                 }
             }
         },
+        "docs.CreateHotelRequest": {
+            "type": "object",
+            "required": [
+                "location_id",
+                "name"
+            ],
+            "properties": {
+                "location_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateHotelResponse": {
+            "type": "object",
+            "properties": {
+                "hotel_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateLocationRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateLocationResponse": {
+            "type": "object",
+            "properties": {
+                "location_id": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.CreateOfferRequest": {
             "type": "object",
             "required": [
+                "check_in",
+                "check_out",
                 "expiration_at",
                 "hotel_id",
                 "location_id",
+                "participants_limit",
+                "room_id",
                 "task"
             ],
             "properties": {
+                "check_in": {
+                    "type": "string"
+                },
+                "check_out": {
+                    "type": "string"
+                },
                 "expiration_at": {
                     "type": "string"
                 },
@@ -1056,6 +1723,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location_id": {
+                    "type": "string"
+                },
+                "participants_limit": {
+                    "type": "integer"
+                },
+                "room_id": {
                     "type": "string"
                 },
                 "task": {
@@ -1071,6 +1744,25 @@ const docTemplate = `{
                 }
             }
         },
+        "docs.CreateRoomRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreateRoomResponse": {
+            "type": "object",
+            "properties": {
+                "room_id": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.GetApplicationsResponse": {
             "type": "object",
             "properties": {
@@ -1082,6 +1774,36 @@ const docTemplate = `{
                 },
                 "pages_count": {
                     "type": "integer"
+                }
+            }
+        },
+        "docs.GetByApplicationIdResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.GetHotelsResponse": {
+            "type": "object",
+            "properties": {
+                "hotels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.HotelResponse"
+                    }
+                }
+            }
+        },
+        "docs.GetLocationsResponse": {
+            "type": "object",
+            "properties": {
+                "locations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.LocationResponse"
+                    }
                 }
             }
         },
@@ -1113,6 +1835,56 @@ const docTemplate = `{
                 }
             }
         },
+        "docs.GetRoomsResponse": {
+            "type": "object",
+            "properties": {
+                "rooms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.RoomResponse"
+                    }
+                }
+            }
+        },
+        "docs.GetUserAppLimitInfoResponse": {
+            "type": "object",
+            "properties": {
+                "active_app_count": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "docs.HotelResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "location_id": {
+                    "type": "string"
+                },
+                "location_name": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.LocationResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.LogInRequest": {
             "type": "object",
             "required": [
@@ -1131,7 +1903,10 @@ const docTemplate = `{
         "docs.OfferResponse": {
             "type": "object",
             "properties": {
-                "check_date": {
+                "check_in_at": {
+                    "type": "string"
+                },
+                "check_out_at": {
                     "type": "string"
                 },
                 "expiration_at": {
@@ -1140,17 +1915,26 @@ const docTemplate = `{
                 "hotel_id": {
                     "type": "string"
                 },
+                "hotel_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
-                "location_id": {
+                "participants_count": {
+                    "type": "integer"
+                },
+                "participants_limit": {
+                    "type": "integer"
+                },
+                "room_id": {
+                    "type": "string"
+                },
+                "room_name": {
                     "type": "string"
                 },
                 "task": {
                     "type": "string"
-                },
-                "used": {
-                    "type": "boolean"
                 }
             }
         },
@@ -1179,7 +1963,16 @@ const docTemplate = `{
         "docs.ReportResponse": {
             "type": "object",
             "properties": {
+                "check_in_at": {
+                    "type": "string"
+                },
+                "check_out_at": {
+                    "type": "string"
+                },
                 "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_name": {
                     "type": "string"
                 },
                 "id": {
@@ -1191,10 +1984,36 @@ const docTemplate = `{
                         "$ref": "#/definitions/docs.ReportImageResponse"
                     }
                 },
+                "location_name": {
+                    "type": "string"
+                },
+                "promocode": {
+                    "type": "string"
+                },
+                "room_name": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 },
+                "task": {
+                    "type": "string"
+                },
                 "text": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.RoomResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1221,7 +2040,19 @@ const docTemplate = `{
         "docs.UpdateOfferRequest": {
             "type": "object",
             "properties": {
+                "check_in_at": {
+                    "type": "string"
+                },
+                "check_out_at": {
+                    "type": "string"
+                },
                 "expiration_at": {
+                    "type": "string"
+                },
+                "hotel_id": {
+                    "type": "string"
+                },
+                "room_id": {
                     "type": "string"
                 },
                 "task": {
@@ -1229,21 +2060,19 @@ const docTemplate = `{
                 }
             }
         },
-        "docs.UpdateReportRequest": {
-            "type": "object",
-            "required": [
-                "text"
-            ],
-            "properties": {
-                "text": {
-                    "type": "string"
-                }
-            }
-        },
         "docs.UserResponse": {
             "type": "object",
             "properties": {
+                "achievements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.AchievementResponse"
+                    }
+                },
                 "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "is_admin": {
@@ -1251,6 +2080,9 @@ const docTemplate = `{
                 },
                 "ostrovok_login": {
                     "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
                 }
             }
         }
@@ -1267,7 +2099,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8081",
 	BasePath:         "/api/v1",
 	Schemes:          []string{"http", "https"},
 	Title:            "Secret Guest API",

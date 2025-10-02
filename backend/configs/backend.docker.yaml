@@ -1,0 +1,16 @@
+rest:
+  port: 8081
+  allow_origin: http://localhost:8080,http://localhost:8081,http://localhost:3000
+
+postgres:
+  host: postgres_secret_guest
+  port: 5432
+
+logger:
+  prefix: "app."
+  flag: 19
+
+minio:
+  endpoint: minio:9000
+  bucket-name: report-images
+  public-endpoint: http://localhost:9000

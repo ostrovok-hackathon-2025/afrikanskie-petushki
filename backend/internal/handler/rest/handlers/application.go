@@ -1,16 +1,38 @@
 package handlers
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
+	appModel "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/application"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
+
+	applicationRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 )
 
-type ApplicationHandlers struct {
+type ApplicationHandler interface {
+	CreateApplication(ctx *gin.Context)
+	GetApplications(ctx *gin.Context)
+	GetApplicationById(ctx *gin.Context)
+	GetUserAppLimitInfo(ctx *gin.Context)
+	GetAppsByFilter(ctx *gin.Context)
+}
+
+type applicationHandler struct {
+	useCase application.ApplicationUseCase
+}
+
+func NewApplicationHandler(useCase application.ApplicationUseCase) ApplicationHandler {
+	return &applicationHandler{
+		useCase: useCase,
+	}
 }
 
 // Add godoc
@@ -27,7 +49,7 @@ type ApplicationHandlers struct {
 // @Failure 403 "Only available for reviewer"
 // @Failure 500 "Internal server error"
 // @Router /application/ [post]
-func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
+func (h *applicationHandler) CreateApplication(ctx *gin.Context) {
 	var request docs.CreateApplicationRequest
 
 	if err := ctx.BindJSON(&request); err != nil {
@@ -36,10 +58,11 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 		return
 	}
 
-	offerId := request.OfferId
+	offerIdStr := request.OfferId
+	offerId, err := uuid.Parse(offerIdStr)
 
-	if offerId == "" {
-		log.Println("Invalid offer_id: ", offerId)
+	if offerIdStr == "" || err != nil {
+		log.Println("Invalid offer_id: ", offerIdStr)
 		ctx.String(http.StatusBadRequest, "invalid offer_id")
 		return
 	}
@@ -51,16 +74,37 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "invalid user_id")
 	}
 
-	_ = userId
+	appId, err := h.useCase.CreateApplication(ctx.Request.Context(), userId, offerId)
 
-	resp := &docs.CreateApplicationResponse{}
+	if err != nil {
+		log.Println("failed to create app", err)
+
+		switch {
+		case errors.Is(err, applicationRepo.ErrOfferNotExist):
+			ctx.String(http.StatusBadRequest, "offer does not exist")
+		case errors.Is(err, applicationRepo.ErrUserNotExist):
+			ctx.String(http.StatusBadRequest, "user does not exist")
+		case errors.Is(err, applicationRepo.ErrParticipantsLimit):
+			ctx.String(http.StatusBadRequest, "out of places")
+		case errors.Is(err, applicationRepo.ErrAppLimit):
+			ctx.String(http.StatusBadRequest, "reach limit of app")
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	resp := &docs.CreateApplicationResponse{
+		ApplicationId: appId.String(),
+	}
 
 	ctx.JSON(http.StatusCreated, resp)
 }
 
 // Add godoc
-// @Summary Get applications
-// @Description Get all applications with pagination
+// @Summary GetForPage applications
+// @Description GetForPage all applications with pagination
 // @Tags Application
 // @Param pageNum query int true "Number of page"
 // @Param pageSize query int true "Size of page"
@@ -73,7 +117,7 @@ func (h *ApplicationHandlers) CreateApplication(ctx *gin.Context) {
 // @Failure 404 "Page with given number not found"
 // @Failure 500 "Internal server error"
 // @Router /application/ [get]
-func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
+func (h *applicationHandler) GetApplications(ctx *gin.Context) {
 	pageNumStr := ctx.Query("pageNum")
 	pageNum, err := strconv.Atoi(pageNumStr)
 
@@ -83,27 +127,55 @@ func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
 		return
 	}
 
-	_ = pageNum
-
 	pageSizeStr := ctx.Query("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeStr)
 
-	if pageNumStr == "" || err != nil {
+	if pageSizeStr == "" || err != nil {
 		log.Println("Invalid pageSize: ", pageSizeStr)
 		ctx.String(http.StatusBadRequest, "invalid pageSize")
 		return
 	}
 
-	_ = pageSize
+	userId, err := auth.GetUserId(ctx)
 
-	resp := &docs.GetApplicationsResponse{}
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	apps, count, err := h.useCase.GetApplications(ctx.Request.Context(), userId, pageNum, pageSize)
+
+	if err != nil {
+		log.Println("failed to get all applications", err)
+
+		switch {
+		case errors.Is(err, applicationRepo.ErrPageNotFound):
+			ctx.Status(http.StatusNotFound)
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	appsResp := make([]*docs.ApplicationResponse, 0, len(apps))
+
+	for _, app := range apps {
+		appsResp = append(appsResp, docs.ApplicationModelToResponse(app))
+	}
+
+	resp := &docs.GetApplicationsResponse{
+		Applications: appsResp,
+		PagesCount:   count,
+	}
 
 	ctx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
-// @Summary Get by id
-// @Description Get application by id
+// @Summary GetForPage by id
+// @Description GetForPage application by id
 // @Tags Application
 // @Param id path string true "Id of requested application"
 // @Produce json
@@ -115,30 +187,187 @@ func (h *ApplicationHandlers) GetApplications(ctx *gin.Context) {
 // @Failure 404 "Application with given id not found"
 // @Failure 500 "Internal server error"
 // @Router /application/{id} [get]
-func (h *ApplicationHandlers) GetApplicationById(ctx *gin.Context) {
+func (h *applicationHandler) GetApplicationById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
 
-	if idStr == "" {
+	if idStr == "" || err != nil {
 		log.Println("invalid application id", idStr)
 		ctx.String(http.StatusBadRequest, "invalid application id")
 		return
 	}
 
-	resp := &docs.ApplicationResponse{}
+	userId, err := auth.GetUserId(ctx)
+
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
+	}
+
+	app, err := h.useCase.GetApplicationById(ctx, userId, id)
+
+	if err != nil {
+		log.Println("failed to get application by id", err)
+
+		switch {
+		case errors.Is(err, applicationRepo.ErrApplicationNotFound):
+			ctx.Status(http.StatusNotFound)
+		case errors.Is(err, application.ErrNotOwner):
+			ctx.Status(http.StatusForbidden)
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	resp := docs.ApplicationModelToResponse(app)
 
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func InitApplicationHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
-	h := &ApplicationHandlers{}
-
-	group := router.Group("/application")
-
-	group.Use(authProvider.RoleProtected("reviewer"))
-
-	{
-		group.POST("/", h.CreateApplication)
-		group.GET("/", h.GetApplications)
-		group.GET("/:id", h.GetApplicationById)
+// GetUserAppLimitInfo
+// Add godoc
+// @Summary GetUserAppLimitInfo
+// @Description GetUserAppLimitInfo get info about limit and active app
+// @Tags Application
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.GetUserAppLimitInfoResponse "Info about limit and active app"
+// @Failure 400 {string} string "Invalid data for getting info"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "User is not reviewer or application does not belong to user"
+// @Failure 404 "User not found"
+// @Failure 500 "Internal server error"
+// @Router /application/limit [get]
+func (h *applicationHandler) GetUserAppLimitInfo(ctx *gin.Context) {
+	userId, err := auth.GetUserId(ctx)
+	if err != nil {
+		log.Println("invalid user_id")
+		ctx.String(http.StatusBadRequest, "invalid user_id")
+		return
 	}
+	info, err := h.useCase.GetUserAppLimitInfo(ctx, userId)
+	if err != nil {
+		log.Printf("failed to get limit info of user with id %d: %v\n", err, userId)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+	resp := &docs.GetUserAppLimitInfoResponse{
+		Limit:          info.Limit,
+		ActiveAppCount: info.ActiveAppCount,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// GetAppsByFilter
+// Add godoc
+// @Summary GetAppsByFilter applications
+// @Description GetAppsByFilter applications by filter with pagination
+// @Tags Application
+// @Param cityId query string false "Id of required city"
+// @Param hotelId query string false "Id of required hotel"
+// @Param roomId query string false "Id of required room"
+// @Param status query string false "status of app"
+// @Param pageNum query int true "Number of page"
+// @Param pageSize query int true "Size of page"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} docs.GetApplicationsResponse "Page of applications by filter"
+// @Failure 400 {string} string "Invalid data for getting applications"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Only available for reviewer"
+// @Failure 404 "Page with given number not found"
+// @Failure 500 "Internal server error"
+// @Router /application/search [get]
+func (h *applicationHandler) GetAppsByFilter(ctx *gin.Context) {
+	pageNumStr := ctx.Query("pageNum")
+	pageNum, err := strconv.Atoi(pageNumStr)
+
+	if pageNumStr == "" || err != nil {
+		log.Println("Invalid pageNum: ", pageNumStr)
+		ctx.String(http.StatusBadRequest, "invalid pageNum")
+		return
+	}
+
+	pageSizeStr := ctx.Query("pageSize")
+	pageSize, err := strconv.Atoi(pageSizeStr)
+
+	if pageSizeStr == "" || err != nil {
+		log.Println("Invalid pageSize: ", pageSizeStr)
+		ctx.String(http.StatusBadRequest, "invalid pageSize")
+		return
+	}
+	cityIdStr := ctx.Query("cityId")
+	var cityIdOpt pkg.Opt[uuid.UUID]
+	if cityIdStr != "" {
+		cityId, err := uuid.Parse(cityIdStr)
+
+		if err != nil {
+			log.Println("Invalid cityId: ", cityIdStr)
+			ctx.String(http.StatusBadRequest, "invalid cityId")
+			return
+		}
+		cityIdOpt = pkg.NewWithValue(cityId)
+	}
+
+	hotelIdStr := ctx.Query("hotelId")
+	var hotelIdOpt pkg.Opt[uuid.UUID]
+	if hotelIdStr != "" {
+		hotelId, err := uuid.Parse(hotelIdStr)
+
+		if err != nil {
+			log.Println("Invalid hotelId: ", hotelIdStr)
+			ctx.String(http.StatusBadRequest, "invalid hotelId")
+			return
+		}
+		hotelIdOpt = pkg.NewWithValue(hotelId)
+	}
+
+	roomIdStr := ctx.Query("roomId")
+	var roomIdOpt pkg.Opt[uuid.UUID]
+	if roomIdStr != "" {
+		roomId, err := uuid.Parse(roomIdStr)
+
+		if err != nil {
+			log.Println("Invalid roomId: ", roomIdStr)
+			ctx.String(http.StatusBadRequest, "invalid roomId")
+			return
+		}
+		roomIdOpt = pkg.NewWithValue(roomId)
+	}
+
+	status := ctx.Query("status")
+	var statusOpt pkg.Opt[appModel.ApplicationStatus]
+	if status != "" {
+		statusOpt = pkg.NewWithValue(appModel.ApplicationStatus(status))
+	}
+
+	filter := &appModel.Filter{
+		LocationID: cityIdOpt,
+		HotelID:    hotelIdOpt,
+		RoomID:     roomIdOpt,
+		Status:     statusOpt,
+		Limit:      uint64(pageSize),
+		Offset:     uint64(pageNum * pageSize),
+	}
+	apps, count, err := h.useCase.GetByFilter(ctx, filter)
+	if err != nil {
+		log.Println("failed to get applications by filter", err)
+		ctx.Status(http.StatusInternalServerError)
+	}
+	appsResp := make([]*docs.ApplicationResponse, len(apps))
+
+	for i, app := range apps {
+		appsResp[i] = docs.ApplicationModelToResponse(app)
+	}
+
+	resp := &docs.GetApplicationsResponse{
+		Applications: appsResp,
+		PagesCount:   count,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
 }

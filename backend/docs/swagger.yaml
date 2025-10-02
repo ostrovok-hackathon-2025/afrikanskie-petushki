@@ -1,7 +1,27 @@
 basePath: /api/v1
 definitions:
+  docs.AchievementResponse:
+    properties:
+      name:
+        type: string
+      raiting_limit:
+        type: integer
+    type: object
+  docs.AnalyticsResponse:
+    properties:
+      accepted_reports:
+        type: integer
+      applications_received:
+        type: integer
+      completed_offers:
+        type: integer
+    type: object
   docs.ApplicationResponse:
     properties:
+      expiration_at:
+        type: string
+      hotel_name:
+        type: string
       id:
         type: string
       offer_id:
@@ -41,25 +61,76 @@ definitions:
       application_id:
         type: string
     type: object
+  docs.CreateHotelRequest:
+    properties:
+      location_id:
+        type: string
+      name:
+        type: string
+    required:
+    - location_id
+    - name
+    type: object
+  docs.CreateHotelResponse:
+    properties:
+      hotel_id:
+        type: string
+    type: object
+  docs.CreateLocationRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  docs.CreateLocationResponse:
+    properties:
+      location_id:
+        type: string
+    type: object
   docs.CreateOfferRequest:
     properties:
+      check_in:
+        type: string
+      check_out:
+        type: string
       expiration_at:
         type: string
       hotel_id:
         type: string
       location_id:
         type: string
+      participants_limit:
+        type: integer
+      room_id:
+        type: string
       task:
         type: string
     required:
+    - check_in
+    - check_out
     - expiration_at
     - hotel_id
     - location_id
+    - participants_limit
+    - room_id
     - task
     type: object
   docs.CreateOfferResponse:
     properties:
       id:
+        type: string
+    type: object
+  docs.CreateRoomRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  docs.CreateRoomResponse:
+    properties:
+      room_id:
         type: string
     type: object
   docs.GetApplicationsResponse:
@@ -70,6 +141,25 @@ definitions:
         type: array
       pages_count:
         type: integer
+    type: object
+  docs.GetByApplicationIdResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  docs.GetHotelsResponse:
+    properties:
+      hotels:
+        items:
+          $ref: '#/definitions/docs.HotelResponse'
+        type: array
+    type: object
+  docs.GetLocationsResponse:
+    properties:
+      locations:
+        items:
+          $ref: '#/definitions/docs.LocationResponse'
+        type: array
     type: object
   docs.GetOffersResponse:
     properties:
@@ -89,6 +179,38 @@ definitions:
           $ref: '#/definitions/docs.ReportResponse'
         type: array
     type: object
+  docs.GetRoomsResponse:
+    properties:
+      rooms:
+        items:
+          $ref: '#/definitions/docs.RoomResponse'
+        type: array
+    type: object
+  docs.GetUserAppLimitInfoResponse:
+    properties:
+      active_app_count:
+        type: integer
+      limit:
+        type: integer
+    type: object
+  docs.HotelResponse:
+    properties:
+      id:
+        type: string
+      location_id:
+        type: string
+      location_name:
+        type: string
+      name:
+        type: string
+    type: object
+  docs.LocationResponse:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   docs.LogInRequest:
     properties:
       ostrovok_login:
@@ -101,20 +223,28 @@ definitions:
     type: object
   docs.OfferResponse:
     properties:
-      check_date:
+      check_in_at:
+        type: string
+      check_out_at:
         type: string
       expiration_at:
         type: string
       hotel_id:
         type: string
+      hotel_name:
+        type: string
       id:
         type: string
-      location_id:
+      participants_count:
+        type: integer
+      participants_limit:
+        type: integer
+      room_id:
+        type: string
+      room_name:
         type: string
       task:
         type: string
-      used:
-        type: boolean
     type: object
   docs.RefreshRequest:
     properties:
@@ -132,7 +262,13 @@ definitions:
     type: object
   docs.ReportResponse:
     properties:
+      check_in_at:
+        type: string
+      check_out_at:
+        type: string
       expiration_at:
+        type: string
+      hotel_name:
         type: string
       id:
         type: string
@@ -140,9 +276,26 @@ definitions:
         items:
           $ref: '#/definitions/docs.ReportImageResponse'
         type: array
+      location_name:
+        type: string
+      promocode:
+        type: string
+      room_name:
+        type: string
       status:
         type: string
+      task:
+        type: string
       text:
+        type: string
+      user_id:
+        type: string
+    type: object
+  docs.RoomResponse:
+    properties:
+      id:
+        type: string
+      name:
         type: string
     type: object
   docs.SignUpRequest:
@@ -160,37 +313,67 @@ definitions:
     type: object
   docs.UpdateOfferRequest:
     properties:
+      check_in_at:
+        type: string
+      check_out_at:
+        type: string
       expiration_at:
+        type: string
+      hotel_id:
+        type: string
+      room_id:
         type: string
       task:
         type: string
     type: object
-  docs.UpdateReportRequest:
-    properties:
-      text:
-        type: string
-    required:
-    - text
-    type: object
   docs.UserResponse:
     properties:
+      achievements:
+        items:
+          $ref: '#/definitions/docs.AchievementResponse'
+        type: array
       email:
+        type: string
+      id:
         type: string
       is_admin:
         type: boolean
       ostrovok_login:
         type: string
+      rating:
+        type: integer
     type: object
-host: localhost:8080
+host: localhost:8081
 info:
   contact: {}
   description: API for "Secret Guest" app
   title: Secret Guest API
   version: "1.0"
 paths:
+  /analytics/:
+    get:
+      description: Calc and return metrics for analytics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of applications
+          schema:
+            $ref: '#/definitions/docs.AnalyticsResponse'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get analytics
+      tags:
+      - Analytics
   /application/:
     get:
-      description: Get all applications with pagination
+      description: GetForPage all applications with pagination
       parameters:
       - description: Number of page
         in: query
@@ -223,7 +406,7 @@ paths:
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get applications
+      summary: GetForPage applications
       tags:
       - Application
     post:
@@ -261,7 +444,7 @@ paths:
       - Application
   /application/{id}:
     get:
-      description: Get application by id
+      description: GetForPage application by id
       parameters:
       - description: Id of requested application
         in: path
@@ -282,19 +465,220 @@ paths:
         "401":
           description: Unauthorized
         "403":
-          description: Only available for reviewer
+          description: User is not reviewer or application does not belong to user
         "404":
           description: Application with given id not found
         "500":
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get by id
+      summary: GetForPage by id
       tags:
       - Application
+  /application/limit:
+    get:
+      description: GetUserAppLimitInfo get info about limit and active app
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Info about limit and active app
+          schema:
+            $ref: '#/definitions/docs.GetUserAppLimitInfoResponse'
+        "400":
+          description: Invalid data for getting info
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: User is not reviewer or application does not belong to user
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: GetUserAppLimitInfo
+      tags:
+      - Application
+  /application/search:
+    get:
+      description: GetAppsByFilter applications by filter with pagination
+      parameters:
+      - description: Id of required city
+        in: query
+        name: cityId
+        type: string
+      - description: Id of required hotel
+        in: query
+        name: hotelId
+        type: string
+      - description: Id of required room
+        in: query
+        name: roomId
+        type: string
+      - description: status of app
+        in: query
+        name: status
+        type: string
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of applications by filter
+          schema:
+            $ref: '#/definitions/docs.GetApplicationsResponse'
+        "400":
+          description: Invalid data for getting applications
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for reviewer
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: GetAppsByFilter applications
+      tags:
+      - Application
+  /hotel/:
+    get:
+      description: GetHotels all hotels
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of hotels
+          schema:
+            $ref: '#/definitions/docs.GetHotelsResponse'
+        "400":
+          description: Invalid data for getting hotels
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get hotels
+      tags:
+      - Hotel
+    post:
+      consumes:
+      - application/json
+      description: Creates offer with given info
+      parameters:
+      - description: Data for creating hotel
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreateHotelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created hotel data
+          schema:
+            $ref: '#/definitions/docs.CreateHotelResponse'
+        "400":
+          description: Invalid data for creating hotel
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Create hotel
+      tags:
+      - Hotel
+  /location/:
+    get:
+      description: GetLocations all locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of locations
+          schema:
+            $ref: '#/definitions/docs.GetLocationsResponse'
+        "400":
+          description: Invalid data for getting locations
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get locations
+      tags:
+      - Location
+    post:
+      consumes:
+      - application/json
+      description: Creates location with given info
+      parameters:
+      - description: Data for creating location
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreateLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created location data
+          schema:
+            $ref: '#/definitions/docs.CreateLocationResponse'
+        "400":
+          description: Invalid data for creating location
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Create location
+      tags:
+      - Location
   /offer/:
     get:
-      description: Get all offers with pagination
+      description: GetForPage all offers with pagination
       parameters:
       - description: Number of page
         in: query
@@ -327,7 +711,7 @@ paths:
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get offers
+      summary: GetForPage offers
       tags:
       - Offer
     post:
@@ -365,7 +749,7 @@ paths:
       - Offer
   /offer/{id}:
     get:
-      description: Get offer by id
+      description: GetForPage offer by id
       parameters:
       - description: Id of requested offer
         in: path
@@ -393,7 +777,7 @@ paths:
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get by id
+      summary: GetForPage by id
       tags:
       - Offer
     patch:
@@ -479,7 +863,7 @@ paths:
       - Offer
   /report/:
     get:
-      description: Get all reports with pagination
+      description: GetForPage all reports with pagination
       parameters:
       - description: Number of page
         in: query
@@ -512,12 +896,12 @@ paths:
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get reports
+      summary: GetForPage reports
       tags:
       - Report
   /report/{id}:
     get:
-      description: Get report by id
+      description: GetForPage report by id
       parameters:
       - description: Id of requested report
         in: path
@@ -545,7 +929,7 @@ paths:
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get by id
+      summary: GetForPage by id
       tags:
       - Report
     patch:
@@ -558,17 +942,11 @@ paths:
         name: id
         required: true
         type: string
-      - description: Data for updating report
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/docs.UpdateReportRequest'
-      - description: Report images
+      - description: Report text
         in: formData
-        name: images
+        name: text
         required: true
-        type: file
+        type: string
       produces:
       - application/json
       responses:
@@ -595,6 +973,11 @@ paths:
       - application/json
       description: Confirms or declains report
       parameters:
+      - description: Id of report to update
+        in: path
+        name: id
+        required: true
+        type: string
       - description: Data for updating report
         in: body
         name: input
@@ -623,7 +1006,7 @@ paths:
       - Report
   /report/my:
     get:
-      description: Get all reports of current user with pagination
+      description: GetForPage all reports of current user with pagination
       parameters:
       - description: Number of page
         in: query
@@ -656,12 +1039,12 @@ paths:
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get my reports
+      summary: GetForPage my reports
       tags:
       - Report
   /report/my/{id}:
     get:
-      description: Get report of current user by id
+      description: GetForPage report of current user by id
       parameters:
       - description: Id of requested report
         in: path
@@ -691,12 +1074,157 @@ paths:
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get my by id
+      summary: GetForPage my by id
       tags:
       - Report
+  /report/my/application/{id}:
+    get:
+      description: Get my report by application id
+      parameters:
+      - description: Id of corresponding application
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Requested report
+          schema:
+            $ref: '#/definitions/docs.GetByApplicationIdResponse'
+        "400":
+          description: Invalid data for getting report by id
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: User is not reviewer or this report does not belong to user
+          schema:
+            type: string
+        "404":
+          description: Report with given id not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get by application id
+      tags:
+      - Report
+  /report/search:
+    get:
+      description: GetReportsByFilter reports by filter with pagination
+      parameters:
+      - description: cityId if report
+        in: query
+        name: cityId
+        type: string
+      - description: hotelId of report
+        in: query
+        name: hotelId
+        type: string
+      - description: Status of report
+        in: query
+        name: status
+        type: string
+      - description: Number of page
+        in: query
+        name: pageNum
+        required: true
+        type: integer
+      - description: Size of page
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of reports
+          schema:
+            $ref: '#/definitions/docs.GetReportsResponse'
+        "400":
+          description: Invalid data for getting reports
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: GetReportsByFilter reports by filter
+      tags:
+      - Report
+  /room/:
+    get:
+      description: GetRooms all rooms
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Page of rooms
+          schema:
+            $ref: '#/definitions/docs.GetRoomsResponse'
+        "400":
+          description: Invalid data for getting rooms
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "404":
+          description: Page with given number not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get rooms
+      tags:
+      - Room
+    post:
+      consumes:
+      - application/json
+      description: Creates offer with given info
+      parameters:
+      - description: Data for creating room
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreateRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created room data
+          schema:
+            $ref: '#/definitions/docs.CreateRoomResponse'
+        "400":
+          description: Invalid data for creating room
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Only available for admin
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Create offer
+      tags:
+      - Room
   /user/:
     get:
-      description: Get data of current user
+      description: GetForPage data of current user
       produces:
       - application/json
       responses:
@@ -704,13 +1232,19 @@ paths:
           description: User data
           schema:
             $ref: '#/definitions/docs.UserResponse'
+        "400":
+          description: Bad request to get user data
+          schema:
+            type: string
         "401":
           description: Unauthorized
+        "404":
+          description: User not found
         "500":
           description: Internal server error
       security:
       - BearerAuth: []
-      summary: Get me
+      summary: GetForPage me
       tags:
       - User
   /user/log-in:

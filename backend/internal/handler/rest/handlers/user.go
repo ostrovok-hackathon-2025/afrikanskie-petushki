@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"errors"
 	"log"
 	"net/http"
 
@@ -8,9 +10,26 @@ import (
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/user"
+
+	repo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 )
 
-type UserHandlers struct {
+type UserHandler interface {
+	LogIn(ctx *gin.Context)
+	SignUp(ctx *gin.Context)
+	Refresh(ctx *gin.Context)
+	GetMe(ctx *gin.Context)
+}
+
+type userHandler struct {
+	useCase user.UseCase
+}
+
+func NewUserHandler(useCase user.UseCase) UserHandler {
+	return &userHandler{
+		useCase: useCase,
+	}
 }
 
 // Add godoc
@@ -26,30 +45,38 @@ type UserHandlers struct {
 // @Failure 404 "User not found"
 // @Failure 500 "Internal server error"
 // @Router /user/log-in [post]
-func (h *UserHandlers) LogIn(ctx *gin.Context) {
+func (h *userHandler) LogIn(ginCtx *gin.Context) {
 	var request docs.LogInRequest
+	ctx := context.Background()
 
-	if err := ctx.BindJSON(&request); err != nil {
+	if err := ginCtx.BindJSON(&request); err != nil {
 		log.Println("Invalid body")
-		ctx.String(http.StatusBadRequest, "invalid body")
+		ginCtx.String(http.StatusBadRequest, "invalid body")
 		return
 	}
 
 	if err := validation.ValidateUsername(request.OstrovokLogin); err != nil {
 		log.Println("Invalid username: ", err.Error())
-		ctx.String(http.StatusBadRequest, err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := validation.ValidatePassword(request.Password); err != nil {
 		log.Println("Invalid username: ", err.Error())
-		ctx.String(http.StatusBadRequest, err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := &docs.AuthResponse{}
+	resp, err := h.useCase.Login(ctx, &request)
 
-	ctx.JSON(http.StatusOK, resp)
+	if err != nil {
+		//TODO обработка похитрее
+		log.Println("Err to login: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, resp)
 }
 
 // Add godoc
@@ -64,36 +91,44 @@ func (h *UserHandlers) LogIn(ctx *gin.Context) {
 // @Failure 404 "User not found"
 // @Failure 500 "Internal server error"
 // @Router /user/sign-up [post]
-func (h *UserHandlers) SignUp(ctx *gin.Context) {
+func (h *userHandler) SignUp(ginCtx *gin.Context) {
 	var request docs.SignUpRequest
+	ctx := context.Background()
 
-	if err := ctx.BindJSON(&request); err != nil {
+	if err := ginCtx.BindJSON(&request); err != nil {
 		log.Println("Invalid body")
-		ctx.String(http.StatusBadRequest, "invalid body")
+		ginCtx.String(http.StatusBadRequest, "invalid body")
 		return
 	}
 
 	if err := validation.ValidateUsername(request.OstrovokLogin); err != nil {
 		log.Println("Invalid username: ", err.Error())
-		ctx.String(http.StatusBadRequest, err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := validation.ValidateEmail(request.Email); err != nil {
 		log.Println("Invalid email: ", err.Error())
-		ctx.String(http.StatusBadRequest, err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := validation.ValidatePassword(request.Password); err != nil {
-		log.Println("Invalid username: ", err.Error())
-		ctx.String(http.StatusBadRequest, err.Error())
+		log.Println("Invalid password: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := &docs.AuthResponse{}
+	resp, err := h.useCase.Register(ctx, &request)
 
-	ctx.JSON(http.StatusCreated, resp)
+	if err != nil {
+		//TODO обработка похитрее
+		log.Println("Err from useCAse password: ", err.Error())
+		ginCtx.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ginCtx.JSON(http.StatusCreated, resp)
 }
 
 // Add godoc
@@ -107,7 +142,7 @@ func (h *UserHandlers) SignUp(ctx *gin.Context) {
 // @Failure 400 {string} string "Invalid data for refresh"
 // @Failure 500 "Internal server error"
 // @Router /user/refresh [post]
-func (h *UserHandlers) Refresh(ctx *gin.Context) {
+func (h *userHandler) Refresh(ctx *gin.Context) {
 	var request docs.RefreshRequest
 
 	if err := ctx.BindJSON(&request); err != nil {
@@ -122,17 +157,18 @@ func (h *UserHandlers) Refresh(ctx *gin.Context) {
 }
 
 // Add godoc
-// @Summary Get me
-// @Description Get data of current user
+// @Summary GetForPage me
+// @Description GetForPage data of current user
 // @Tags User
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} docs.UserResponse "User data"
 // @Failure 400 {string} string "Bad request to get user data"
 // @Failure 401 "Unauthorized"
+// @Failure 404 "User not found"
 // @Failure 500 "Internal server error"
 // @Router /user/ [get]
-func (h *UserHandlers) GetMe(ctx *gin.Context) {
+func (h *userHandler) GetMe(ctx *gin.Context) {
 	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
@@ -141,22 +177,22 @@ func (h *UserHandlers) GetMe(ctx *gin.Context) {
 		return
 	}
 
-	_ = userId
+	user, err := h.useCase.GetMe(ctx.Request.Context(), userId)
 
-	resp := &docs.UserResponse{}
+	if err != nil {
+		log.Println("failed to get user info", err)
+
+		switch {
+		case errors.Is(err, repo.ErrUserNotFound):
+			ctx.Status(http.StatusNotFound)
+		default:
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	resp := docs.UserModelToResponse(user)
 
 	ctx.JSON(http.StatusOK, resp)
-}
-
-func InitUserHandlers(router *gin.RouterGroup, authProvider *auth.Auth) {
-	h := &UserHandlers{}
-
-	group := router.Group("/user")
-
-	{
-		group.POST("/log-in", h.LogIn)
-		group.POST("/sign-up", h.SignUp)
-		group.POST("/refresh", h.Refresh)
-		group.GET("/", authProvider.LoginProtected(), h.GetMe)
-	}
 }

@@ -1,9 +1,9 @@
 services:
-  backend-app:
-    container_name: backend-app
-    image: backend-app
+  frontend:
+    container_name: frontend
+    image: frontend
     build:
-      context: ./backend
+      context: ./frontend
       dockerfile: Dockerfile
     restart: always
     ports:
@@ -11,9 +11,91 @@ services:
     networks:
       - main
     stdin_open: true
-    tty: true 
+    tty: true
+    depends_on:
+      backend-app:
+        condition: service_healthy
     env_file:
-      - ./.env.example
+      - .env.example
+
+  backend-app:
+    container_name: backend-app
+    image: backend-app
+    environment:
+      CONFIG_PATH: "${CONFIG_PATH}"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: always
+    ports:
+      - 8081:8081
+    networks:
+      - main
+    stdin_open: true
+    tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./backend/configs:/root/configs:ro
+    env_file:
+      - .env.example
+
+  db:
+    container_name: postgres_secret_guest
+    image: postgres:16
+    restart: on-failure
+    ports:
+      - 5432:5432
+    networks:
+      - main
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./backend/migrations/old:/var/lib/testdata
+      - secret-guest-pgdata:/var/lib/postgresql/data
+      - ./backend/migrations/sql:/docker-entrypoint-initdb.d
+
+  minio:
+    container_name: minio_secret_guest
+    image: quay.io/minio/minio:latest
+    command: [ "server", "--console-address", ":9090", "/mnt/data" ]
+    environment:
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+      MINIO_USE_SSL: "false"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9090/minio/health/live" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "9090:9090"
+      - "9000:9000"
+    networks:
+      - main
+    volumes:
+      - 'minio-data:/mnt/data'
 
 networks:
   main:
+
+volumes:
+  secret-guest-pgdata: { }
+  minio-data: { }
