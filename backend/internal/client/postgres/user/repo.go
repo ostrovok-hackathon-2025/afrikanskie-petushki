@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 
 	"github.com/google/uuid"
@@ -17,6 +18,7 @@ type Repo interface {
 	CreateUser(ctx context.Context, user *model.User, passwordHash string) error
 	UserExists(ctx context.Context, login string) (bool, error)
 	GetUserById(ctx context.Context, userId uuid.UUID) (*model.User, error)
+	GetUserByReportId(ctx context.Context, reportId uuid.UUID) (*model.User, error)
 	UpdateRating(ctx context.Context, userId uuid.UUID, rating int) error
 }
 
@@ -75,6 +77,30 @@ func (r *repo) GetUserById(ctx context.Context, userId uuid.UUID) (*model.User, 
 	var user UserDTO
 
 	err := r.sqlClient.GetContext(ctx, &user, query, userId)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get user from repo: %w", err)
+	}
+
+	return user.ToUserModel(), nil
+}
+
+func (r *repo) GetUserByReportId(ctx context.Context, reportId uuid.UUID) (*model.User, error) {
+	query := `
+		SELECT u.id, u.ostrovok_login, u.is_admin, u.rating 
+		FROM "user" u 
+		INNER JOIN application a ON a.user_id = u.id 
+		INNER JOIN report r ON r.application_id = a.id
+		WHERE r.id = $1
+	`
+
+	var user UserDTO
+
+	err := r.sqlClient.GetContext(ctx, &user, query, reportId)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

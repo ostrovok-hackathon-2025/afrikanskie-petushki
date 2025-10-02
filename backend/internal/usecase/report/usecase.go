@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 	"mime/multipart"
 	"path/filepath"
+
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/ostrovok"
@@ -38,11 +40,24 @@ type usecase struct {
 	db             report.Repo
 	s3             image.Repo
 	ostrovokClient ostrovok.Client
-  userRepo       user.Repo
+	userRepo       user.Repo
+	appsRepo       application.ApplicationRepo
 }
 
-func New(db report.Repo, s3 image.Repo, ostrovokClient ostrovok.Client, userRepo user.Repo) Usecase {
-  return &usecase{db: db, s3: s3, ostrovokClient: ostrovokClient, userRepo: userRepo}
+func New(
+	db report.Repo,
+	s3 image.Repo,
+	ostrovokClient ostrovok.Client,
+	userRepo user.Repo,
+	appsRepo application.ApplicationRepo,
+) Usecase {
+	return &usecase{
+		db:             db,
+		s3:             s3,
+		ostrovokClient: ostrovokClient,
+		userRepo:       userRepo,
+		appsRepo:       appsRepo,
+	}
 }
 
 func (u *usecase) Get(ctx context.Context, limit, offset int64) ([]report2.Report, error) {
@@ -128,7 +143,7 @@ func (u *usecase) UpdateStatus(ctx context.Context, report report2.Report) error
 		return err
 	}
 
-	user, err := u.userRepo.GetUserById(ctx, report.UserID)
+	user, err := u.userRepo.GetUserByReportId(ctx, report.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -142,7 +157,7 @@ func (u *usecase) UpdateStatus(ctx context.Context, report report2.Report) error
 
 	newRating = validation.ValidateRating(newRating)
 
-	return u.userRepo.UpdateRating(ctx, report.UserID, newRating)
+	return u.userRepo.UpdateRating(ctx, user.ID, newRating)
 }
 
 func (u *usecase) removeOldImages(ctx context.Context, report report2.Report) error {

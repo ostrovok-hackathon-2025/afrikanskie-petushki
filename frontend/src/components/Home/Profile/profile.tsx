@@ -60,7 +60,12 @@ export default function Profile() {
             )}
           >
             Рейтинг:&nbsp;{" "}
-            <CountUp from={0} to={raiting} direction="up" duration={1} />
+            <CountUp
+              from={0}
+              to={raiting}
+              direction="up"
+              duration={1 + raiting / 25}
+            />
           </div>
         </div>
       </div>
