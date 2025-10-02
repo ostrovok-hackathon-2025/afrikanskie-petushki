@@ -14,7 +14,7 @@ services:
     tty: true
     depends_on:
       backend-app:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - .env.example
 

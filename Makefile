@@ -1,6 +1,6 @@
 .PHONY: up
 up: ## Run service with dependencies
-	docker compose --env-file ./.env.example up --force-recreate --wait -d
+	docker compose --env-file ./.env.example up --force-recreate -d
 
 .PHONY: build
 build:
