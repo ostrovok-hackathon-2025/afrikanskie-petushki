@@ -13,6 +13,8 @@ type ApplicationRepo interface {
 	GetApplicationById(ctx context.Context, applicationId uuid.UUID) (*application.Application, error)
 	GetByOfferID(ctx context.Context, offerID uuid.UUID) ([]*application.Application, error)
 
+	GetByOfferIDForDraw(ctx context.Context, offerID uuid.UUID) ([]*application.ApplicationWithRating, error)
+
 	GetUserAppLimitInfo(ctx context.Context, userID uuid.UUID) (*application.UserAppLimitInfo, error)
 
 	UpdateApplicationStatus(ctx context.Context, application *application.Application) error

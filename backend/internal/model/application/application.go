@@ -24,6 +24,14 @@ type Application struct {
 	HotelName    string
 }
 
+type ApplicationWithRating struct {
+	Id         uuid.UUID
+	UserId     uuid.UUID
+	OfferId    uuid.UUID
+	Status     ApplicationStatus
+	UserRating int
+}
+
 type UserAppLimitInfo struct {
 	Limit          uint
 	ActiveAppCount uint

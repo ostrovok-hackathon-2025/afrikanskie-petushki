@@ -26,6 +26,14 @@ type ApplicationDTO struct {
 	HotelName    string    `db:"name"`
 }
 
+type ApplicationWithRatingDTO struct {
+	Id         uuid.UUID `db:"id"`
+	UserId     uuid.UUID `db:"user_id"`
+	OfferId    uuid.UUID `db:"offer_id"`
+	Status     string    `db:"status"`
+	UserRating int       `db:"rating"`
+}
+
 func (d *ApplicationDTO) ToApplicationModel() *application.Application {
 	return &application.Application{
 		Id:           d.Id,
@@ -34,6 +42,16 @@ func (d *ApplicationDTO) ToApplicationModel() *application.Application {
 		Status:       application.ApplicationStatus(d.Status),
 		ExpirationAt: d.ExpirationAt,
 		HotelName:    d.HotelName,
+	}
+}
+
+func (d *ApplicationWithRatingDTO) ToModel() *application.ApplicationWithRating {
+	return &application.ApplicationWithRating{
+		Id:         d.Id,
+		UserId:     d.UserId,
+		OfferId:    d.OfferId,
+		Status:     application.ApplicationStatus(d.Status),
+		UserRating: d.UserRating,
 	}
 }
 

@@ -7,15 +7,12 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
-	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/offer"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/report"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 	appModel "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
 	reportModel "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/report"
-	userModel "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/pkg"
 )
 
 type SecretGuestWorker struct {
@@ -86,7 +83,7 @@ func (w *SecretGuestWorker) process() {
 			continue
 		}
 
-		applications, err := w.applicationRepo.GetByOfferID(ctx, i.ID)
+		applications, err := w.applicationRepo.GetByOfferIDForDraw(ctx, i.ID)
 		if err != nil {
 			log.Printf("❌Error application receive %v", err)
 			continue
@@ -131,39 +128,21 @@ func (w *SecretGuestWorker) process() {
 	log.Println("\n Processing done")
 }
 
-func (w *SecretGuestWorker) selectWinnerByRating(ctx context.Context, applications []*appModel.Application) (*appModel.Application, error) {
+func (w *SecretGuestWorker) selectWinnerByRating(_ context.Context, applications []*appModel.ApplicationWithRating) (*appModel.Application, error) {
 	if len(applications) == 0 {
 		return nil, errors.New("no applications found")
 	}
 
-	users := make([]userModel.User, 0, len(applications))
-	appByUserID := make(map[uuid.UUID]*appModel.Application)
+	winnerApp := chooseByRating(applications)
 
-	for _, app := range applications {
-		user, err := w.userRepo.GetUserById(ctx, app.UserId)
-		if err != nil {
-			log.Printf("⚠️ Warning: failed to get user %s: %v", app.UserId, err)
-			continue
-		}
-
-		users = append(users, *user)
-		appByUserID[user.ID] = app
-	}
-
-	if len(users) == 0 {
-		return nil, errors.New("no valid users found for applications")
-	}
-
-	winnerUserID := pkg.ChooseByRating(users)
-
-	if winnerUserID == uuid.Nil {
+	if winnerApp == nil {
 		return nil, errors.New("failed to select winner")
 	}
 
-	winnerApp, ok := appByUserID[winnerUserID]
-	if !ok {
-		return nil, errors.New("winner application not found")
-	}
-
-	return winnerApp, nil
+	return &appModel.Application{
+		Id:      winnerApp.Id,
+		UserId:  winnerApp.UserId,
+		OfferId: winnerApp.OfferId,
+		Status:  winnerApp.Status,
+	}, nil
 }

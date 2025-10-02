@@ -208,6 +208,34 @@ func (r *applicationRepo) GetByOfferID(
 	return res, nil
 }
 
+func (r *applicationRepo) GetByOfferIDForDraw(
+	ctx context.Context,
+	offerID uuid.UUID,
+) ([]*application.ApplicationWithRating, error) {
+	query := `
+	SELECT a.id as id, a.user_id, a.offer_id, a.status, u.rating
+	FROM application a JOIN public."user" u on u.id = a.user_id
+	WHERE offer_id = $1
+	`
+
+	var apps []ApplicationWithRatingDTO
+
+	err := r.db.SelectContext(ctx, &apps, query, offerID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []*application.ApplicationWithRating{}, nil // пустой слайс, если нет заявок. когда отель кал
+		}
+		return nil, fmt.Errorf("failed to get applications by offer_id: %w", err)
+	}
+
+	res := make([]*application.ApplicationWithRating, 0, len(apps))
+	for _, app := range apps {
+		res = append(res, app.ToModel())
+	}
+
+	return res, nil
+}
+
 func (r *applicationRepo) GetUserAppLimitInfo(ctx context.Context, userID uuid.UUID) (*application.UserAppLimitInfo, error) {
 
 	dto, err := getUserAppLimitInfo(r.db, ctx, userID)

@@ -1,11 +1,10 @@
-package pkg
+package worker
 
 import (
 	"math"
 	"math/rand"
 
-	"github.com/google/uuid"
-	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/application"
 )
 
 var (
@@ -13,12 +12,12 @@ var (
 	gamma = 0.17628
 )
 
-func ChooseByRating(users []model.User) uuid.UUID {
-	contributions := make([]float64, len(users))
+func chooseByRating(apps []*application.ApplicationWithRating) *application.ApplicationWithRating {
+	contributions := make([]float64, len(apps))
 
 	sum := 0.0
-	for i, user := range users {
-		contribution := transformRatingToContribution(user.Rating, alpha, gamma)
+	for i, app := range apps {
+		contribution := transformRatingToContribution(app.UserRating, alpha, gamma)
 		contributions[i] = contribution
 		sum += contribution
 	}
@@ -27,10 +26,10 @@ func ChooseByRating(users []model.User) uuid.UUID {
 	for i, c := range contributions {
 		target -= c
 		if target < 0 {
-			return users[i].ID
+			return apps[i]
 		}
 	}
-	return uuid.Nil
+	return nil
 }
 
 func transformRatingToContribution(rating int, alpha, gamma float64) float64 {
