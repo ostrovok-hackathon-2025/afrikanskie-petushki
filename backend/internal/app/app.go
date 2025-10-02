@@ -18,6 +18,7 @@ import (
 	userRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/s3/image"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/config"
+
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/handlers"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/middleware/auth"
 	analyticsUC "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/usecase/analytics"
@@ -64,9 +65,10 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 	hotelUseCase := hotelUC.NewUseCase(hotelRepository)
 	locationUseCase := locationUC.NewUseCase(locationRepository)
 	roomUseCase := roomUC.NewUseCase(roomRepository)
-	reportUsccase := report.New(reportRepository, imageRepo, ostrovokClient)
+	reportUsccase := report.New(reportRepository, imageRepo, ostrovokClient, userRepository)
 	analyticsUseCase := analyticsUC.NewAnalyticsUseCase(analyticsRepository)
 
+	analyticsUseCase := analyticsUC.NewAnalyticsUseCase(analyticsRepository)
 	//Handlers
 
 	userHandler := handlers.NewUserHandler(userUseCase)

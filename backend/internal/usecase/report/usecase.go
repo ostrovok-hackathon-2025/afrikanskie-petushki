@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 	"mime/multipart"
 	"path/filepath"
 
@@ -35,10 +38,11 @@ type usecase struct {
 	db             report.Repo
 	s3             image.Repo
 	ostrovokClient ostrovok.Client
+  userRepo       user.Repo
 }
 
-func New(db report.Repo, s3 image.Repo, ostrovokClient ostrovok.Client) Usecase {
-	return &usecase{db: db, s3: s3, ostrovokClient: ostrovokClient}
+func New(db report.Repo, s3 image.Repo, ostrovokClient ostrovok.Client, userRepo user.Repo) Usecase {
+  return &usecase{db: db, s3: s3, ostrovokClient: ostrovokClient, userRepo: userRepo}
 }
 
 func (u *usecase) Get(ctx context.Context, limit, offset int64) ([]report2.Report, error) {
@@ -119,7 +123,26 @@ func (u *usecase) UpdateStatus(ctx context.Context, report report2.Report) error
 		}
 	}
 
-	return u.db.UpdateStatus(ctx, report)
+	err := u.db.UpdateStatus(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	user, err := u.userRepo.GetUserById(ctx, report.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	var newRating int
+	if report.Status == "accepted" {
+		newRating = user.Rating + 20
+	} else if report.Status == "declined" {
+		newRating = user.Rating - 5
+	}
+
+	newRating = validation.ValidateRating(newRating)
+
+	return u.userRepo.UpdateRating(ctx, report.UserID, newRating)
 }
 
 func (u *usecase) removeOldImages(ctx context.Context, report report2.Report) error {

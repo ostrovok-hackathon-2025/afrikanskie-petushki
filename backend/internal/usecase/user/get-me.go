@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 	"github.com/google/uuid"
 	repo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
@@ -31,6 +31,5 @@ func (u *useCase) GetMe(ctx context.Context, userId uuid.UUID) (*model.User, err
 	}
 
 	user.Email = ostrovokUser.Email
-
 	return user, err
 }
