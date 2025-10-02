@@ -9,6 +9,7 @@
 ```bash
 git clone https://github.com/ostrovok-hackathon-2025/afrikanskie-petushki.git
 cd afrikanskie-petushki
+cp .env.example .env
 docker compose up --build
 открыть http://localhost:8080
 ```
