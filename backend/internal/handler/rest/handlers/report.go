@@ -514,6 +514,7 @@ func (h *reportHandler) convertToReportResp(r report2.Report) *docs.ReportRespon
 		ExpirationAt: r.ExpirationAt.Format(time.RFC3339),
 		Status:       r.Status,
 		Text:         r.Text,
+		Promocode:    r.Promocode,
 		HotelName:    r.HotelName,
 		LocationName: r.LocationName,
 		RoomName:     r.RoomName,

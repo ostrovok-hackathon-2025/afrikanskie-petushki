@@ -16,6 +16,7 @@ export interface ReportInfo {
   }[];
 
   status: string;
+  promocode: string;
 }
 
 export const loadReport = async (id: string): Promise<ReportInfo | null> => {
@@ -38,5 +39,6 @@ export const loadReport = async (id: string): Promise<ReportInfo | null> => {
     text: resp.data.text ?? "",
 
     status: resp.data.status ?? "",
+    promocode: resp.data.promocode ?? "",
   };
 };

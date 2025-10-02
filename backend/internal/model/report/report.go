@@ -28,6 +28,7 @@ type Report struct {
 	CheckOutAt    time.Time
 	RoomName      string
 	Images        []Image
+	Promocode     string
 }
 
 func NewReport(applicationId uuid.UUID, ExpirationAt time.Time) Report {

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { loadReport, ReportInfo } from "../model";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
+import { Copy } from "lucide-react";
 
 interface Grade {
   result: string;
@@ -125,15 +126,15 @@ export default function ReportView({ id, goToEdit }: ReportViewProps) {
 
       {reportInfo.status === "accepted" || reportInfo.status === "declined" ? (
         <>
-          <div className="font-gain text-lg font-medium mb-6">
+          <div className="font-gain text-lg font-medium mb-16">
             Вердикт: <span className={statusCol}>{grade?.result + "!"}</span>
           </div>
 
-          <div className="font-gain font-bold text-5xl mb-4">
+          <div className="font-gain font-bold text-5xl mb-6">
             {grade?.title}
           </div>
 
-          <div className="font-gain text-base text-muted-foreground mb-8">
+          <div className="font-gain text-base text-muted-foreground mb-12">
             {grade?.description}
           </div>
 
@@ -145,8 +146,14 @@ export default function ReportView({ id, goToEdit }: ReportViewProps) {
           </div>
 
           {reportInfo.status === "accepted" && (
-            <div className="cursor-pointer rounded-sm text-2xl text-primary-foreground font-gain text-bold bg-primary w-fit font-bold box-border px-4 py-2">
-              C47-D89
+            <div
+              className="flex items-center gap-3 cursor-pointer rounded-sm text-2xl text-primary-foreground font-gain text-bold bg-primary w-fit font-bold box-border px-4 py-2"
+              onClick={() =>
+                navigator.clipboard.writeText(reportInfo.promocode)
+              }
+            >
+              {reportInfo.promocode}
+              <Copy />
             </div>
           )}
         </>
