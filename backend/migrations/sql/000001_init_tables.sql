@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS report
     expiration_at  TIMESTAMP WITH TIME ZONE,
     status         VARCHAR(16),
     text           TEXT,
+    promocode      VARCHAR(16) DEFAULT '',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

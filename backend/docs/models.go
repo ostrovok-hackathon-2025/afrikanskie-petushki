@@ -139,6 +139,7 @@ type ReportResponse struct {
 	ExpirationAt string                 `json:"expiration_at"`
 	Status       string                 `json:"status"`
 	Text         string                 `json:"text"`
+	Promocode    string                 `json:"promocode"`
 	UserId       string                 `json:"user_id"`
 	HotelName    string                 `json:"hotel_name"`
 	LocationName string                 `json:"location_name"`

@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
 	"mime/multipart"
 	"path/filepath"
 
 	"github.com/google/uuid"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/ostrovok"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/report"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/s3/image"
 	report2 "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/report"
@@ -33,18 +35,16 @@ type Usecase interface {
 }
 
 type usecase struct {
-	db       report.Repo
-	s3       image.Repo
-	userRepo user.Repo
+	db             report.Repo
+	s3             image.Repo
+	ostrovokClient ostrovok.Client
+  userRepo       user.Repo
 }
 
-func New(db report.Repo, s3 image.Repo, userRepo user.Repo) Usecase {
-	return &usecase{
-		db:       db,
-		s3:       s3,
-		userRepo: userRepo,
-	}
+func New(db report.Repo, s3 image.Repo, ostrovokClient ostrovok.Client, userRepo user.Repo) Usecase {
+  return &usecase{db: db, s3: s3, ostrovokClient: ostrovokClient, userRepo: userRepo}
 }
+
 func (u *usecase) Get(ctx context.Context, limit, offset int64) ([]report2.Report, error) {
 	return u.db.Get(ctx, limit, offset)
 }
@@ -107,6 +107,22 @@ func (u *usecase) UpdateStatus(ctx context.Context, report report2.Report) error
 		return errors.New("invalid status")
 	}
 
+	if report.Status == "accepted" {
+		promocode, err := u.ostrovokClient.GeneratePromocode(ctx)
+
+		if err != nil {
+			return err
+		}
+
+		report.Promocode = promocode
+
+		err = u.db.UpdatePromocode(ctx, report)
+
+		if err != nil {
+			return fmt.Errorf("failed to save promocode: %w", err)
+		}
+	}
+
 	err := u.db.UpdateStatus(ctx, report)
 	if err != nil {
 		return err
@@ -119,7 +135,7 @@ func (u *usecase) UpdateStatus(ctx context.Context, report report2.Report) error
 
 	var newRating int
 	if report.Status == "accepted" {
-		newRating = user.Rating + 10
+		newRating = user.Rating + 20
 	} else if report.Status == "declined" {
 		newRating = user.Rating - 5
 	}

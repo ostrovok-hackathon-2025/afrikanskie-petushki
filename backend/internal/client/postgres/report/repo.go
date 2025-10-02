@@ -24,6 +24,7 @@ type Repo interface {
 	Upsert(ctx context.Context, report model.Report) error
 	GetImagesByReportID(ctx context.Context, reportID uuid.UUID) ([]model.Image, error)
 	UpdateStatus(ctx context.Context, report model.Report) error
+	UpdatePromocode(ctx context.Context, report model.Report) error
 	GetByApplicationId(ctx context.Context, applicationId uuid.UUID) (uuid.UUID, uuid.UUID, error)
 	GetByFilter(ctx context.Context, filter model.Filter) ([]model.Report, error)
 	GetCountByFilter(ctx context.Context, filter model.Filter) (int, error)
@@ -49,6 +50,7 @@ type getRow struct {
 	ExpirationAt  time.Time  `db:"expiration_at"`
 	Status        string     `db:"status"`
 	Text          string     `db:"text"`
+	Promocode     string     `db:"promocode"`
 	ImageID       *uuid.UUID `db:"image_id"`
 	ImageLink     *string    `db:"image_link"`
 	HotelName     string     `db:"hotel_name"`
@@ -85,6 +87,7 @@ const queryGetByID = `
             r.expiration_at,
             r.status,
             r.text,
+			r.promocode,
             p.id as "image_id",
             p.s3_link as "image_link",
             a.user_id as "user_id",
@@ -112,6 +115,7 @@ func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, e
 		ExpirationAt  time.Time  `db:"expiration_at"`
 		Status        string     `db:"status"`
 		Text          string     `db:"text"`
+		Promocode     string     `db:"promocode"`
 		ImageID       *uuid.UUID `db:"image_id"`
 		ImageLink     *string    `db:"image_link"`
 		HotelName     string     `db:"hotel_name"`
@@ -142,6 +146,7 @@ func (r *repo) GetByID(ctx context.Context, id uuid.UUID) (model.Report, bool, e
 		ExpirationAt:  rows[0].ExpirationAt,
 		Status:        rows[0].Status,
 		Text:          rows[0].Text,
+		Promocode:     rows[0].Promocode,
 		LocationName:  rows[0].LocationName,
 		HotelName:     rows[0].HotelName,
 		RoomName:      rows[0].RoomName,
@@ -169,6 +174,7 @@ const queryGetByUserID = `
             r.expiration_at,
             r.status,
             r.text,
+			r.promocode,
             p.id as "image_id",
             p.s3_link as "image_link",
 			h.name as "hotel_name",
@@ -197,6 +203,7 @@ func (r *repo) GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset 
 		UserID        uuid.UUID  `db:"user_id"`
 		Status        string     `db:"status"`
 		Text          string     `db:"text"`
+		Promocode     string     `db:"promocode"`
 		ImageID       *uuid.UUID `db:"image_id"`
 		ImageLink     *string    `db:"image_link"`
 		HotelName     string     `db:"hotel_name"`
@@ -228,6 +235,7 @@ func (r *repo) GetByUserID(ctx context.Context, userID uuid.UUID, limit, offset 
 				ExpirationAt:  row.ExpirationAt,
 				Status:        row.Status,
 				Text:          row.Text,
+				Promocode:     row.Promocode,
 				LocationName:  row.LocationName,
 				HotelName:     row.HotelName,
 				RoomName:      row.RoomName,
@@ -263,6 +271,7 @@ const queryGet = `
             r.expiration_at,
             r.status,
             r.text,
+			r.promocode,
             p.id as "image_id",
             p.s3_link as "image_link",
 			h.name as "hotel_name",
@@ -434,6 +443,22 @@ func (r *repo) UpdateStatus(ctx context.Context, report model.Report) error {
 	return nil
 }
 
+const reportUpdatePromocodeQuery = `
+        UPDATE report SET promocode = $1 WHERE id = $2
+    `
+
+func (r *repo) UpdatePromocode(ctx context.Context, report model.Report) error {
+	_, err := r.db.ExecContext(ctx, reportUpdatePromocodeQuery,
+		report.Promocode,
+		report.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 const reportGetByApplicationIdQuery = `
         SELECT r.id, a.user_id 
 		FROM report r
@@ -547,6 +572,7 @@ func convertGetDtoToModel(rows []getRow) []model.Report {
 				ExpirationAt:  row.ExpirationAt,
 				Status:        row.Status,
 				Text:          row.Text,
+				Promocode:     row.Promocode,
 				LocationName:  row.LocationName,
 				HotelName:     row.HotelName,
 				RoomName:      row.RoomName,

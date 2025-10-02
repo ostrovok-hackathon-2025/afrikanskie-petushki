@@ -65,7 +65,8 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 	hotelUseCase := hotelUC.NewUseCase(hotelRepository)
 	locationUseCase := locationUC.NewUseCase(locationRepository)
 	roomUseCase := roomUC.NewUseCase(roomRepository)
-	reportUsccase := report.New(reportRepository, imageRepo, userRepository)
+	reportUsccase := report.New(reportRepository, imageRepo, ostrovokClient, userRepository)
+	analyticsUseCase := analyticsUC.NewAnalyticsUseCase(analyticsRepository)
 
 	analyticsUseCase := analyticsUC.NewAnalyticsUseCase(analyticsRepository)
 	//Handlers

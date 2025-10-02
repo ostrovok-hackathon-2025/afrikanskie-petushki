@@ -15,6 +15,7 @@ export interface DocsReportResponse {
   id?: string;
   images?: DocsReportImageResponse[];
   location_name?: string;
+  promocode?: string;
   room_name?: string;
   status?: string;
   task?: string;

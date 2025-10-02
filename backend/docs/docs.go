@@ -1976,6 +1976,9 @@ const docTemplate = `{
                 "location_name": {
                     "type": "string"
                 },
+                "promocode": {
+                    "type": "string"
+                },
                 "room_name": {
                     "type": "string"
                 },

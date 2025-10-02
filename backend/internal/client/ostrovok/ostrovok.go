@@ -3,6 +3,8 @@ package ostrovok
 import (
 	"context"
 	"errors"
+	"math/rand"
+	"strings"
 
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/ostrovok"
 )
@@ -39,6 +41,7 @@ var (
 
 type Client interface {
 	GetUserByLogin(ctx context.Context, login string) (*model.OstrovokUser, error)
+	GeneratePromocode(ctx context.Context) (string, error)
 }
 
 type client struct {
@@ -53,4 +56,23 @@ func (c *client) GetUserByLogin(_ context.Context, login string) (*model.Ostrovo
 		return user, nil
 	}
 	return nil, ErrUserNotExists
+}
+
+func (c *client) GeneratePromocode(ctx context.Context) (string, error) {
+	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const digits = "0123456789"
+
+	var result strings.Builder
+
+	result.WriteByte(letters[rand.Intn(len(letters))])
+	result.WriteByte(digits[rand.Intn(len(digits))])
+	result.WriteByte(digits[rand.Intn(len(digits))])
+
+	result.WriteByte('-')
+
+	result.WriteByte(letters[rand.Intn(len(letters))])
+	result.WriteByte(digits[rand.Intn(len(digits))])
+	result.WriteByte(digits[rand.Intn(len(digits))])
+
+	return result.String(), nil
 }
