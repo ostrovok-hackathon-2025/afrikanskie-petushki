@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/docs"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/ostrovok"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/achievement"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 	model "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/model/user"
 )
@@ -18,18 +19,20 @@ type UseCase interface {
 }
 
 type useCase struct {
-	repo           user.Repo
-	ostrovokClient ostrovok.Client
-	jwtSecret      []byte
+	repo            user.Repo
+	ostrovokClient  ostrovok.Client
+	jwtSecret       []byte
+	achievementRepo achievement.Repo
 }
 
-func NewUseCase(repo user.Repo, ostrovokClient ostrovok.Client) UseCase {
+func NewUseCase(repo user.Repo, ostrovokClient ostrovok.Client, achievementRepo achievement.Repo) UseCase {
 
 	jwtSecret := getEnvWithDefault("JWT_SECRET", "your-super-secret-jwt-key-change-in-production")
 
 	return &useCase{
-		repo:           repo,
-		ostrovokClient: ostrovokClient,
-		jwtSecret:      []byte(jwtSecret),
+		repo:            repo,
+		ostrovokClient:  ostrovokClient,
+		jwtSecret:       []byte(jwtSecret),
+		achievementRepo: achievementRepo,
 	}
 }

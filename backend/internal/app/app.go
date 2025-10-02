@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/ostrovok"
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/achievement"
 	analyticsRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/analytics"
 	applicationRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 	hotelRepo "github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/hotel"
@@ -54,18 +55,28 @@ func MustConfigureApp(engine *gin.Engine, cfg *config.Config) func() {
 	roomRepository := roomRepo.NewRepo(sqlClient)
 	reportRepository := reportRepo.NewRepo(sqlClient)
 	analyticsRepository := analyticsRepo.NewRepo(sqlClient)
+	achieventRepository := achievement.NewRepo(sqlClient)
 
 	imageRepo := image.NewImageRepoMinio(minioClient, cfg.MinioConfig.PublicEndpoint, cfg.MinioConfig.BucketName)
 
 	//UseCases
 
 	applicationService := applicationUC.NewApplicationService(applicationRepository)
-	userUseCase := userUC.NewUseCase(userRepository, ostrovokClient)
+	userUseCase := userUC.NewUseCase(userRepository, ostrovokClient, achieventRepository)
 	offerUseCase := offerUC.NewUseCase(offerRepository)
 	hotelUseCase := hotelUC.NewUseCase(hotelRepository)
 	locationUseCase := locationUC.NewUseCase(locationRepository)
 	roomUseCase := roomUC.NewUseCase(roomRepository)
-	reportUsccase := report.New(reportRepository, imageRepo, ostrovokClient, userRepository, applicationRepository)
+
+	reportUsccase := report.New(
+		reportRepository,
+		imageRepo,
+		ostrovokClient,
+		userRepository,
+		applicationRepository,
+		achieventRepository,
+	)
+
 	analyticsUseCase := analyticsUC.NewAnalyticsUseCase(analyticsRepository)
 
 	//Handlers

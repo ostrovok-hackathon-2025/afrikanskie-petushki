@@ -1560,6 +1560,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "docs.AchievementResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "raiting_limit": {
+                    "type": "integer"
+                }
+            }
+        },
         "docs.AnalyticsResponse": {
             "type": "object",
             "properties": {
@@ -2052,6 +2063,12 @@ const docTemplate = `{
         "docs.UserResponse": {
             "type": "object",
             "properties": {
+                "achievements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.AchievementResponse"
+                    }
+                },
                 "email": {
                     "type": "string"
                 },

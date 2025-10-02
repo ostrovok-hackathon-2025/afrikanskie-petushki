@@ -5,8 +5,10 @@
  * API for "Secret Guest" app
  * OpenAPI spec version: 1.0
  */
+import type { DocsAchievementResponse } from './docsAchievementResponse';
 
 export interface DocsUserResponse {
+  achievements?: DocsAchievementResponse[];
   email?: string;
   id?: string;
   is_admin?: boolean;

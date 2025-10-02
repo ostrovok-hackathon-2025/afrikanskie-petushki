@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"mime/multipart"
 	"path/filepath"
 
+	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/achievement"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/application"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/client/postgres/user"
 	"github.com/ostrovok-hackathon-2025/afrikanskie-petushki/backend/internal/handler/rest/validation"
@@ -37,11 +39,12 @@ type Usecase interface {
 }
 
 type usecase struct {
-	db             report.Repo
-	s3             image.Repo
-	ostrovokClient ostrovok.Client
-	userRepo       user.Repo
-	appsRepo       application.ApplicationRepo
+	db              report.Repo
+	s3              image.Repo
+	ostrovokClient  ostrovok.Client
+	userRepo        user.Repo
+	appsRepo        application.ApplicationRepo
+	achievementRepo achievement.Repo
 }
 
 func New(
@@ -50,13 +53,15 @@ func New(
 	ostrovokClient ostrovok.Client,
 	userRepo user.Repo,
 	appsRepo application.ApplicationRepo,
+	achievementRepo achievement.Repo,
 ) Usecase {
 	return &usecase{
-		db:             db,
-		s3:             s3,
-		ostrovokClient: ostrovokClient,
-		userRepo:       userRepo,
-		appsRepo:       appsRepo,
+		db:              db,
+		s3:              s3,
+		ostrovokClient:  ostrovokClient,
+		userRepo:        userRepo,
+		appsRepo:        appsRepo,
+		achievementRepo: achievementRepo,
 	}
 }
 
@@ -157,7 +162,26 @@ func (u *usecase) UpdateStatus(ctx context.Context, report report2.Report) error
 
 	newRating = validation.ValidateRating(newRating)
 
-	return u.userRepo.UpdateRating(ctx, user.ID, newRating)
+	if err := u.userRepo.UpdateRating(ctx, user.ID, newRating); err != nil {
+		return err
+	}
+
+	achievements, err := u.achievementRepo.GetAchievements(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, e := range achievements {
+		if newRating >= e.RaitingLimit {
+			err = u.achievementRepo.AddAchievement(ctx, user.ID, e.Id)
+
+			if err != nil {
+				log.Println("failed to add achievement", err)
+			}
+		}
+	}
+
+	return nil
 }
 
 func (u *usecase) removeOldImages(ctx context.Context, report report2.Report) error {
