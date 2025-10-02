@@ -96,21 +96,37 @@ type AuthResponse struct {
 	RefreshTTL   int    `json:"refresh_ttl"`
 }
 
+type AchievementResponse struct {
+	Name         string `json:"name"`
+	RaitingLimit int    `json:"raiting_limit"`
+}
+
 type UserResponse struct {
-	Id            string `json:"id"`
-	OstrovokLogin string `json:"ostrovok_login"`
-	Email         string `json:"email"`
-	IsAdmin       bool   `json:"is_admin"`
-	Rating        int    `json:"rating"`
+	Id            string                `json:"id"`
+	OstrovokLogin string                `json:"ostrovok_login"`
+	Email         string                `json:"email"`
+	IsAdmin       bool                  `json:"is_admin"`
+	Rating        int                   `json:"rating"`
+	Achievements  []AchievementResponse `json:"achievements"`
 }
 
 func UserModelToResponse(u *user.User) *UserResponse {
+	achievements := make([]AchievementResponse, 0, len(u.Achievements))
+
+	for _, e := range u.Achievements {
+		achievements = append(achievements, AchievementResponse{
+			Name:         e.Name,
+			RaitingLimit: e.RaitingLimit,
+		})
+	}
+
 	return &UserResponse{
 		Id:            u.ID.String(),
 		OstrovokLogin: u.OstrovokLogin,
 		Email:         u.Email,
 		IsAdmin:       u.IsAdmin,
 		Rating:        u.Rating,
+		Achievements:  achievements,
 	}
 }
 

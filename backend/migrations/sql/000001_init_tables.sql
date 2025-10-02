@@ -69,3 +69,19 @@ CREATE TABLE IF NOT EXISTS photo
     report_id UUID REFERENCES report (id),
     s3_link   TEXT UNIQUE
 );
+
+CREATE TABLE IF NOT EXISTS achievement
+(
+    id UUID NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    rating_limit INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_achievement
+(
+    id UUID NOT NULL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES "user" (id),
+    achievement_id UUID NOT NULL REFERENCES achievement (id),
+    
+    CONSTRAINT uq_user_achievement UNIQUE (user_id, achievement_id)
+);

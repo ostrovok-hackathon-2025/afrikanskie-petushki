@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  docs.AchievementResponse:
+    properties:
+      name:
+        type: string
+      raiting_limit:
+        type: integer
+    type: object
   docs.AnalyticsResponse:
     properties:
       accepted_reports:
@@ -321,6 +328,10 @@ definitions:
     type: object
   docs.UserResponse:
     properties:
+      achievements:
+        items:
+          $ref: '#/definitions/docs.AchievementResponse'
+        type: array
       email:
         type: string
       id:
